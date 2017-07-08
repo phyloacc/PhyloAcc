@@ -4,17 +4,16 @@ This is a software to detect the shift pattern of DNA substitution rate of a gen
 We need some prelimenary inputs which might be generated from other softwares: (1) a Phylogeny in mod format. The file can be output from phyloFit in PHAST package, with the transition rate matrix of bases and branch lengths. Our model assumes that those are the substitution rates under neutral evoluation and will estimate conserved and accelerated rate relatived to the neutral rate. In our study, we used genome-wide four-fold degenerate sites to estimtate the rate matrix and branch lengths. (2) a multiple alignment file concatenating sequences of all input conserved elements in FASTA format, and (3) a bed file with the position of each individual element in the coordinate of concatenated alignment file (0-based).
 
 We also need a parameter file, which contains the pathes for input files and output directory, information of species and parameters for MCMC. In the parameter file, each parameter is specified in a line with the parameter name at the beginning followed by paremeter value. The parameters are: 
-PHYTREE_FILE -- the path of Phylogeny  
-SEG_FILE simulation_diff_rates/simu_500_200_diffr_1-1.bed
-ALIGN_FILE simulation_diff_rates/simu_500_200_diffr_1-1.fasta
-RESULT_PREFIX simulation_diff_rates2/simu_500_200_1-1
-RESULT_INDIV simulation_diff_rates2/indiv/simu_500_200_1-1
-BURNIN 500
-MCMC 2500
-CHAIN 1
-TARGETSPECIES strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
-OUTGROUP allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
-CONSERVE taeGut;ficAlb;pseHum;corBra;melUnd;falPer;picPub;lepDis;halLeu;aptFor;pygAde;fulGla;nipNip;balReg;chaVoc;calAnn;chaPel;cucCan;colLiv;mesUni;galGal;melGal;anaPla;cryCin;tinGut;eudEle;notPer; 
-REF galGal
+PHYTREE_FILE: the path of Phylogeny (.mod)  
+SEG_FILE: the path of bed file for genomic regions
+ALIGN_FILE: the path of multiple alignment file (.fasta)
+RESULT_PREFIX: the prefix for output files
+BURNIN: number of initial iterations to discard before equilibrium of the chain (default: 500)
+MCMC: number of MCMC iterations (default: )
+CHAIN: 1
+TARGETSPECIES: species of interest. E.g. species potentially lost conservation or with convergent phenotype changes.
+OUTGROUP: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
+CONSERVE: species assumed to be mostly conserved. The algorithm will filter out elements with alignment gaps in more than 50% of the conserved species. 
+REF: galGal
 INDEL 0
 GAPCHAR -
