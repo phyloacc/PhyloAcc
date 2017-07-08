@@ -1,9 +1,9 @@
 # Parameter file
-The parameters are: 
-PHYTREE_FILE: the path of Phylogeny (.mod)  
-SEG_FILE: the path of bed file for genomic regions
-ALIGN_FILE: the path of multiple alignment file (.fasta)
-RESULT_PREFIX: the prefix for output files
+In the parameter file, each parameter is specified in a line with the parameter name at the beginning followed by paremeter value. The parameters are: 
+* **PHYTREE_FILE**: the path of Phylogeny (.mod)  
+* **SEG_FILE**: the path of bed file for genomic regions
+* **ALIGN_FILE**: the path of multiple alignment file (.fasta)
+* **RESULT_PREFIX**: the prefix for output files
 BURNIN: number of initial iterations to discard before equilibrium of the chain (default: 500)
 MCMC: number of MCMC iterations (default: )
 CHAIN: 1
