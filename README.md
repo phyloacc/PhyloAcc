@@ -20,9 +20,9 @@ INDEL 0
 GAPCHAR -
 
 ## Prerequisites
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library
-* [Open MPI](https://www.open-mpi.org/): for parallel computing, not required.
-
+* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
+* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library.
+* [Open MPI](https://www.open-mpi.org/)(not required): for parallel computing.
 ## Installation
 
 ## Usage
