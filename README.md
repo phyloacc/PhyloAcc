@@ -1,3 +1,5 @@
 # PhyloAcc
-This is a software to identify DNA elements accelerated in some specific species.
-Input: Phylogeny
+This is a software to detect the shift pattern of DNA substitution rate of a genomic region, and identify genomic elements accelerated in some specific species from a set of conserved elements. The underlying model assumes a latent discrete state (Z) of relative substitution rate of each branch on the phylogeny which can be neutral, conserved and accelerated. For each genomic element, it will start from neutral rate at the common ancestor of the phylogeny, transit to conserved state and then reach accelerated state in some lineages. Our method utilizes adaptive collapsed Gibbs sampling to obtain the pattern of substitution rate shifts (posterior distribution of Z) as well as relative substitution rates of conserved and accelerated state. To identify DNA elements with accelerating on specific branches, we compared marginal likelihood under three models: null model (M0) where all branches are neutral or conserved; accelerated model (M1) in which branches leading to target species are accelerated; and full model (M2), with no constraints on latent states. Then we used Bayes factors: between M1 and M0 (BF1) and M1 and M2 (BF2) as criteria to identify DNA elements accelerated exclusively in target lineages.
+
+
+Input: a Phylogeny, a parameter file, 
