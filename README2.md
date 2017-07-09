@@ -1,12 +1,12 @@
 # Parameter file
 In the parameter file, each parameter is specified in a line with the parameter name at the beginning followed by paremeter value. The parameters are: 
-* Input and output: 
-  * **PHYTREE_FILE**: the path of Phylogeny (.mod)  
-  * **SEG_FILE**: the path of bed file for genomic regions
-  * **ALIGN_FILE**: the path of multiple alignment file (.fasta)
-  * **RESULT_PREFIX**: the prefix for output files
+* **Input and output**: 
+  * *PHYTREE_FILE*: the path of Phylogeny (.mod)  
+  * *SEG_FILE*: the path of bed file for genomic regions
+  * *ALIGN_FILE*: the path of multiple alignment file (.fasta)
+  * *RESULT_PREFIX*: the prefix for output files
  
-* Specify species on the phylogeny
+* **Specify species on the phylogeny**:
 * **TARGETSPECIES**: species of interest. E.g. species potentially lost conservation or with convergent phenotype changes.
 * **OUTGROUP**: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
 * **CONSERVE**: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than **CONSERVE_PROP** of the conserved species. 
