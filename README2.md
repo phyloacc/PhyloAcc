@@ -29,6 +29,6 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *SEED*: seed for random sampling (default: 5)
   * *RATIO0*: initial value for the conserved rate (default: 0.5). 
   * *RATIO1*: initial value for the neutral rate (default: 1). 
-  * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. 
+  * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. If sampling hyperparamers, the algorithm will only output the posterior of Z (latent state of each branch) under full model. 
   * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
 
