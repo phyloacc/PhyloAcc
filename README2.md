@@ -18,10 +18,10 @@ In the parameter file, each parameter is specified in a line with the parameter 
  * *PREP_LRATE*: the prior transition probabily from conserved to accelerated state (default: 0.1).
 
 * **Control for MCMC**: 
-* *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 500)
-* *MCMC*: number of MCMC iterations (default: )
-* *SEED*: seed for random sampling (default: )
-* *RATIO0*: initial value for the conserved rate (default: 0.5). 
-* *RATIO1*: initial value for the neutral rate (default: 1). 
-* *CHAIN*: (default: 1)
+ * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 500)
+ * *MCMC*: number of MCMC iterations (default: )
+ * *SEED*: seed for random sampling (default: )
+ * *RATIO0*: initial value for the conserved rate (default: 0.5). 
+ * *RATIO1*: initial value for the neutral rate (default: 1). 
+ * *CHAIN*: (default: 1)
 
