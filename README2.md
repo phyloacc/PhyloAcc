@@ -5,6 +5,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *SEG_FILE*: the path of bed file for genomic regions
   * *ALIGN_FILE*: the path of multiple alignment file (.fasta)
   * *RESULT_PREFIX*: the prefix for output files
+  * *id_path* (optional): only compute elements in this file. (The element is tagged by its order in the input bed file starting from 0). If not specified, the program will compute all elements in the input file.  
  
 * **Specify species on the phylogeny**:
   * *TARGETSPECIES*: species of interest. E.g. species potentially lost conservation or with convergent phenotype changes.
@@ -22,9 +23,9 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.04).
 
 * **Control for MCMC**: 
-  * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 500)
-  * *MCMC*: number of MCMC iterations (default: )
-  * *SEED*: seed for random sampling (default: )
+  * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 100). Should set to be larger.
+  * *MCMC*: number of MCMC iterations (default: 400). Should set to be larger. 
+  * *SEED*: seed for random sampling (default: 5)
   * *RATIO0*: initial value for the conserved rate (default: 0.5). 
   * *RATIO1*: initial value for the neutral rate (default: 1). 
   * *CHAIN*: (default: 1)
