@@ -5,7 +5,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *SEG_FILE*: the path of bed file for genomic regions
   * *ALIGN_FILE*: the path of multiple alignment file (.fasta)
   * *RESULT_PREFIX*: the prefix for output files
-  * *id_path* (optional): only compute elements in this file. (The element is tagged by its order in the input bed file starting from 0). If not specified, the program will compute all elements in the input file.  
+  * *ID_FILE* (optional): only compute elements in this file. (The element is tagged by its order in the input bed file starting from 0). If not specified, the program will compute all elements in the input file.  
  
 * **Specify species on the phylogeny**:
   * *TARGETSPECIES*: species of interest. E.g. species potentially lost conservation or with convergent phenotype changes.
@@ -28,5 +28,6 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *SEED*: seed for random sampling (default: 5)
   * *RATIO0*: initial value for the conserved rate (default: 0.5). 
   * *RATIO1*: initial value for the neutral rate (default: 1). 
-  * *CHAIN*: (default: 1)
+  * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. 
+  * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
 
