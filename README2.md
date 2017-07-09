@@ -13,6 +13,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *CONSERVE*: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species. 
   * *CONSERVE_PROP*: Default 0.8.
   * *GAPCHAR*: The character for alignment gaps (default: *). 
+  * *GAP_PROP*: If the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species.   
 
 * **(Hyper)Parameters for the model**:
   * *PREP_GRATE*: the prior transition probabily from neutral to conserved state (default: 0.8).
