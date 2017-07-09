@@ -11,11 +11,15 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *OUTGROUP*: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
   * *CONSERVE*: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species. 
   * *CONSERVE_PROP*: Default 0.8.
-  * *GAPCHAR*: - 
+  * *GAPCHAR*: The character for alignment gaps (default: *). 
 
-* **Parameters for the model**:
+* **(Hyper)Parameters for the model**:
   * *PREP_GRATE*: the prior transition probabily from neutral to conserved state (default: 0.8).
   * *PREP_LRATE*: the prior transition probabily from conserved to accelerated state (default: 0.1).
+  * *CONSERVE_PRIOR_A*: the shape parameter for the gamma prior of conserved rate (default: 10).
+  * *CONSERVE_PRIOR_B*: the scale parameter for the gamma prior of conserved rate (default: 0.2).
+  * *ACCE_PRIOR_A*: the shape parameter for the gamma prior of acceleraed rate (default: 5).
+  * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.04).
 
 * **Control for MCMC**: 
   * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 500)
