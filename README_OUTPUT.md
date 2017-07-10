@@ -12,7 +12,7 @@
   * *loglik_RES*: marginal logliklihood under accelerated model
   * *loglik_all*: marginal logliklihood under full model
   * *log_ratio*: Bayes factor between null and accelerated model
-  * *loglik_Max1, loglik_Max2, loglik_Max3*: Maximum likelihood at $\hat r$ and $\hat Z$ under null ($M_0$), full ($M_2$) and accelerated ($M_1$) model respectively.
+  * *loglik_Max1, loglik_Max2, loglik_Max3*: Maximum joint likelihood of X (sequences), r (mutation rates) and Z (latent states) under null ($M_0$), full ($M_2$) and accelerated ($M_1$) model respectively.
   if updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihood for each element will be recomputed and concatenated to this file.
   
 
