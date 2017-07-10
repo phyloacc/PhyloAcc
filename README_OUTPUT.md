@@ -17,7 +17,7 @@
 
 *prefix*_1_elem_Z.txt: maximum loglikhood configurations of latent state Z under full model, with Z=-1(missing),0(neutral),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file.
 
-*prefix*_hyper.txt: hyperparameters at each iteration. Columns are:
+*prefix*_hyper.txt: hyperparameters at each iteration, only meaningful if adapting full Bayesian approach by sampling hyperparameters. Columns are:
 * *iter*: the number of iteration
 * *nprior_a, nprior_b*: the shape and scale hyperparameter of the gamma prior of accelerated mutation rate
 * *cprior_a, cprior_b*: the shape and scale hyperparameter of the gamma prior of conserved mutation rate
