@@ -3,7 +3,7 @@
 1. element ID which is order of the element in the input bed file starting from zero
 2. posterior mode of accelerated mutation rate
 3. posterior mode of conserved mutation rate
-4. from 4th column and on, we have four columns for each branch: *_0 indicates whether it's missing; *_1, *_2 and *_3 are the posterior probability in neutral, conserved and accelerated state respectively. Column order of the branch is the same as that in *prefix*_elem_Z.txt. *
+4. from 4th column and on, we have four columns for each branch: *_0 indicates whether it's "missing"; *_1, *_2 and *_3 are the posterior probability in neutral, conserved and accelerated state respectively. If branches within outgroup are "missing", the algorithm will prune those branches and set the latent state of them to -1 so that posterior probabilities are all zero. Column order of the branch is the same as that in *prefix*_elem_Z.txt.
 
 *prefix*_elem_lik.txt: marginal logliklihood for all models (integrating out parameters). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
@@ -26,3 +26,4 @@
 * *grate*: rate of gain conservation, i.e. the prior of transition probability of $Z=0$ to $Z=1$
 * *lrate*: rate of loss conservation, i.e. the prior of transition probability of $Z=1$ to $Z=2$
 
+*prefix*_lik_rate_Z_[0-2]_*.txt: if verbose=T, output trace of MCMC samples for loglikelihood, mutation rates and laten states Z. [0-2]: under null, full and accelerated model respectively. *: element ID. 
