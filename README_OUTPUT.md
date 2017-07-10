@@ -8,6 +8,11 @@
 *prefix*_elem_lik.txt: marginal logliklihood for all models (integrating out parameters). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
   * *ID*: The element name as in the iput bed file.
-  * *log_ratio* is the acceleration score. loglik_Max* is the maximum likelihood.
+  * *loglik_NUll*: marginal logliklihood under null model.
+  * *loglik_RES*: marginal logliklihood under accelerated model.
+  * *loglik_all*: marginal logliklihood under full model.
+  * *log_ratio*: Bayes factor between null and accelerated model. 
+  * *loglik_Max*: Maximum likelihood at $$\hat r$$
+  
 
 *prefix*_1_elem_Z.txt: configurations of latent state Z with maximum loglikhood under full model, Z=-1(missing),0(neutral),1(conserved),2(accelerated); elements are ordered as the input bed file.
