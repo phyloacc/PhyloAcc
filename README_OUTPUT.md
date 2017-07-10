@@ -3,7 +3,7 @@
 1. element ID which is order of the element in the input bed file starting from zero
 2. posterior mode of accelerated mutation rate
 3. posterior mode of conserved mutation rate
-4. from 4th column and on, we have four columns for each branch: *_0 indicates whether it's missing; *_1, *_2 and *_3 are the posterior probability in neutral, conserved and accelerated state respectively. Column order of the branch is the same as that in *prefix*_elem_Z.txt.
+4. from 4th column and on, we have four columns for each branch: *_0 indicates whether it's missing; *_1, *_2 and *_3 are the posterior probability in neutral, conserved and accelerated state respectively. Column order of the branch is the same as that in *prefix*_elem_Z.txt. *
 
 *prefix*_elem_lik.txt: marginal logliklihood for all models (integrating out parameters). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
