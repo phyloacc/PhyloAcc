@@ -6,6 +6,8 @@ Some prelimenary inputs which might be generated from other softwares are requir
 
 We also need a parameter file, which contains the pathes for input files and output directory, information of species and parameters for MCMC. Please read [README2.md](https://github.com/xyz111131/PhyloAcc/blob/master/README2.md) for more detail. 
 
+After running the algorithm, our method will output the posterior of latent state (Z) for each branch for each element under each model in the files "*prefix*_rate_postZ_[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files are explained in [README_OUTPUT.md]
+
 ## Prerequisites
 * [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
 * [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library.
