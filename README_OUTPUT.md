@@ -12,9 +12,7 @@
   * *loglik_RES*: marginal logliklihood under accelerated model.
   * *loglik_all*: marginal logliklihood under full model.
   * *log_ratio*: Bayes factor between null and accelerated model. 
-  * *loglik_Max1*: Maximum likelihood at $\hat r$ and $\hat Z$ under null model ($M_0$).
-  * *loglik_Max2*: Maximum likelihood at $\hat r$ and $\hat Z$ under full model($M_1$).
-  * *loglik_Max3*: Maximum likelihood at $\hat r$ and $\hat Z$ under accelerated model($M_2$).
+  * *loglik_Max1, loglik_Max2, loglik_Max3*: Maximum likelihood at $\hat r$ and $\hat Z$ under null ($M_0$), full ($M_2$) and accelerated ($M_1$) model respectively.
   
 
 *prefix*_1_elem_Z.txt: configurations of latent state Z with maximum loglikhood under full model, Z=-1(missing),0(neutral),1(conserved),2(accelerated); elements are ordered as the input bed file.
