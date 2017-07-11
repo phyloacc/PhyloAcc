@@ -29,4 +29,4 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 * *grate*: rate of gain conservation, i.e. the prior of transition probability of $Z=0$ to $Z=1$
 * *lrate*: rate of loss conservation, i.e. the prior of transition probability of $Z=1$ to $Z=2$
 
-*prefix*\_lik_rate_Z\_[0-2]_*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element ID. 
+*prefix*\_lik_rate_Z\_[0-2]_*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element ID. 
