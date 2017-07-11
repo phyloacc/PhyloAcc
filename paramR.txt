@@ -1,0 +1,14 @@
+PHYTREE_FILE newData/neut_ver3_final.named.mod
+SEG_FILE newData/subseq_cons_5001_10000.bed
+ALIGN_FILE newData/subseq_cons_5001_10000.fasta
+RESULT_PREFIX result_init3-6_0527/subseq_cons_5001_10000_v3
+RESULT_INDIV result_init3-6_0527/indiv/subseq_cons_5001_10000_v3
+BURNIN 1000
+MCMC 10000
+CHAIN 1
+TARGETSPECIES strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
+OUTGROUP allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
+CONSERVE taeGut;ficAlb;pseHum;corBra;melUnd;falPer;picPub;lepDis;halLeu;aptFor;pygAde;fulGla;nipNip;balReg;chaVoc;calAnn;chaPel;cucCan;colLiv;mesUni;galGal;melGal;anaPla;cryCin;tinGut;eudEle;notPer; 
+REF galGal
+INDEL 0
+GAPCHAR -
