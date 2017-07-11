@@ -25,6 +25,9 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *CONSERVE_PRIOR_B*: the scale parameter for the gamma prior of conserved rate (default: 0.2).
   * *ACCE_PRIOR_A*: the shape parameter for the gamma prior of acceleraed rate (default: 5).
   * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.04).
+  * *RATE_OPT*: to avoid label switching of latent state, we provide options to restrict accelerated rate larger than conserved rate. 0: no restriction on rates; 1: have lower and upper bound on acceleraed and conserved rates respectively; 2: restrict accelerated rate to be larger than conserved rate. (default: 1)
+  * *NLB*: lower bound for the accelerated rate. Only valid if *RATE_OPT* = 1. Default: 0.6.
+  * *CUB*: upper bound for the conserved rate. Only valid if *RATE_OPT* = 1. Default: 1.
 
 * **Control for MCMC**: 
   * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 200). Should set to be larger.
