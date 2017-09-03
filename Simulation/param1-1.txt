@@ -1,4 +1,4 @@
-PHYTREE_FILE neut_ver3_final.named.mod
+PHYTREE_FILE Data/neut_ver3_final.named.mod
 SEG_FILE Simulation/simu_500_200_diffr_1-1.bed
 ALIGN_FILE Simulation/simu_500_200_diffr_1-1.fasta
 RESULT_PREFIX Simulation/simu_500_200_1-1
