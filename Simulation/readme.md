@@ -2,4 +2,4 @@ The folder contains simulation data and example result. **simu_500_200_diffr_\*.
 ```bash
 PhyloAcc Simulation/param2-6.txt
 ```
-under the root directory and example results are shown in (https://github.com/xyz111131/PhyloAcc/edit/master/Simulation/result). 
+under the root directory and example results are shown in [result](https://github.com/xyz111131/PhyloAcc/Simulation/result). 
