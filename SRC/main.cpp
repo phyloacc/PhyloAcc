@@ -212,7 +212,7 @@ void LoadParams(int argc, char* argv[])
 void DispParams(PhyloProf profile, int seed)
 {
     double mean_seg_size = 0;
-    for(int c=0; c<profile.C; c++)
+    for(unsigned int c=0; c<profile.C; c++)
         mean_seg_size += (double)(profile.element_pos[c][1] - profile.element_pos[c][0]) / profile.C;
     cout << "  # total length = " << profile.G << " (" << profile.C << ")" << ". # Species = " << profile.S << ". # elements = " << profile.C << ". Mean gene set size = " << mean_seg_size << "." << endl;
     cout << "  # Burn-ins = " << num_burn << ". # MCMC Updates = " << num_mcmc << ". # adaptive frequency = " << num_thin << ".  RND SEED = " << seed << "." << endl << endl; //
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
         
         // Gibbs sampling
         #pragma omp parallel for schedule (guided)
-        for(int i = 0; i < ids.size(); i++ ) //pC bpp.C
+        for(std::size_t i = 0; i < ids.size(); i++ ) //pC bpp.C
         {
             int c = ids[i];
             bool filter = false;

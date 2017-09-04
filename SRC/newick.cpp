@@ -453,7 +453,7 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
         if(!strcmp(line_splits[0].c_str(), "BACKGROUND:")){
             
             int ind=0;
-            for(int g=1; g<line_splits.size(); g++)
+            for(std::size_t g=1; g<line_splits.size(); g++)
             {
                 if(line_splits[g]=="") continue;
                 phylo_tree.pi[ind] = atof(line_splits[g].c_str());
@@ -467,7 +467,7 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
                 std::getline(in_prof, linestr);
                 vector<string> tmp = strutils::split(strutils::trim(linestr),' ');
                 int ind=0;
-                for(int g=0; g<tmp.size(); g++)
+                for(std::size_t g=0; g < tmp.size(); g++)
                 {
                     if(tmp[g]=="") continue;
                     phylo_tree.subs_rate(i,ind) = atof(tmp[g].c_str());
