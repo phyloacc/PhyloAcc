@@ -270,7 +270,9 @@ int main(int argc, char* argv[])
     ofstream out_Z1(outpath_Z1.c_str());
     ofstream out_Z2(outpath_Z2.c_str());
     
-   
+    // output species name
+    string species_name = output_path+"_species_names.txt";
+    ofstream out_species(species_name.c_str());
     
     out_Z0 << "ID\tn_rate\tc_rate"; out_Z1 << "ID\tn_rate\tc_rate"; out_Z2 << "ID\tn_rate\tc_rate";
     for(int s=0; s<bpp.N;s++){
@@ -279,8 +281,12 @@ int main(int argc, char* argv[])
             out_Z1 <<"\t"<<bpp.nodes_names[s]<<"_"<<k;
             out_Z2 <<"\t"<<bpp.nodes_names[s]<<"_"<<k;
          }
+         out_species << bpp.nodes_names[s] << endl;
     }
 	out_Z0 <<endl; out_Z1 <<endl; out_Z2 <<endl;
+
+    out_species.close();
+
     double lrate_prop, grate_prop;
     
     vector<int> ids;
