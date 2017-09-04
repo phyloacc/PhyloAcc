@@ -15,7 +15,7 @@ After running the algorithm, our method will output the posterior of latent stat
 ## Installation
 
 ## Usage
-Try this under the root directory. To run your own data, please change the directory in your parameter file.
+Try this under the root directory. To run your own data, please change the paths in your parameter file.
 ```bash
 PhyloAcc Simulation/param2-6.txt
 ```
