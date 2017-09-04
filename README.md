@@ -4,7 +4,9 @@ This is a software to detect the shift pattern of DNA substitution rate of a gen
 ## Getting Started
 Some preliminary inputs which might be generated from other software are required: (1) a Phylogeny in mod format. The file can be output from phyloFit in PHAST package, with the transition rate matrix of bases and branch lengths. Our model assumes that those are the substitution rates under neutral evolution and will estimate conserved and accelerated rate relative to the neutral rate. In our study, we used genome-wide four-fold degenerate sites to estimate the rate matrix and branch lengths. (2) a multiple alignment file concatenating sequences of all input conserved elements in FASTA format, and (3) a bed file with the position of each individual element in the coordinate of concatenated alignment file (0-based).
 
-We also need a parameter file, which contains the paths for input files and the output directory, information of species, and parameters for MCMC. Please read [README2.md](https://github.com/xyz111131/PhyloAcc/blob/master/README2.md) for more details. 
+
+We also need a parameter file, which contains the pathes for input files and output directory, information of species and parameters for MCMC. Please read [README_PARAMETER.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_PARAMETER.md) for more detail. 
+
 
 After running the algorithm, our method will output the posterior of latent state (Z) for each branch (indicating neutral, conserved or accelerated) for each element under each model in the files "*prefix*\_rate_postZ\_[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files are explained in [README_OUTPUT.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_OUTPUT.md).
 
