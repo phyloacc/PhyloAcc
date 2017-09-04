@@ -14,12 +14,33 @@ After running the algorithm, our method will output the posterior of latent stat
 * [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
 * [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library.
 * [Open MP](http://www.openmp.org/)(optional): for parallel computing.
+
+## Build
+Run:
+```bash
+make
+```
+in PhyloAcc directory to generate the 'PhyloAcc' excutable.
+
 ## Installation
+Run:
+```bash
+sudo make install
+```
+to install in default path /usr/local/bin, and 
+```bash
+sudo make uninstall
+```
+to uninstall.
 
 ## Usage
-Try this under the root directory. To run your own data, please change the paths in your parameter file.
+Try this in PhyloAcc directory as a test:
+```bash
+./PhyloAcc Simulation/param2-6.txt
+```
+or this after installation:
 ```bash
 PhyloAcc Simulation/param2-6.txt
 ```
-
+To run your own data, please change the paths in your parameter file.
 
