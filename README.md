@@ -15,7 +15,7 @@ After running the algorithm, our method will output the posterior of latent stat
 ## Installation
 
 ## Usage
-PhyloAcc Simulation/param1-1.txt
+PhyloAcc Simulation/param2-6.txt
 
 
 

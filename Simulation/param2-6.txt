@@ -1,8 +1,8 @@
 PHYTREE_FILE Data/neut_ver3_final.named.mod
-SEG_FILE Simulation/simu_500_200_diffr_1-1.bed
-ALIGN_FILE Simulation/simu_500_200_diffr_1-1.fasta
-RESULT_PREFIX Simulation/simu_500_200_1-1
-RESULT_INDIV Simulation/indiv/simu_500_200_1-1
+SEG_FILE Simulation/simu_500_200_diffr_2-6.bed
+ALIGN_FILE Simulation/simu_500_200_diffr_2-6.fasta
+RESULT_PREFIX Simulation/result/simu_500_200_2-6
+RESULT_INDIV Simulation/result/indiv/simu_500_200_2-6
 BURNIN 500
 MCMC 1000
 CHAIN 1
