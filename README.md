@@ -12,8 +12,15 @@ After running the algorithm, our method will output the posterior of latent stat
 
 ## Prerequisites
 * [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library.
-* [Open MP](http://www.openmp.org/)(optional): for parallel computing.
+* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website or using brew (Recommend): 
+```bash
+brew install homebrew/science/armadillo
+```
+* [Open MP](http://www.openmp.org/)(optional): for parallel computing. You might need latest GCC (verion 7) supporting openmp. You could using brew to (re)install gcc. 
+```bash
+brew update (update the formulae and Homebrew itself, if your brew is out-dated)
+brew install gcc
+```
 
 ## Build
 Run:
@@ -43,4 +50,6 @@ or this after installation:
 PhyloAcc Simulation/param2-6.txt
 ```
 To run your own data, please change the paths in your parameter file.
+
+There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). 
 
