@@ -42,6 +42,8 @@ string targetspecies;
 string conservegroup; // can't be missing in more than 50%
 double conserve_prop = 0.8;
 
+int num_thread = 1;
+
 // running parameters
 int num_burn = 200;         // num of burn-in updates
 int num_mcmc = 800;         // num of MCMC updates,10
@@ -184,6 +186,9 @@ void LoadParams(int argc, char* argv[])
             line_stream >> sample_hyper;
         else if(tmp == "VERBOSE")
             line_stream >> verbose;
+        else if(tmp == "NUM_THREAD")
+            line_stream >> num_thread;
+
 
 
     }
@@ -215,7 +220,8 @@ void DispParams(PhyloProf profile, int seed)
     for(unsigned int c=0; c<profile.C; c++)
         mean_seg_size += (double)(profile.element_pos[c][1] - profile.element_pos[c][0]) / profile.C;
     cout << "  # total length = " << profile.G << " (" << profile.C << ")" << ". # Species = " << profile.S << ". # elements = " << profile.C << ". Mean gene set size = " << mean_seg_size << "." << endl;
-    cout << "  # Burn-ins = " << num_burn << ". # MCMC Updates = " << num_mcmc << ". # adaptive frequency = " << num_thin << ".  RND SEED = " << seed << "." << endl << endl; //
+    cout << "# Burn-ins = " << num_burn << ". # MCMC Updates = " << num_mcmc << ". # adaptive frequency = " << num_thin << ".  RND SEED = " << seed << "." << endl ; //
+    cout << "# Threads = " << num_thread << endl << endl;
 }
 
 int main(int argc, char* argv[])
@@ -323,21 +329,23 @@ int main(int argc, char* argv[])
             istringstream line_stream(line_buff);
             string tmp; line_stream >> tmp;
             tmp = strutils::trim(tmp);
+            if(tmp=="") continue;
             ids.push_back(atoi(tmp.c_str()));
             
         }
 
     }
 
-    
+    cout << ids.size() << " of elements to be computed" << endl; 
     for(int iter =0; iter<num_chain; iter++)
     {
+        cout << "Running MCMC chain " << iter +1 << " ..." << endl;
         // generate next indel parameter, nprior_a, nprior_b, etc...
         bpp.sample_proposal(iter, lrate_prop, grate_prop,out_hyper);
        
         
         // Gibbs sampling
-        #pragma omp parallel for schedule (guided)
+        #pragma omp parallel for schedule (guided) num_threads(num_thread)
         for(std::size_t i = 0; i < ids.size(); i++ ) //pC bpp.C
         {
             int c = ids[i];
