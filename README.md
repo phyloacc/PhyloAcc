@@ -18,7 +18,7 @@ brew install homebrew/science/armadillo
 ```
 * [Open MP](http://www.openmp.org/)(optional): for parallel computing. You might need latest GCC (verion 7) supporting openmp. You could using brew to (re)install gcc. 
 ```bash
-brew update (update the formulae and Homebrew itself, if your brew is out-dated)
+brew update ## update the formulae and Homebrew itself, if your brew is out-dated
 brew install gcc
 ```
 
