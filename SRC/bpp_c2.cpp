@@ -25,7 +25,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     // find uncertain nodes
     for(int s =0; s<N;s++)
     {
-        for(int i = num_burn; i < trace_Z.size(); i++)
+        for(std::size_t i = num_burn; i < trace_Z.size(); i++)
         {
             if(trace_Z[i][s] == Max_Z[s]) posterior_Z[s]++;
         }
@@ -61,8 +61,8 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     //rate distribution of config MaxZ
     //vector<double> nrate;
     //vector<double> crate;
-    int checkConf = 0;
-    for(unsigned int i = trace_Z.size() - 1; i >= num_burn ; i--)
+    //int checkConf = 0;
+    for(int i = trace_Z.size() - 1; i >= num_burn ; i--)
     {
         unsigned int j = 0;
         for(; j < numConf;j++)
@@ -122,7 +122,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     int effective_sum = 0;
     
     // get log(P(X, Z)),logdet(Sigma) for each configuration
-    for(int i = 0; i<numConf;i++)
+    for(unsigned int i = 0; i<numConf;i++)
     {
         double w = (double)numConfigZ[i]/num_mcmc;
         if(w < 0.1) continue; // always keep MaxZ (if only one config, same as Chib)
@@ -160,7 +160,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     {
         double varn =0 , varc = 0, cov = 0, meann = 0, meanc = 0;
         VB = 0;
-        for(int i = 0; i<numConf;i++)
+        for(unsigned int i = 0; i < numConf;i++)
         {
             varn += var_nrate[i];
             varc += var_crate[i];
@@ -393,7 +393,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
     }
     #pragma omp critical
     {
-        for(int i=0; i< trace_loglik.size();i++)
+        for(std::size_t i=0; i< trace_loglik.size();i++)
         {
             out_lik<<trace_loglik[i]<<"\t"<<trace_n_rate[i] << "\t"<<trace_c_rate[i]<<"\t";
             for(int s=0; s<N;s++)
@@ -418,7 +418,7 @@ void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstre
     for(int s=0; s<N;s++)
     {
         
-        for(int i=num_burn; i< trace_loglik.size();i++)
+        for(std::size_t i = num_burn; i< trace_loglik.size();i++)
         {
             
             countZ[s][trace_Z[i][s]+1]++;

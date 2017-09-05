@@ -11,12 +11,11 @@ using namespace std;
 
 struct PhyloProf
 {
-    int G, S, C; //, P, CG;
+    unsigned G, S, C; //, P, CG;
     vector< string > species_names;
     vector< string > element_names;
     vector< double* > element_pos;
     vector<string> element_id;
-    
     vector< string> X;
    
 };
