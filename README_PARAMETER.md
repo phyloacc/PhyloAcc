@@ -29,7 +29,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *NLB*: lower bound for the accelerated rate. Only valid if *RATE_OPT* = 1. Default: 0.6.
   * *CUB*: upper bound for the conserved rate. Only valid if *RATE_OPT* = 1. Default: 1.
 
-* **Control for MCMC**: 
+* **Control for MCMC and number of threads**: 
   * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 200). Should set to be larger.
   * *MCMC*: number of MCMC iterations (default: 800). Should set to be larger. 
   * *ADAPT_FREQ*: number of iterations to recompute acceptance rate of Metropolis-Hastings for adaptively adjusting the proposal variances for mutation rates (default: 100).
@@ -38,4 +38,5 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *RATIO1*: initial value for the neutral rate (default: 1). 
   * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. If sampling hyperparamers, the algorithm will only output the posterior of Z (latent state of each branch) under full model. 
   * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
+  * *NUM_THREAD*: Number of threads to run the algorithm (default: 1).
 
