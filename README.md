@@ -22,7 +22,7 @@ brew update ## update the formulae and Homebrew itself, if your brew is out-date
 brew install gcc
 ```
 
-## Build
+## Build on Linux or Macs
 Run:
 ```bash
 make
