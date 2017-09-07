@@ -25,7 +25,7 @@ brew install homebrew/science/armadillo
 ```
 * [Open MP](http://www.openmp.org/): for parallel computing. 
 
-## Build on Linux or Macs
+## Build on Linux or Mac
 Run:
 ```bash
 make
