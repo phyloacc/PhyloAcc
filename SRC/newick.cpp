@@ -423,7 +423,7 @@ void TravelTree3(newick_node *root, PhyloTree &phylo_tree)
 // load the phylogenetic tree
 PhyloTree LoadPhyloTree(string phylo_tree_path)
 {
-   cout << "Loading phylogenetic tree from " << phylo_tree_path << "......";
+   cout << "Loading phylogenetic tree from " << phylo_tree_path << "......" << endl;
    
     
     ifstream in_prof(phylo_tree_path.c_str());

@@ -5,7 +5,7 @@
 //  Created by hzr on 3/8/16.
 //  Copyright © 2016 hzr. All rights reserved.
 //
-
+#include <dirent.h>
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -35,6 +35,7 @@ string output_path="";
 string output_path2="";
 string segment_path;
 string id_path="";
+string result_prefix="test";
 
 string refspecies;
 string outgroup;
@@ -85,7 +86,7 @@ void LoadParams(int argc, char* argv[])
     else
         params_path = "/Users/hzr/GitHub/PhyloAcc/C_code/params1.txt"; //params2
     
-    cout << "Loading program configurations from " << params_path << "......";
+    cout << "Loading program configurations from " << params_path << "......" <<endl;
     
     const int BUFF_SIZE = 1024;
     char line_buff[BUFF_SIZE];
@@ -113,11 +114,13 @@ void LoadParams(int argc, char* argv[])
             line_stream >> id_path;
         else if (tmp=="BATCH")
             line_stream >> batch;
-        else if (tmp=="RESULT_PREFIX")
+        else if (tmp=="RESULT_FOLDER")
             line_stream >> output_path;
+        else if (tmp=="PREFIX")
+            line_stream >> result_prefix;
         
-        else if (tmp=="RESULT_INDIV")
-            line_stream >> output_path2;
+        //else if (tmp=="RESULT_INDIV")
+        //    line_stream >> output_path2;
         
         else if (tmp=="SEED")
             line_stream >> seed;
@@ -197,22 +200,31 @@ void LoadParams(int argc, char* argv[])
     phytree_path = strutils::trim(phytree_path, " \"\t\n");
     align_path = strutils::trim(align_path, " \"\t\n");
     output_path  = strutils::trim(output_path,  " \"\t\n");
-    output_path2  = strutils::trim(output_path2,  " \"\t\n");
+    //output_path2  = strutils::trim(output_path2,  " \"\t\n");
     segment_path = strutils::trim(segment_path, " \"\t\n");
     
     
 }
 
-//void InitParams(int G)
-//{
-//    if(num_burn <= 0)
-//        num_burn = 100;
-//    if(num_mcmc <= 0)
-//        num_mcmc = 400;
-//   
-//    if(num_thin <= 0)
-//        num_thin = 5;
-//}
+
+
+bool DirectoryExists( string pzPath )
+{
+    if ( pzPath == "") return false;
+
+    DIR *pDir;
+    bool bExists = false;
+
+    pDir = opendir (pzPath.c_str());
+
+    if (pDir != NULL)
+    {
+        bExists = true;    
+        (void) closedir (pDir);
+    }
+
+    return bExists;
+}
 
 void DispParams(PhyloProf profile, int seed)
 {
@@ -233,6 +245,13 @@ int main(int argc, char* argv[])
     
     // load the program parameters
     LoadParams(argc, argv);
+
+    // check output path
+    if(! DirectoryExists(output_path))
+    {
+    	cout << "output path doesn't exist or empty!" << endl;
+    	return 1;
+    }
     
     // load the phylogenetic profile
     PhyloProf profile = LoadPhyloProfiles(align_path,segment_path);
@@ -254,10 +273,12 @@ int main(int argc, char* argv[])
     //initialize the MCMC sampling
     bpp.InitMCMC(num_burn, num_mcmc, num_thin);
     
-    
-    string outpath_Z0 = output_path+"_rate_postZ_" +to_string(0) +".txt";
-    string outpath_Z1 = output_path+"_rate_postZ_" +to_string(1) +".txt";
-    string outpath_Z2 = output_path+"_rate_postZ_" +to_string(2) +".txt";
+
+    output_path = output_path + "/" + result_prefix ;
+    output_path2 = output_path;
+    string outpath_Z0 = output_path + "_rate_postZ_" +to_string(0) +".txt";
+    string outpath_Z1 = output_path + "_rate_postZ_" +to_string(1) +".txt";
+    string outpath_Z2 = output_path + "_rate_postZ_" +to_string(2) +".txt";
     
     
     string outpath_hyper = output_path+"_hyper.txt";

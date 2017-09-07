@@ -376,7 +376,7 @@ double BPP_C::prior_Z_subtree(vector<int> & tmpZ)  //whether cal prob_back again
 
 void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
     
-    string outpath_lik = output_path2 +"_lik_rate_Z_" + to_string(resZ) + "_" + to_string(CC) +".txt";
+    string outpath_lik = output_path2 +"_mcmc_trace_" + to_string(resZ) + "_" + to_string(CC) +".txt";
     ofstream out_lik;
     out_lik.precision(8);
     
