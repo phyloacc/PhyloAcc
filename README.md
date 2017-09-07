@@ -11,16 +11,20 @@ We also need a parameter file, which contains the pathes for input files and out
 After running the algorithm, our method will output the posterior of latent state (Z) for each branch (indicating neutral, conserved or accelerated) for each element under each model in the files "*prefix*\_rate_postZ\_[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files are explained in [README_OUTPUT.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_OUTPUT.md).
 
 ## Prerequisites
-* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website or using brew (Recommend): 
-```bash
-brew install homebrew/science/armadillo
-```
-* [Open MP](http://www.openmp.org/)(optional): for parallel computing. You might need latest GCC (verion 7) supporting openmp. You could using brew to (re)install gcc. 
+* [GCC](https://gcc.gnu.org/): You might need latest GCC (verion 7) supporting openmp. If you are using Mac, you could use brew to (re)install gcc. 
 ```bash
 brew update ## update the formulae and Homebrew itself, if your brew is out-dated
 brew install gcc
 ```
+* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
+* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. Before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. Recommended packages for Fedora & Red Hat (installed before Armadillo) are cmake, openblas-devel, lapack-devel, arpack-devel, SuperLU-devel; for Ubuntu & Debian: cmake, libopenblas-dev, liblapack-dev, libarpack-dev. 
+ 
+
+or using brew (Recommended, if you are using Mac): 
+```bash
+brew install homebrew/science/armadillo
+```
+* [Open MP](http://www.openmp.org/): for parallel computing. 
 
 ## Build on Linux or Macs
 Run:
