@@ -16,9 +16,10 @@ After running the algorithm, our method will output the posterior of latent stat
 brew update ## update the formulae and Homebrew itself, if your brew is out-dated
 brew install gcc
 ```
-* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/): a numerical library for C and C++. 
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. For Linux, before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. 
-For Mac, you could use brew (Recommended): 
+* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/): a numerical library for C and C++. PhyloAcc has been
+  tested with version 2.4 of GSL.
+* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. For Linux, before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. PhyloAcc has been tested with verison 8.100.1.
+For Mac, you could use brew (tested and Recommended): 
 ```bash
 brew install homebrew/science/armadillo
 ```
