@@ -16,11 +16,9 @@ After running the algorithm, our method will output the posterior of latent stat
 brew update ## update the formulae and Homebrew itself, if your brew is out-dated
 brew install gcc
 ```
-* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/):a numerical library for C and C++. 
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. Before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. Recommended packages for Fedora & Red Hat (installed before Armadillo) are cmake, openblas-devel, lapack-devel, arpack-devel, SuperLU-devel; for Ubuntu & Debian: cmake, libopenblas-dev, liblapack-dev, libarpack-dev. 
- 
-
-or using brew (Recommended, if you are using Mac): 
+* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/): a numerical library for C and C++. 
+* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. For Linux, before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. 
+For Mac, you could use brew (Recommended): 
 ```bash
 brew install homebrew/science/armadillo
 ```
