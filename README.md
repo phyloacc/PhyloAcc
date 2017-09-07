@@ -52,11 +52,11 @@ or this after installation:
 ```bash
 PhyloAcc Simulation/param2-6-test.txt
 ```
-For testing propose, it will only run the first 10 elements of simulated data from *Simulation/simu_500_200_diffr_2-6.* and output to *Simulation/result_tmp/*. To run the all elements, which will generate results in *Simulation/result/*, you could run:
+For testing propose, it will only run the first 10 elements of simulated data from Simulation/simu_500_200_diffr_2-6.* and output to Simulation/result_tmp/. To run the all elements, which will generate results in Simulation/result/, you could run:
 ```bash
 ./PhyloAcc Simulation/param2-6.txt
 ```
-. To run your own data, please change the paths in your parameter file.
+To run your own data, please change the paths in your parameter file.
 
 There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). 
 
