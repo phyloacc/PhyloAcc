@@ -7,7 +7,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *RESULT_FOLDER*: the output folder. The folder should exist.
   * *PREFIX*: the prefix for output files (default: test).
   * *ID_FILE* (optional): only compute elements in this file. (The element is tagged by its order in the input bed file starting from 0). If not specified, the program will compute all elements in the input file.  
-  * *VERBOSE*: if it's true, the algorithm will output some intermediate results to console and MCMC trace for each element (default: false). Should set to false if computing many elements, otherwise output file is too large. 
+  * *VERBOSE*: 0 or 1. If it's 1, the algorithm will output some intermediate results to console and MCMC trace for each element (default: 0). Should set to 0 if computing many elements, otherwise output file is too large. 
  
 * **Specify species on the phylogeny**:
   * *TARGETSPECIES*: species of interest. E.g. species potentially lost conservation or with convergent phenotype changes.
