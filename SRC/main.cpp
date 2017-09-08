@@ -301,7 +301,7 @@ int main(int argc, char* argv[])
     string species_name = output_path+"_species_names.txt";
     ofstream out_species(species_name.c_str());
     
-    out_Z0 << "ID\tn_rate\tc_rate"; out_Z1 << "ID\tn_rate\tc_rate"; out_Z2 << "ID\tn_rate\tc_rate";
+    out_Z0 << "No.\tn_rate\tc_rate"; out_Z1 << "No.\tn_rate\tc_rate"; out_Z2 << "No.\tn_rate\tc_rate";
     for(int s=0; s<bpp.N;s++){
          for(int k=0;k<4;k++){
             out_Z0 <<"\t"<<bpp.nodes_names[s]<<"_"<<k;

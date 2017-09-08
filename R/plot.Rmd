@@ -1,0 +1,91 @@
+---
+title: "Plots and further analyis from output of PhyloAcc"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+```
+
+
+This Rscript will guide you how to generate the sequence alignment and branch substitution pattern for each DNA elements as in the paper. 
+```{r init, include= FALSE}
+setwd("/Users/hzr/GitHub/PhyloAcc/R")
+source("drawAlign_function.R")
+```
+
+### Read in tree data
+First, we'll have to input a phylogenetic tree in (*.mod*) including the tree structure, branch length as well as rate matrix of nucleotides' substitution, which could be output from phyloFit (PHAST); a file output by PhyloAcc (*xxx_species_namesxxx*) containing the species name for each column in *xxx_rate_postZ_xxx* files. We could also input a file with common name of the species to be shown in the plots: the argument **common_name** is optional which takes a file with abbreviation of species name appeared in data files and output files in the first column and species common name shown on the plot as the second column, and extra columns (not used in the scripts) such as full species names. 
+
+The function ```prepare_dat``` will output a list containing the tree and names etc. as input to ```plotZPost``` and ```plotAlign``` to generate plots.
+
+```{r treeData, cache=F}
+treeData <- prepare_data(tree_path = "../Data/neut_ver3_final.named.mod", species_name = "../Data/species_names.txt", common_name = "../Data/birdname2.txt")
+```
+
+### Generate plots for one element from PhyloAcc outputs 
+
+Then, we're going to read in element BF scores and posteriors of substitution rates and latent conservation states output from PhyloAcc. 
+
+```{r results, echo=FALSE,cache=F}
+#### read in BF scores as well as marginal log likelihood under null, accelerated and full model #### 
+score <- read.table("../Simulation/result/simu_500_200_2-6_elem_lik.txt", header=T)
+## compute BF2
+score$BF2 <- -score$loglik_all + score$loglik_RES
+## order score by BF1
+score <- score[order(-score$log_ratio),]
+
+#### read in posteriors of substitution rates and latent conservation states ####
+postZ <- read.table("../Simulation/result/simu_500_200_2-6_rate_postZ_1.txt", header=T, check.names = F)  ## _1 is the posteriors under full model
+```
+
+Select Top elements (e.g. BF2 > 0 and large BF1) and plot: 
+```{r plotZPost, fig.height = 8}
+sel <- which(score$BF2 > 0)[1] # select the element with largest BF1 and BF2 > 0
+lk = score[sel, ]
+k = score[sel, 1] # get the No. of the selected element
+targets = c("strCam","rhePen","rheAme","casCas","droNov","aptRow","aptHaa","aptOwe","anoDid") # convergent species
+Z = unlist(postZ[postZ$No. == k, ]) # get the posteriors of conservation states
+tit = paste("BF1:", round(lk$log_ratio), "BF2:",round(lk$BF2), "  ") # use BF scores as title
+plotZPost(Z, treeData, target_species=targets, tit=tit, offset=3)
+```
+
+Read in bed file and sequences alignments. In the bed file for simulation, the 1th column is element name (); the 2nd and 3rd columns are start and end positions in the alignment for each element; the 6th and 7th columns are conserved and accelerated rates to generate the DNA sequences for that element.
+```{r readAlign, fig.height = 8}
+bed <- read.delim("../Simulation/simu_500_200_diffr_2-6.bed", header=F)
+library(seqinr)
+fasta <- read.alignment(file = "../Simulation/simu_500_200_diffr_2-6.fasta", format = "fasta")  
+align <- as.matrix(fasta)
+align <- align[treeData$tree$tip.label,]  # reorder species in the alignment same as tips of the tree. The name of the species in the alignment file has to the same as in the tree!
+```
+
+
+```{r plotAlign, fig.height = 8,cache=FALSE}
+plotAlign(k, align, bed, treeData, target_species=targets)
+```
+
+### Expected number of independent acceleration and accelerated species
+Next, we could compute expected number of independent acceleration and accelerated species within target species. We will first select all the ratite accelerated elements (in this simulation, all elements are ratite accelerated and expectedly, the algorithm selects almost all the simulated elements) and then get the histogram of expected number of independent acceleration with clades of target species and accelerated target species for each element.
+```{r loss}
+sel <- score$No.[which(score$log_ratio>10 & score$BF2 > 0)] # select the ratites accelerated elements
+internal <- getInternals(treeData$tree, targets) # get common ancestors of target species that might be accelerated
+topZ = postZ[postZ$No. %in% sel, seq(7, ncol(postZ), by=4)] # get the posterior of Z==2 (being accelerated) for selected elements
+colnames(topZ) <- sapply(colnames(topZ), function(x) strsplit(x, "_")[[1]][1])
+
+acc = rowSums(topZ[,targets]); # expected number of accelerated species within target species
+loss = rowSums(topZ[,targets]) - rowSums(topZ[,internal]) # expected independent acceleration happened
+par(mfrow=c(1,2), mar=c(4, 4, 2, 2), mgp = c(2, .5, 0),cex.lab = 1.5,cex.axis=1.2,lwd=2)
+hist(acc, main="", xlab ="# of accelerated species"  ); 
+hist(loss, main="", xlab= "# independent acceleration")
+```
+
+In this case, as the simulated configuration is that all ratites branches accelerated, so there are three independent loss (i.e. one at ancestor of kiwi-Rhea clades, one for Moa and one for Ostrich) and all 9 target species are accelerated. From the histogram, we could see that the model correctly identifies 3 losses and 9 acceleratin branches within ratites. For real data which contains different acceleration patterns, these distributions will be more flat. To get elements that might be associated with phenotypically convergence, we could select elements with multiple independent acceleration and/or accelerated in most target species.
+
+### Evolutionary patterns over all elements
+Finally, we could get the overall posterior probability of acceleration on each branch for all the input elements. The higher means that branch is more likely to be accelerated across the whole genome (or all inputs). 
+```{r overall}
+plotZPost_all(treeData, topZ, targets)
+```
+
+In this example, all elements are accelerated only in ratite branches, and our model detected the pattern correctly as the acceleration probability is nearly 1 for ratites (shown as red) but it is nearly 0 for non accelerated branches. But for the real data, since all patterns are mixed together, the average posterior probability of accelerated will not be concentrated at 1.
+

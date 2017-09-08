@@ -10,7 +10,7 @@ library(ape)
 #        species_name is a file output by PhyloAcc containing the species name for each column in *postZ* files; 
 #        common_name is optional file with three columns: abbreviation of species name appeared in data files and output files; full species names; and species comman name shown on the plot 
 ## output: a list as input to plotZPost and plotAlign to generate plots
-prepare_data <- function(tree_path = "Data/neut_ver3_final.named.mod", species_name = "Data/species_name.txt", common_name = "Data/birdname2.txt")
+prepare_data <- function(tree_path = "Data/neut_ver3_final.named.mod", species_name = "Data/species_names.txt", common_name = "Data/birdname2.txt")
 {
  
     tree <- read.tree(tree_path) # 43 species
@@ -43,9 +43,9 @@ prepare_data <- function(tree_path = "Data/neut_ver3_final.named.mod", species_n
 
 #### Plot the acceleration pattern (posterior of substitution rate on each branch) of one element ####
 ## input: Z: one row from *postZ* file, posterior of Z for each branch; 0: missing(only for outgroup), 1: neutral, 2: conserved, 3: accelerated
-#         tit: title of the figure (BF scores); 
+#         tit: title of the figure (e.g. BF scores); 
 #         treeData: output from  prepare_data
-#         target_species: group of species shown in different color (e.g. phenotypically convergent species)
+#         target_species: group of species shown in different color (e.g. phenotypically convergent species), please use the abbrev. name same as the tree
 #         offset=2, posterior of Z start from the third column
 ## output: plot of one element
 
@@ -57,8 +57,8 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
   names(tip.color) <- species
   if(!is.null(target_species)) tip.color[target_species] <- 4
   
-  ratio1 = Z[2] # c_rate
-  ratio2 = Z[1] # n_rate
+  ratio1 = Z[3] # c_rate
+  ratio2 = Z[2] # n_rate
   #print(ratio1);print(ratio2);
  
 
@@ -84,9 +84,10 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
   # color grey is missing
   missing = Z[seq(offset + 1,E,by = 4)]
   tip.color[missing >0] = "azure4"
+  par(mar= c(2,0,0,0))
   plot(mytree,edge.color = edge_col,tip.color = tip.color,edge.width  =3,label.offset = 0.003,no.margin =F, cex=1.1, bg=NA)
   mtext(substitute(paste(t, r[1], "=", r1, ", ", r[2], "=", r2),
-    list(t=tit, r1 =round(ratio1,2), r2 = round(ratio2,2))), side = 1, cex=2, line = 0.5)
+    list(t=tit, r1 =round(ratio1,2), r2 = round(ratio2,2))), side = 1, cex=1.5, line = 0.5)
   
 }
 
@@ -96,7 +97,9 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
 ## input: kth element to plot
 #         align, a matrix of sequence alignment, rows are species, columns are loci
 #         bed, a data frame of coordianate of each element
-#         legend, “top”(default), “left”,“right”, “bottom”, "none"
+#         treeData, output from  prepare_data
+#         target_species: group of species shown in different color (e.g. phenotypically convergent species), please use the abbrev. name same as the tree
+#         legend, the position of legend, can be "top" (default), "left", "right", "bottom", "none"
 ## output: heatmap of sequence alignment showing consensus nucleotides, substitutions, indels and N
 plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top")
 {
@@ -112,8 +115,8 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
   ele_cons <- apply(element1, 2, function(x) { y <- xtabs(~x); 
       cb = names(y)[order(y,decreasing = T)]
       cb <- cb[which(cb%in%c('a','c','g','t'))[1]]
-      z <-  rep("subs",length(x)) 
-      z[x==cb] <- "cons";
+      z <-  rep("substitution",length(x)) 
+      z[x==cb] <- "consensus";
       z[x=='-'] <- "indel";
       z[x=='n'] <- "N"; #| x=='*'
       return(z);
@@ -131,5 +134,63 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
           plot.background = element_rect(fill = "transparent"))
   
   plot(p)
+}
+
+
+#### Get internal nodes for computing independent loss ####
+## input : a phylogenetic tree and a group of target species at tips
+## output: a list of nodes which are common ancestors of target species
+getInternals <- function(tree, targets)
+{
+  N = tree$Nnode *2 -1 #total number of nodes
+  targets_ind <- which(tree$tip.label %in% targets)
+  double_nodes <- targets_ind # nodes with both children in the targets 
+  record <- rep(0, N) # record how many children of it within targets
+  while(length(double_nodes) > 0)
+   {
+    u = double_nodes[1];
+    double_nodes <- double_nodes[-1];  # pop
+    p = tree$edge[tree$edge[,2] == u, 1]# get parent of u
+    record[p] = record[p] + 1
+    if(record[p] == 2){
+      double_nodes <- c(double_nodes, p);
+    }
+  }
+  ind <- which(record[-1:-length(tree$tip.label)] > 0)
+  return(tree$node.label[ind])
+}
+
+
+#### 
+color.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, by=nticks), title='') {
+  scale = (length(lut)-1)/(max-min)
+  
+  #dev.new(width=1.75, height=5)
+  par(mar=c(1,4,1,1), bg=NA)
+  plot(c(0,10), c(min,max), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main=title)
+  axis(2, ticks, las=1, cex.axis=1.2)
+  for (i in 1:(length(lut)-1)) {
+    y = (i-1)/scale + min
+    rect(0,y,10,y+1/scale, col=lut[i], border=NA)
+  }
+}
+
+plotZPost_all <- function(treeData, topZ, targets)
+{
+  topZ2 <- colMeans(topZ)
+  topZ2 <- topZ2[treeData$node_idx]; names(topZ2) <- c(treeData$tree$tip.label,treeData$tree$node.label)
+  topZ2 <- topZ2[treeData$tree$edge[,2]]
+  
+  rbPal <- colorRampPalette(c('springgreen3','firebrick1'))
+  edge_col <- rbPal(100)[as.numeric(cut(topZ2,breaks = 100))]
+  tip.color = rep(1, length(treeData$tree$tip.label))
+  names(tip.color) <- treeData$tree$tip.label
+  tip.color[targets] <- 4
+  mytree <- treeData$tree
+  mytree$tip.label <- treeData$tip
+  layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=c(4,1), heights=c(1,2))
+  par(mar=c(0,0,0,0))
+  plot(mytree,type = "clad", edge.color = edge_col,tip.color = tip.color,edge.width  =3,label.offset = 0.01, no.margin =T, cex=1.1, font=4, bg=NA, family= "sans")
+  color.bar(colorRampPalette(c('springgreen3','firebrick1'))(100), 0, max = max(topZ2),nticks = 0.1)
 }
 
