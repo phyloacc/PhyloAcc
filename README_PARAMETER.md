@@ -1,9 +1,9 @@
 # Parameter file
 In the parameter file, each parameter is specified in a line with the parameter name at the beginning followed by paremeter value. The parameters are: 
 * **Input and output**: 
-  * *PHYTREE_FILE*: the path of Phylogeny (.mod)  
+  * *PHYTREE_FILE*: the path of phylogeny (.mod)  
   * *SEG_FILE*: the path of bed file for genomic regions
-  * *ALIGN_FILE*: the path of multiple alignment file (.fasta)
+  * *ALIGN_FILE*: the path of multiple alignment file (.fasta). The name of the species in the alignment file has to the same as in the phylogenetic tree!
   * *RESULT_FOLDER*: the output folder. The folder should exist.
   * *PREFIX*: the prefix for output files (default: test).
   * *ID_FILE* (optional): only compute elements in this file. (The element is tagged by its order in the input bed file starting from 0). If not specified, the program will compute all elements in the input file.  
