@@ -2,7 +2,7 @@
 In the parameter file, each parameter is specified in a line with the parameter name at the beginning followed by paremeter value. The parameters are: 
 * **Input and output**: 
   * *PHYTREE_FILE*: the path of phylogeny (.mod)  
-  * *SEG_FILE*: the path of bed file for genomic regions
+  * *SEG_FILE*: the path of bed file for genomic regions. At least 3 columns in the bed file. The first column is usually chromosome, the second and third columns are the starting and ending positions of each element (in the coordinate of the whole multiple alignment). The program assumes that the alignment file concatenates all the elements together and will only use the second and third columns in the bed file. If concatenating multiple chromosomes, the coordinate of elements on the current chromosome should not start from zero but should add to the previous chromosone.
   * *ALIGN_FILE*: the path of multiple alignment file (.fasta). The name of the species in the alignment file has to the same as in the phylogenetic tree!
   * *RESULT_FOLDER*: the output folder. The folder should exist.
   * *PREFIX*: the prefix for output files (default: test).
