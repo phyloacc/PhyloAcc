@@ -1,6 +1,6 @@
 # Format of output files
 *prefix*\_rate_postZ\_*.txt: posterior median of conserved and accelerated rate and posterior mean of latent state on each branch for each element. Columns in the file are:
-1. element ID which is order of the element in the input bed file starting from zero
+1. element No. which is order of the element in the input bed file starting from zero
 2. posterior mode of accelerated mutation rate
 3. posterior mode of conserved mutation rate
 4. from 4th column and on, we have four columns for each branch: *_0 indicates whether it's "missing"; *_1, *_2 and *_3 are the posterior probability in neutral, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*_elem_Z.txt. 
@@ -29,4 +29,4 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 * *grate*: rate of gain conservation, i.e. the prior of transition probability of $Z=0$ to $Z=1$
 * *lrate*: rate of loss conservation, i.e. the prior of transition probability of $Z=1$ to $Z=2$
 
-*prefix*\_lik_rate_Z\_[0-2]_*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element ID.
+*prefix*\_lik_rate_Z\_[0-2]_*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element No. .
