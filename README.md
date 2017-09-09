@@ -24,6 +24,7 @@ For Mac, you could use brew (tested and Recommended):
 brew install homebrew/science/armadillo
 ```
 * [Open MP](http://www.openmp.org/): for parallel computing. 
+* To use the R functions to plot,  please install [Rstudio](https://www.rstudio.com/) with current version of R (>=3.3.2) and install seqinr, ggplot2, reshape2, ape packages.  
 
 ## Build on Linux or Mac
 Run:
@@ -59,5 +60,4 @@ For testing propose, it will only run the first 10 elements of simulated data fr
 ```
 Again, it will output to Simulation/result_tmp/. To run your own data, please change the paths in your parameter file.
 
-There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). 
-
+There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.rmd) for detail.
