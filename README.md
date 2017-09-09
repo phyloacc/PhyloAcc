@@ -60,4 +60,4 @@ For testing propose, it will only run the first 10 elements of simulated data fr
 ```
 Again, it will output to Simulation/result_tmp/. To run your own data, please change the paths in your parameter file.
 
-There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.rmd) for detail.
+There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail.
