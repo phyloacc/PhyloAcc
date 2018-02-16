@@ -44,20 +44,28 @@ sudo make uninstall
 ```
 to uninstall.
 
+For our extended version modeling GC-based gene conversion (gBGC) effect, please go to [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC) and make & install under that directory.
+
 ## Usage
-Try this in PhyloAcc directory as a test:
+Try this in PhyloAcc directory as a test, which will run simulated elements on ratite phylogeny:
 ```bash
-mkdir Simulation/result_tmp
-./PhyloAcc Simulation/param2-6-test.txt
+mkdir Simulation_ratite/result_tmp
+./PhyloAcc Simulation_ratite/param2-6-test.txt
 ```
 or this after installation:
 ```bash
-PhyloAcc Simulation/param2-6-test.txt
+PhyloAcc Simulation_ratite/param2-6-test.txt
 ```
-For testing propose, it will only run the first 10 elements of simulated data from Simulation/simu_500_200_diffr_2-6.* and output to Simulation/result_tmp/. To run the all elements, which will generate results in Simulation/result/, you could run:
+For testing propose, it will only run the first 10 elements of simulated data from Simulation_ratite/simu_500_200_diffr_2-6.* and output to Simulation/result_tmp/. To run the all elements, which will generate results in Simulation_ratite/result/, you could run:
 ```bash
-./PhyloAcc Simulation/param2-6.txt
+./PhyloAcc Simulation_ratite/param2-6.txt
 ```
 Again, it will output to Simulation/result_tmp/. To run your own data, please change the paths in your parameter file.
 
 There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail.
+
+To run the model including gBGC, 
+```bash
+./PhyloAcc_gBGC Simulation/param2-6-test.txt
+```
+under [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC). It will output to V2_GBGC/Simulation/result_tmp/.
