@@ -64,8 +64,9 @@ Again, it will output to Simulation/result_tmp/. To run your own data, please ch
 
 There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail.
 
-To run the model including gBGC, 
+To run the model including gBGC,
 ```bash
-./PhyloAcc_gBGC Simulation/param2-6-test.txt
+mkdir Simulation/result_tmp
+./PhyloAcc_gBGC paramGC-0.txt
 ```
-under [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC). It will output to V2_GBGC/Simulation/result_tmp/.
+under [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC). It will output to *V2_GBGC/Simulation/result_tmp/*.
