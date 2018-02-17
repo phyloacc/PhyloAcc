@@ -69,4 +69,7 @@ To run the model including gBGC,
 mkdir Simulation/result_tmp
 ./PhyloAcc_gBGC paramGC-0.txt
 ```
-under [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC). It will output to *V2_GBGC/Simulation/result_tmp/*.
+under *V2_GBGC/*. It will output to *V2_GBGC/Simulation/result_tmp/*.
+
+## Data
+The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). 
