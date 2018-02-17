@@ -30,3 +30,5 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 * *lrate*: rate of loss conservation, i.e. the prior of transition probability of $Z=1$ to $Z=2$
 
 *prefix*\_lik_rate_Z\_[0-2]_*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element No. .
+
+The output files from the extended version including gBGC is slightly different. *prefix*\_rate_postZ\_*.txt also contains posterior mode of gBGC coefficient (*gBC* column) and posterior of having gBGC effect on each branch (* *_B * column).*prefix*_1_elem_Z.txt has latent gBGC state on each branch in the first columns.
