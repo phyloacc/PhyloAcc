@@ -1,6 +1,9 @@
 PhyloAcc
 PhyloAcc.dSYM
-Simulation/result_tmp
+Simulation_ratite/result_tmp
 R/.Rhistory
 R/plot_cache/
 R/plot_files/
+longcnee*
+*.mod2
+Data/result

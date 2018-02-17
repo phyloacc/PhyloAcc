@@ -1,0 +1,15 @@
+PHYTREE_FILE Data/neut_ver3_final.named.mod
+SEG_FILE Simulation_ratite/simu_500_200_diffr_2-6.bed
+ALIGN_FILE Simulation_ratite/simu_500_200_diffr_2-6.fasta
+ID_FILE Simulation_ratite/ID.txt
+RESULT_FOLDER Simulation_ratite/result_tmp/
+PREFIX simu_500_200_2-6
+BURNIN 500
+MCMC 1000
+CHAIN 1
+TARGETSPECIES strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
+OUTGROUP allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
+CONSERVE taeGut;ficAlb;pseHum;corBra;melUnd;falPer;picPub;lepDis;halLeu;aptFor;pygAde;fulGla;nipNip;balReg;chaVoc;calAnn;chaPel;cucCan;colLiv;mesUni;galGal;melGal;anaPla;cryCin;tinGut;eudEle;notPer; 
+GAPCHAR -
+NUM_THREAD 4
+VERBOSE 1

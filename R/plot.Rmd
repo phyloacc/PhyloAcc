@@ -53,7 +53,6 @@ plotZPost(Z, treeData, target_species=targets, tit=tit, offset=3)
 Read in bed file and sequences alignments. In the bed file for simulation, the 1th column is element name (); the 2nd and 3rd columns are start and end positions in the alignment for each element; the 6th and 7th columns are conserved and accelerated rates to generate the DNA sequences for that element.
 ```{r readAlign, fig.height = 8}
 bed <- read.delim("../Simulation/simu_500_200_diffr_2-6.bed", header=F)
-library(seqinr)
 fasta <- read.alignment(file = "../Simulation/simu_500_200_diffr_2-6.fasta", format = "fasta")  
 align <- as.matrix(fasta)
 align <- align[treeData$tree$tip.label,]  # reorder species in the alignment same as tips of the tree. The name of the species in the alignment file has to the same as in the tree!
