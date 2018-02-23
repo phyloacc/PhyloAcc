@@ -62,10 +62,14 @@ For testing propose, it will only run the first 10 elements of simulated data fr
 ```
 Again, it will output to Simulation/result_tmp/. To run your own data, please change the paths in your parameter file.
 
-There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail.
-
-To run the model including gBGC, 
+To run the model including gBGC,
 ```bash
-./PhyloAcc_gBGC Simulation/param2-6-test.txt
+mkdir Simulation/result_tmp
+./PhyloAcc_gBGC paramGC-0.txt
 ```
-under [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC). It will output to V2_GBGC/Simulation/result_tmp/.
+under *V2_GBGC/*. It will output to *V2_GBGC/Simulation/result_tmp/* (which will be the same as in V2_GBGC/Simulation/result/).
+
+There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail. R scripts to generate simulated DNA sequences are also in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R), please see [Simulation.md](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation.md) for more detail. 
+
+## Data
+The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). 
