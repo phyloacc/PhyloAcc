@@ -529,14 +529,16 @@ void BPP::getSubtree(int root, set<int>& child, vector<int> & visited_init)  // 
     
 }
 
-void BPP::Output_init(PhyloProf & prof, string output_path){
+void BPP::Output_init(PhyloProf & prof, string output_path, vector<int> & ids){
     
         string outpath_elem = output_path+ "_elem_lik.txt";
         ofstream out_lik(outpath_elem.c_str());
         out_lik.precision(8);
         out_lik << "No.\tID\tloglik_NUll\tloglik_RES\tloglik_all\tlog_ratio\tloglik_Max1\tloglik_Max2\tloglik_Max3"<<endl;
-        for(int cc=0; cc<C;cc++)
+        //for(int cc=0; cc<C;cc++)
+        for(vector<int>::iterator it = ids.begin(); it !=ids.end(); it++)
         {
+            int cc = *it;
             out_lik <<cc << "\t" << prof.element_names[cc] << "\t" << log_liks_null[cc] <<"\t"  <<log_liks_resZ[cc] <<"\t"  <<log_liks_sgl[cc]<< "\t"<< log_liks_resZ[cc] -  log_liks_null[cc];
             for(int r=0;r<3;r++) out_lik <<"\t" <<log_liks_Z[r][cc];
             out_lik << endl;
@@ -554,11 +556,13 @@ void BPP::Output_init(PhyloProf & prof, string output_path){
                     out_z<<nodes_names[s] << "\t";
                 }
                 out_z <<endl;
-            for(int c=0;c<C;c++)
+            //for(int c=0;c<C;c++)
+            for(vector<int>::iterator it = ids.begin(); it !=ids.end(); it++)
             {
-                    for(int s=0; s<N;s++)
-                            out_z<<Max_Z[r][c][s]<<"\t";
-                    out_z <<endl;
+                int c = *it;
+                for(int s=0; s<N;s++)
+                    out_z<<Max_Z[r][c][s]<<"\t";
+                out_z <<endl;
             }
         out_z.close();
     }
@@ -567,10 +571,12 @@ void BPP::Output_init(PhyloProf & prof, string output_path){
 }
 
 
-void BPP::Output_init0(PhyloProf & prof, ofstream& out_lik){
+void BPP::Output_init0(PhyloProf & prof, ofstream& out_lik, vector<int> & ids){
     
-    for(int cc=0; cc<C;cc++)
+    //for(int cc=0; cc<C;cc++)
+    for(vector<int>::iterator it = ids.begin(); it !=ids.end(); it++)
     {
+        int cc = *it;
         out_lik <<cc << "\t" << prof.element_names[cc] << "\t"  <<log_liks_sgl[cc]<< "\t"<<log_liks_Z[1][cc];
         out_lik << endl;
     }

@@ -509,8 +509,8 @@ static void printZ(int N, vector<int> & Z, int (*children)[2])
 void MatchProfAndTree(PhyloProf & _prof, PhyloTree & _tree);
     void InitPhyloTree(PhyloTree & tree);//double indel, double indel2 = 0.01, double indel_pi = 0.5);
 void InitMCMC(int _num_burn, int _num_mcmc, int _num_thin);
-void Output_init(PhyloProf & prof, string output_path);
-    void Output_init0(PhyloProf & prof, ofstream& out_lik);
+void Output_init(PhyloProf & prof, string output_path, vector<int> & ids);
+    void Output_init0(PhyloProf & prof, ofstream& out_lik, vector<int> & ids);
 void getSubtree(int root, vector<int> & visited_init);
 void getSubtree(int root, set<int>& child, vector<int> & visited_init);
 void getUppertree(int root, vector<int>& child, set<int> & visited_init);

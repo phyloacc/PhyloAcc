@@ -409,9 +409,9 @@ int main(int argc, char* argv[])
         try{
           if(sample_hyper) {
             bpp.sample_hyperparam(lrate_prop, grate_prop);
-            bpp.Output_init0(profile,out_lik);
+            bpp.Output_init0(profile,out_lik, ids);
           }else{
-            bpp.Output_init(profile,output_path);
+            bpp.Output_init(profile,output_path, ids);
           }
         }catch (exception& e){
               cout << " Standard exception: " << e.what() << endl;
