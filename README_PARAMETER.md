@@ -35,7 +35,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *ADAPT_FREQ*: number of iterations to recompute acceptance rate of Metropolis-Hastings for adaptively adjusting the proposal variances for mutation rates (default: 100).
   * *SEED*: seed for random sampling (default: 5)
   * *RATIO0*: initial value for the conserved rate (default: 0.5). 
-  * *RATIO1*: initial value for the neutral rate (default: 1). 
+  * *RATIO1*: initial value for the accelerated rate (default: 1). 
   * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. If sampling hyperparamers, the algorithm will only output the posterior of Z (latent state of each branch) under full model. 
   * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
   * *NUM_THREAD*: Number of threads to run the algorithm (default: 1).
