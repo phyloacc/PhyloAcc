@@ -8,7 +8,7 @@
 
 #include "bpp_c.hpp"
 #include "bpp.hpp"
-
+#include <gsl/gsl_errno.h>
 
 //void BPP_C::getSubtree(int root, set<int>& child, vector<int> & visited_init)  // traverse from root, stop at children, 74 & 64; do include 1-S!
 //{
@@ -131,6 +131,7 @@ void BPP_C::getEmission_ambig() //whether calculate null
 void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z = 1 to missing
 {
     
+    failure = false;
     if(iter == 0)
     {
         //initalize Z, all Z are 1 except the root
@@ -313,7 +314,7 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
         
         MonitorChain(m, bpp, log_lik_old, logp_Z, resZ);  //cout in each function
         
-        if(m == num_burn+num_mcmc-1) break;
+        if(failure || (m == num_burn+num_mcmc-1))  break;
         
         // sample H_m|Z_m,r_m
         for(int g=0; g<GG; g++)
@@ -467,7 +468,7 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
     }
     
     
-    if(verbose) Output_sampling(iter, output_path2, bpp, resZ);  //has to be before Output_init!!
+    if(verbose || failure) Output_sampling(iter, output_path2, bpp, resZ);  //has to be before Output_init!!
 
 }
 
@@ -605,8 +606,14 @@ void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // 
     
 }
 
-void BPP_C::MonitorChain(int m, BPP &bpp, double & loglik, const double add_loglik,const int resZ)  //calculate P(X|Z, TM(r) ),
+void BPP_C::MonitorChain(int  m, BPP &bpp, double & loglik, const double add_loglik,const int resZ)  //calculate P(X|Z, TM(r) ),
 {
+    for(int s=0; s<N;s++)
+    {
+        trace_Z[m][s] = Z[s];
+
+    }
+
     if(m==0)
     {
         trace_loglik[m] = 0;
@@ -626,19 +633,44 @@ void BPP_C::MonitorChain(int m, BPP &bpp, double & loglik, const double add_logl
     //double gain, loss;
     //log_f_Z(Z, log_TM_Int, gain, loss);
     trace_full_loglik[m] = trace_loglik[m] + add_loglik ;
+    /*int status = gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b);
+    if (status) {
+        if (status == GSL_EDOM) {
+            fprintf (stderr, "%d, invalid argument for conserved rate in computing loglik, %f\n", CC,trace_c_rate[m]);
+            cout << bpp.cprior_a << " " << bpp.cprior_b <<endl;
+        } else {
+            fprintf (stderr, "%d, failed in computing loglik, gsl_errno=%d\n",CC,
+                     status);
+        }
+        //m = num_burn+num_mcmc-1;
+        failure = 1;
+        return;
+    }*/
+    
     trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b));
+    
     if(resZ !=0)
     {
-        trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b));
-    }
-    
-    
-    
-    for(int s=0; s<N;s++)
-    {
-        trace_Z[m][s] = Z[s];
+        /*int status = gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b);
+        if (status) {
+          if (status == GSL_EDOM) {
+            fprintf (stderr, "%d, invalid argument for accelerated rate in computing loglik, %f\n", CC,trace_n_rate[m]);
+        } else {
+            fprintf (stderr, "%d, failed in computing loglik, gsl_errno=%d\n",
+                     CC,status);
+        }
+        //m = num_burn+num_mcmc-1;
+        failure = 1;
+        return;
+        }*/
         
+        trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b));
+        
+
     }
+    
+    
+    
     
     if(m>=num_burn && trace_full_loglik[m]>MaxLoglik)
     {
@@ -812,36 +844,61 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
         
         
         if(neut) {
-            proposal =gsl_ran_gamma(RNG,cur_r/prop_n,prop_n);
+            double u = r*(prop_n - 1/prop_n ) + 1/prop_n; // generate uniform from (1/prop_n, prop_n);
+            proposal = cur_r *  u;
             if(bpp.ropt == 1 && proposal <  bpp.nlb ) //trace_c_rate[m]) 0.6
             {
-                return(cur_r);
+                //return(cur_r);
+                continue;
             }else if(bpp.ropt == 2 && proposal < trace_c_rate[m])
             {
-                 return(cur_r);
+                 //return(cur_r);
+                 continue;
             }
         }
         else{
-            proposal =gsl_ran_gamma(RNG,cur_r/prop_c,prop_c);
+            double u = r*(prop_c - 1/prop_c ) + 1/prop_c; // generate uniform from (1/prop_n, prop_n);
+            proposal = cur_r *  u;
             if(bpp.ropt == 1 && proposal > bpp.cub) //trace_n_rate[m+1]) 1
             {
-                return(cur_r);
+                continue;
+                //return(cur_r);
             }else if(bpp.ropt == 2 && proposal > trace_n_rate[m+1])
             {
-                return(cur_r);
+                continue;
+                //return(cur_r);
             }
         }
+       
+      #pragma omp critical
+      {
+ 
+        if(proposal < 1e-8 || proposal > 1e8)
+        {
+            if(neut)
+            {
+                cerr << "WARNING: sampling accelerated rate "<< proposal <<"  " << prop_n << " " <<cur_r <<" for element "<< CC <<"at iter " << m <<"  out of range!" <<endl;
+            }else{
+                cerr << "WARNING: sampling conserved rate "<< proposal << "  " << prop_c <<"  "<< cur_r<<" for element "<< CC <<"at iter " << m << "  out of range!" <<endl;
+            }   
+        }
+      }
+      
+      if(proposal < 1e-8 || proposal > 1e8) {
+          verbose=1;  
+          continue;
+      }
+
         
-        // if(m>0)cout << cur_r << "; " << proposal <<"; ";
         
         loglik_new = log_f_Xz(visited, lambda_tmp, neut, proposal,bpp);  //P(X|Z), lambda not changed, lambda_tmp changed
         
 
-        if(neut) MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(gsl_ran_gamma_pdf(cur_r,proposal/prop_n,prop_n)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_n,prop_n));
-        else  MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(gsl_ran_gamma_pdf(cur_r,proposal/prop_c,prop_c)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_c,prop_c));
+        if(neut) MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(cur_r) - log(proposal); //+ log(gsl_ran_gamma_pdf(cur_r,proposal/prop_n,prop_n)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_n,prop_n));
+        else  MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(cur_r) - log(proposal);//+ log(gsl_ran_gamma_pdf(cur_r,proposal/prop_c,prop_c)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_c,prop_c));
         
        
-     //cout << cur_r << "; " << proposal <<"; " << loglik_old  << "; " << loglik_new << ";" <<loglik_new -loglik_old<< ";" << MH_ratio << endl;
+     if(neut) cout << cur_r << "; " << proposal <<"; " << loglik_old  << "; " << loglik_new << ";" <<loglik_new -loglik_old<< ";" << MH_ratio << endl;
        
         
         if(log(r) < MH_ratio)
@@ -921,6 +978,7 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
                 else
                     scale_adj = 1;
                 prop_n = prop_n * scale_adj;
+                if(prop_n < 1.0001) prop_n = 1.0001;
                 accept_n_rate = 0;
             }else{
                 if((double) accept_c_rate/adaptive_freq > 0.44)
@@ -930,6 +988,7 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
                 else
                     scale_adj = 1;
                 prop_c = prop_c * scale_adj;
+                if(prop_c < 1.0001) prop_c = 1.0001;
                 accept_c_rate = 0;
             }
         }
