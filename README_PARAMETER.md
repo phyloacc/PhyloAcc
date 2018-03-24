@@ -21,10 +21,10 @@ In the parameter file, each parameter is specified in a line with the parameter 
 * **(Hyper)Parameters for the model**:
   * *PREP_GRATE*: the prior transition probabily from neutral to conserved state (default: 0.8).
   * *PREP_LRATE*: the prior transition probabily from conserved to accelerated state (default: 0.1).
-  * *CONSERVE_PRIOR_A*: the shape parameter for the gamma prior of conserved rate (default: 10).
-  * *CONSERVE_PRIOR_B*: the scale parameter for the gamma prior of conserved rate (default: 0.2).
-  * *ACCE_PRIOR_A*: the shape parameter for the gamma prior of acceleraed rate (default: 5).
-  * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.04).
+  * *CONSERVE_PRIOR_A*: the shape parameter for the gamma prior of conserved rate (default: 5).
+  * *CONSERVE_PRIOR_B*: the scale parameter for the gamma prior of conserved rate (default: 0.04).
+  * *ACCE_PRIOR_A*: the shape parameter for the gamma prior of acceleraed rate (default: 10).
+  * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.2).
   * *RATE_OPT*: to avoid label switching of latent state, we provide options to restrict accelerated rate larger than conserved rate. 0: no restriction on rates; 1: have lower and upper bound on acceleraed and conserved rates respectively; 2: restrict accelerated rate to be larger than conserved rate. (default: 1)
   * *NLB*: lower bound for the accelerated rate. Only valid if *RATE_OPT* = 1. Default: 0.6.
   * *CUB*: upper bound for the conserved rate. Only valid if *RATE_OPT* = 1. Default: 1.
@@ -35,7 +35,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *ADAPT_FREQ*: number of iterations to recompute acceptance rate of Metropolis-Hastings for adaptively adjusting the proposal variances for mutation rates (default: 100).
   * *SEED*: seed for random sampling (default: 5)
   * *RATIO0*: initial value for the conserved rate (default: 0.5). 
-  * *RATIO1*: initial value for the neutral rate (default: 1). 
+  * *RATIO1*: initial value for the accelerated rate (default: 1). 
   * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. If sampling hyperparamers, the algorithm will only output the posterior of Z (latent state of each branch) under full model. 
   * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
   * *NUM_THREAD*: Number of threads to run the algorithm (default: 1).
