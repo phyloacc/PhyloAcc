@@ -123,13 +123,11 @@ class BPP_C
     time_t last_time;
     
     unsigned long int seed;
-    
-    bool verbose; //= false;
 
     
 public:
-    
-   
+    bool failure = false;
+    bool verbose; 
     
     BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, double nconsToMis = 1)//, double _indel)
     {
@@ -340,8 +338,6 @@ public:
         //getEmission_ambig();
         
         
-        prop_c = (double) 1/GG;
-        prop_n = (double) 1/GG * 10;
         
         
         log_emission = vector<vector<double> >(N-1, vector<double>(3,0));
@@ -393,7 +389,7 @@ public:
     void MonitorChain(int m, BPP &bpp, double &loglik, const double add_loglik, const int resZ) ;
     void getUpdateNode(bool neut,vector<bool> & visited_init);
     double log_f_Xz(vector<bool> visited, vector<vector<vec>>& lambda_tmp, bool neut, double propos, BPP& bpp);
-    double sample_rate(int resZ, double old_rate, bool neut, vector<bool> visited, double & loglik_old, BPP& bpp, int M =1, bool adaptive = true, double adaptive_factor = 1);
+    double sample_rate(int resZ, double old_rate, bool neut, vector<bool> visited, double & loglik_old, BPP& bpp, int M =1, bool adaptive = true, double adaptive_factor = 0.5);
     void Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string output_path2,int resZ, bool UpR, bool UpHyper, double lrate_prop, double grate_prop);
     vector<int> Update_Z_subtree(int num_base = 5);
     void Output_init(string output_path, string output_path2, BPP& bpp,ofstream& outZ, int resZ);

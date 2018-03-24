@@ -22,7 +22,7 @@
 #include "bpp_c.hpp"
 #include "utils.h"
 #include <math.h>
-
+#include <gsl/gsl_errno.h>
 
 using namespace std;
 using namespace arma;
@@ -48,7 +48,7 @@ int num_thread = 1;
 // running parameters
 int num_burn = 200;         // num of burn-in updates
 int num_mcmc = 800;         // num of MCMC updates,10
-int num_thin = 100;    // num of updates between two samples, adaptive frequency
+int num_thin = 500;    // num of updates between two samples, adaptive frequency
 int num_chain; // outer loop of updates Q matrix and hyperparameter of substitution rates
 
 
@@ -358,6 +358,7 @@ int main(int argc, char* argv[])
     }
 
     cout << ids.size() << " of elements to be computed" << endl; 
+    //gsl_set_error_handler_off();
     for(int iter =0; iter<num_chain; iter++)
     {
         cout << "Running MCMC chain " << iter +1 << " ..." << endl;
@@ -385,21 +386,33 @@ int main(int argc, char* argv[])
             {
                 bppc.initMCMC(iter,bpp,0);  //not constrain log_prob_back
                 bppc.Gibbs(iter,bpp,out_Z0,output_path,output_path2,0,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+                //if(!bppc.failure)
+                //{
                 bppc.Eval2(bpp,0);
+                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 0);
                 bppc.Output_init(output_path,output_path2,bpp,out_Z0, 0); //sort rates!!, posterior median of nrate and crate; posterior mean of Z
-
+               // }
                 // res model, crate by null model
                 bppc.initMCMC(iter,bpp,2);  //not constrain log_prob_back
                 bppc.Gibbs(iter,bpp,out_Z2,output_path,output_path2,2,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+                //if(!bppc.failure)
+                //{
                 bppc.Eval2(bpp,2);
+                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 2);
                 bppc.Output_init(output_path,output_path2,bpp,out_Z2, 2); //sort rates!!
+                //}
             }
             
             // full model, nrate, crate by res model
             bppc.initMCMC(iter,bpp,1);  //not constrain log_prob_back
             bppc.Gibbs(iter, bpp,out_Z1,output_path,output_path2,1, true, sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+            //if(!bppc.failure)
+            //{
             bppc.Eval2(bpp,1);
+            if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 1);
             bppc.Output_init(output_path,output_path2,bpp,out_Z1, 1); //sort rates!!
+            //}
+
             }catch (exception& e){
               cout << c << " Standard exception: " << e.what() << endl;
             }

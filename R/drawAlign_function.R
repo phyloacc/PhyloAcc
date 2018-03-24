@@ -57,8 +57,8 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
   names(tip.color) <- species
   if(!is.null(target_species)) tip.color[target_species] <- 4
   
-  ratio1 = Z[3] # c_rate
-  ratio2 = Z[2] # n_rate
+  ratio1 = Z[offset] # c_rate
+  ratio2 = Z[offset-1] # n_rate
   #print(ratio1);print(ratio2);
  
 
@@ -109,16 +109,20 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
   names(cols_sp) <- species
   if(!is.null(target_species)) cols_sp[target_species] <- 4
   cols =c("azure2","#df8640","#FFFFFF", "#3794bf") #gainsboro
-  
-  element1 <- align[,(bed[k+1,2]+1): bed[k+1,3]]
+  if(is.null(bed))
+  {
+    element1 <- align[species,]
+  }else{
+    element1 <- align[,(bed[k+1,2]+1): bed[k+1,3]]
+  }
   # get the consensus base pair
   ele_cons <- apply(element1, 2, function(x) { y <- xtabs(~x); 
       cb = names(y)[order(y,decreasing = T)]
-      cb <- cb[which(cb%in%c('a','c','g','t'))[1]]
+      cb <- cb[which(cb%in%c('a','c','g','t','A','C','G','T'))[1]]
       z <-  rep("substitution",length(x)) 
       z[x==cb] <- "consensus";
       z[x=='-'] <- "indel";
-      z[x=='n'] <- "N"; #| x=='*'
+      z[x=='n' | x=='N'] <- "N"; #| x=='*'
       return(z);
   })
   

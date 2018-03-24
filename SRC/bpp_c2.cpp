@@ -197,12 +197,17 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         }
         if(verbose) cout << "P(X,Z*,r*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|resZ): " << bpp.log_liks_resZ[CC] << " P(X): " << bpp.log_liks_sgl[CC] << endl;
         //cout << "P(X,Z*,r*): " << MaxLoglik << " P(X): " << bpp.log_liks_sgl[CC] << endl;
+
+        if(bpp.log_liks_sgl[CC] == NAN) failure = 1;
     }
     else if(resZ==0)
     {
         bpp.log_liks_null[CC] = VB/effective_sum + log(effective_sum) + 0.5*(log(2*M_PI) + 1);
+        if(bpp.log_liks_null[CC] == NAN) failure = 1;
+
     }else{
         bpp.log_liks_resZ[CC] = VB/effective_sum + log(effective_sum) + log(2*M_PI) + 1;
+        if(bpp.log_liks_resZ[CC] == NAN) failure = 1;
     }
     
     
@@ -380,28 +385,30 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
     ofstream out_lik;
     out_lik.precision(8);
     
-    if(iter ==0)
+    #pragma omp critical
     {
+      if(iter ==0)
+      {
         out_lik.open(outpath_lik.c_str());
         out_lik << "loglik\trate_n\trate_c\t";
         for(int s =0 ;s<N;s++){  // header: species name
             out_lik<<bpp.nodes_names[s] << "\t";
         }
         out_lik <<endl;
-    }else{
+      }else{
         out_lik.open(outpath_lik.c_str(), ios::app);
-    }
-    #pragma omp critical
-    {
-        for(std::size_t i=0; i< trace_loglik.size();i++)
+      }
+        
+      for(std::size_t i=0; i< trace_loglik.size();i++)
         {
             out_lik<<trace_loglik[i]<<"\t"<<trace_n_rate[i] << "\t"<<trace_c_rate[i]<<"\t";
             for(int s=0; s<N;s++)
                 out_lik<<trace_Z[i][s]<<"\t";
             out_lik <<endl;
         }
-    }
+    
     out_lik.close();
+    }
 }
 
 
