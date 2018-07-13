@@ -59,12 +59,13 @@ private:
     // names of species
     vector<int> target_species;
     vector<int> conservedgroup;
-    int refspecies;
+    //int refspecies;
     
     double conserve_prop;
     
     vector<int> outgroup;
     set<int> upper;
+    set<int> upper_conserve;
     
     vector<int> subtree;
     vector<int> tosample;
@@ -103,10 +104,15 @@ private:
     vector<vector < vector <int > >> Max_Z;
     vector<vector < vector <int > >> cur_Z;
     
-    double ind_lrate;  //for Z
+    
+    double ind_lrate, ind_lrate2;  //for Z
     double ind_grate;
     double vlr = 100; // proposal variance of loss rate
     double vgr = 100; // proposal variance of gain rate
+    //double prior_glr[3];
+    double prior_l_a, prior_l_b;
+    double prior_l2_a, prior_l2_b;
+    double prior_g_a, prior_g_b;
     
     vector<mat >  TM_Int;
     //vector<mat>  TM_null;
@@ -130,6 +136,10 @@ private:
     
     vector< double > cur_nrate;
     vector< double > cur_crate;
+    
+    vector< double > cur_lrate;
+    vector< double > cur_grate;
+    vector< double > cur_lrate2;
 
     
     vector < vector <mat>> log_cache_TM_neut_ensemble;
@@ -160,7 +170,7 @@ public:
 
 
 
-BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, string _refspecies, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, double _prep_lrate, double _prep_grate, double _indel, double _indel2, double missing_thres, bool _sample_indel)
+    BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, double _prep_grate, double _prep_lrate, double _prep_lrate2, double _prior_g_a, double _prior_g_b, double _prior_l_a, double _prior_l_b,double _prior_l2_a, double _prior_l2_b, double _indel, double _indel2, double missing_thres, bool _sample_indel)
 {
     
     seed = _seed;
@@ -184,7 +194,17 @@ BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _ta
     indel2 = _indel2; //0.013 for ratite; 0.08 for mammal
     
     ind_lrate = _prep_lrate;
+    ind_lrate2 = _prep_lrate2;
     ind_grate = _prep_grate;
+//    prior_glr[0] = _prior_l * _prior_gla;
+//    prior_glr[1] = _prior_g * _prior_gla;
+//    prior_glr[2] = (1 - _prior_l -_prior_g)  * _prior_gla;
+    
+    prior_l_a = _prior_l_a, prior_l_b = _prior_l_b;
+    prior_l2_a = _prior_l2_a, prior_l2_b = _prior_l2_b;
+    prior_g_a = _prior_g_a, prior_g_b = _prior_g_b;
+    
+    
     
     nprior_a = _npriora, nprior_b = _npriorb;  //around 1
     cprior_a = _cpriora, cprior_b = _cpriorb;  //around ratio
@@ -203,8 +223,8 @@ BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _ta
     species_names = _prof.species_names;
     nodes_names = _tree.nodes_names;
     
-    _refspecies = strutils::trim(_refspecies);
-    refspecies = find(species_names.begin(), species_names.end(),  _refspecies) - species_names.begin();
+    //_refspecies = strutils::trim(_refspecies);
+    //refspecies = find(species_names.begin(), species_names.end(),  _refspecies) - species_names.begin();
     
     
     vector<string> tmp = strutils::split(strutils::trim(_target),';');
@@ -267,17 +287,18 @@ BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _ta
     
     
     
-    for(int s=0; s<N; s++)
-    {
-        
-        //double x = exp(-ind_grate *distances[s]);
-        TM_Int[s](0,0) = 1 - ind_grate;
-        TM_Int[s](1,0) = ind_grate;
-        //double y = exp(-ind_lrate *distances[s]);
-        TM_Int[s](1,1) = 1 - ind_lrate;
-        TM_Int[s](2,1) = ind_lrate;
-        
-    }
+//    for(int s=0; s<N; s++)
+//    {
+//
+//        //double x = exp(-ind_grate *distances[s]);
+//        TM_Int[s](0,0) = 1 - ind_grate;
+//        TM_Int[s](1,0) = ind_grate * (1 - ind_lrate2);
+//        TM_Int[s](2,0) = ind_grate * ind_lrate2;
+//        //double y = exp(-ind_lrate *distances[s]);
+//        TM_Int[s](1,1) = 1 - ind_lrate;
+//        TM_Int[s](2,1) = ind_lrate;
+//
+//    }
 
     tmp = strutils::split(strutils::trim(_outgroup),';');
     for(vector<string>::iterator it = tmp.begin(); it<tmp.end();it++)
@@ -286,6 +307,8 @@ BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _ta
         outgroup.push_back(pos);
     }
     getUppertree(N-1, outgroup, upper);
+    getUppertree(N-1, conservedgroup, upper_conserve);
+    
     for(int s=0; s<N-1; s++) // nodes: from bottom to top, doesn't include root
     {
         if(upper.find(s)==upper.end())
@@ -298,16 +321,20 @@ BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _ta
    // ctnutils::DispVector(upper);
    // cout << endl;
     
-    for(set<int>:: iterator it = upper.begin(); it!=upper.end();it++)
-    {
-        TM_Int[*it](1,1) = 1;
-        TM_Int[*it](2,1) = 0;
-    }
-    
-    
-    for(int s=0; s<N; s++){
-        log_TM_Int[s] = log(TM_Int[s]);
-    }
+//    for(set<int>:: iterator it = upper.begin(); it!=upper.end();it++)
+//    {
+//        TM_Int[*it](1,1) = 1;
+//        TM_Int[*it](2,1) = 0;
+//
+//        TM_Int[*it](0,0) = 1 - ind_grate;
+//        TM_Int[*it](1,0) = ind_grate;
+//        TM_Int[*it](2,0) = 0;
+//    }
+//
+//
+//    for(int s=0; s<N; s++){
+//        log_TM_Int[s] = log(TM_Int[s]);
+//    }
     
     
     //if(_sample_indel) sample_indel(_prof.X, missing_thres, output_path, 200, 25); //_prof.X
@@ -517,7 +544,7 @@ void getUppertree(int root, vector<int>& child, set<int> & visited_init);
 
     void sample_indel(vector< string> & X, double missing_thres, string output_path, int _iter = 100, int _MH = 10, bool _verbose = true);
 void sample_proposal(int iter, double & lrate_prop, double & grate_prop, ofstream & output);
-void sample_hyperparam(double lrate_prop, double grate_prop); //double indel_prop, double indel2_prop, 
+void sample_hyperparam(double lrate_prop, double grate_prop,  vector<int> & ids); //double indel_prop, double indel2_prop, 
 double log_lik(vector< vector<vec> > & lambda, double indel, double indel2, int iter, int block, vector<unsigned int> & v, double p);
     };
 

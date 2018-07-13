@@ -37,7 +37,7 @@ string segment_path;
 string id_path="";
 string result_prefix="test";
 
-string refspecies;
+//string refspecies;
 string outgroup;
 string targetspecies;
 string conservegroup; // can't be missing in more than 50%
@@ -52,8 +52,14 @@ int num_thin = 500;    // num of updates between two samples, adaptive frequency
 int num_chain; // outer loop of updates Q matrix and hyperparameter of substitution rates
 
 
-double prep_lrate = 0.1;
-double prep_grate = 0.8; //20;
+double prep_lrate = 0.3;
+double prep_lrate2 = 0.0;//0.1
+double prep_grate = 0.5; // initalization
+
+double prior_lrate2_a = 0,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
+double prior_lrate_a = 1 ,prior_lrate_b = 1 ; // beta prior for lrate, 2
+double prior_grate_a = 1,prior_grate_b = 1 ; // beta prior for grate
+
 
 double ratio0 = 0.5; //initial conserved rate
 double ratio1 = 1; // initial accelerated rate
@@ -84,7 +90,7 @@ void LoadParams(int argc, char* argv[])
     if (argc > 1)
         params_path = string(argv[1]);
     else
-        params_path = "/Users/hzr/GitHub/PhyloAcc/C_code/params1.txt"; //params2
+        params_path = "/Users/hzr/Phd_2/Bird/PhyloAcc_init3-3/params2s.txt"; //params2
     
     cout << "Loading program configurations from " << params_path << "......" <<endl;
     
@@ -170,8 +176,8 @@ void LoadParams(int argc, char* argv[])
             line_stream >> conserve_prop;
         else if (tmp == "GAP_PROP")
             line_stream >> missing_thres;
-        else if (tmp == "REF")
-            line_stream >> refspecies;
+        //else if (tmp == "REF")
+         //   line_stream >> refspecies;
         else if (tmp == "CONSTOMIS")
             line_stream >> consToMis;
         
@@ -265,7 +271,7 @@ int main(int argc, char* argv[])
     
     // create and init the BPP object
     //int pC = 500;  // only read in some elements for testing
-    BPP bpp(0, profile, phytree, output_path, targetspecies, outgroup, conserve_prop, conservegroup, refspecies, ratio0, ratio1, ropt, cub, nlb, nprior_a, nprior_b, cprior_a, cprior_b, seed, prep_lrate, prep_grate, indel, indel2, missing_thres, sample_indel);  //c=1 test run first element
+    BPP bpp(0, profile, phytree, output_path, targetspecies, outgroup, conserve_prop, conservegroup, ratio0, ratio1, ropt, cub, nlb, nprior_a, nprior_b, cprior_a, cprior_b, seed, prep_grate, prep_lrate, prep_lrate2, prior_grate_a, prior_grate_b,prior_lrate_a, prior_lrate_b,prior_lrate2_a, prior_lrate2_b,  indel, indel2, missing_thres, sample_indel);  //c=1 test run first element
     
     // remove profile?
     //profile.~PhyloProf();
@@ -301,7 +307,7 @@ int main(int argc, char* argv[])
     string species_name = output_path+"_species_names.txt";
     ofstream out_species(species_name.c_str());
     
-    out_Z0 << "No.\tn_rate\tc_rate"; out_Z1 << "No.\tn_rate\tc_rate"; out_Z2 << "No.\tn_rate\tc_rate";
+    out_Z0 << "No.\tn_rate\tc_rate\tg_rate\tl_rate\tl2_rate"; out_Z1 << "No.\tn_rate\tc_rate\tg_rate\tl_rate\tl2_rate"; out_Z2 << "No.\tn_rate\tc_rate\tg_rate\tl_rate\tl2_rate";
     for(int s=0; s<bpp.N;s++){
          for(int k=0;k<4;k++){
             out_Z0 <<"\t"<<bpp.nodes_names[s]<<"_"<<k;
@@ -363,14 +369,14 @@ int main(int argc, char* argv[])
     {
         cout << "Running MCMC chain " << iter +1 << " ..." << endl;
         // generate next indel parameter, nprior_a, nprior_b, etc...
-        bpp.sample_proposal(iter, lrate_prop, grate_prop,out_hyper);
+        //bpp.sample_proposal(iter, lrate_prop, grate_prop,out_hyper);
        
         
         // Gibbs sampling
         #pragma omp parallel for schedule (guided) num_threads(num_thread)
         for(std::size_t i = 0; i < ids.size(); i++ ) //pC bpp.C
         {
-            int c = ids[i];
+            int c = ids[i];//4502; //
             bool filter = false;
             //if(bppc.root<77 || bppc.parent2[76] == -1) continue;  // too many species missing
           
@@ -421,7 +427,7 @@ int main(int argc, char* argv[])
         // sample indel, nprior_a, nprior_b, etc...
         try{
           if(sample_hyper) {
-            bpp.sample_hyperparam(lrate_prop, grate_prop);
+            bpp.sample_hyperparam(lrate_prop, grate_prop, ids);
             bpp.Output_init0(profile,out_lik, ids);
           }else{
             bpp.Output_init(profile,output_path, ids);

@@ -158,19 +158,29 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
         fixZ[*it] = 1;
     }
     
-    fixZ[root] =0;  //0: 0,1: 0/1, -1: all
+    fixZ[root] =1;  // originally: 0... (0: 0, 1: 0/1, -1: all)
     
     MaxLoglik = -INFINITY;
        
-
-    
     trace_n_rate[0] = bpp.cur_nrate[CC]; //1;
     trace_c_rate[0] = bpp.cur_crate[CC]; //ratio; log_cache_TM_cons??
+    
+//    for(size_t tempm = 0; tempm < 50; tempm ++ )
+//    {
+//        if(tempm >= num_burn+num_mcmc) break;
+//        trace_l_rate[tempm] = bpp.cur_lrate[CC];
+//        trace_l2_rate[tempm] = bpp.cur_lrate2[CC];
+//        trace_g_rate[tempm] = bpp.cur_grate[CC];
+//    }
+    trace_l_rate[0] = bpp.cur_lrate[CC];
+    trace_l2_rate[0] = bpp.cur_lrate2[CC];
+    trace_g_rate[0] = bpp.cur_grate[CC];
+   
     
     for(int s=0; s<N; s++)
     {
         log_cache_TM_null[s] = bpp.log_cache_TM_null[s]; // already initialized in hpp
-        log_TM_Int[s] = bpp.log_TM_Int[s];
+        //log_TM_Int[s] = bpp.log_TM_Int[s];
     }
 
 
@@ -217,11 +227,6 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
         
     }
     
-    for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
-    {
-        log_TM_Int[*it](1,1) = 0;
-        log_TM_Int[*it](2,1) = log(0);
-    }
 
     
     log_prob_back = vector<vec> (N, zeros<vec>(3));
@@ -230,22 +235,25 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
         for(int g=0; g<GG; g++)
             lambda[g][s].fill(0);
     
-   getEmission_ambig();  
+    getEmission_ambig();
     //with prior, null model, all branches except outgroup are conserved, only have to sample Z  (0/1) of outgroup
     if(resZ==2)
     {
         //initiate log_prob_back not used
         
-        for(int s=0; s<S;s++) //0/1
-        {
+//        for(int s=0; s<S;s++) //0/1
+//        {
+//
+//            log_prob_back[s][1] = 0;
+//            log_prob_back[s][0] = 0;
+//            log_prob_back[s][2] = -INFINITY;
+//            fixZ[s] = 1;
+//        }
+        
+       
             
-            log_prob_back[s][1] = 0;
-            log_prob_back[s][0] = 0;
-            log_prob_back[s][2] = -INFINITY;
-            fixZ[s] = 1;
-        }
-            
-        for(vector<int>::iterator it = bpp.target_species.begin(); it < bpp.target_species.end(); it++) //1/2
+        //for(vector<int>::iterator it = bpp.target_species.begin(); it < bpp.target_species.end(); it++) //1/2
+        for(vector<int>::iterator it = upper_conserve_c.begin(); it < upper_conserve_c.end(); it++)
         {
             int s= *it;
 //            log_prob_back[s][2] = 0;
@@ -255,10 +263,12 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
 //            lambda2[s].col(0).fill(-INFINITY); lambda2[s].col(2).fill(0); // in last step set to -inf
             
             //restore restriction on 2
-            log_prob_back[s][2] = 0;
-            fixZ[s] = -1;
+            //log_prob_back[s][2] = 0;
+            fixZ[s] = 1;
 
         }
+        
+         // also need to include ancestors of fixZ == 1!!! 0704
         
               
     }
@@ -268,9 +278,9 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
         {
             int s = *it;
             
-            log_prob_back[s][1] = 0;
-            log_prob_back[s][0] = 0;
-            log_prob_back[s][2] = -INFINITY;
+//            log_prob_back[s][1] = 0;
+//            log_prob_back[s][0] = 0;
+//            log_prob_back[s][2] = -INFINITY;
             fixZ[s] = 1;
             
         }
@@ -278,10 +288,51 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
 
    }
     
+    //    for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
+    //    {
+    //        log_TM_Int[*it](1,1) = 0;
+    //        log_TM_Int[*it](2,1) = log(0);
+    //
+    //        log_TM_Int[*it](0,0) = log(1 - bpp.ind_grate);
+    //        log_TM_Int[*it](1,0) = log(bpp.ind_grate);
+    //        log_TM_Int[*it](2,0) = log(0);
+    //    }
+    
+    for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
+    {
+        int s = *it;
+        
+        if(fixZ[s] == 1)
+        {
+            log_TM_Int[s](0,1) = log(0);  // set once, never changed
+            log_TM_Int[s](1,1) = 0;
+            log_TM_Int[s](2,1) = log(0);
+            
+            log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
+            log_TM_Int[s](1,0) = log(trace_g_rate[0]);
+            log_TM_Int[s](2,0) = log(0);
+        
+        }else{
+            log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
+            log_TM_Int[s](1,0) = log(trace_g_rate[0]) + log(1 - trace_l2_rate[0]);
+            log_TM_Int[s](2,0) = log(trace_g_rate[0]) + log(trace_l2_rate[0]);
+            
+            double y = 1 - trace_l_rate[0];
+            log_TM_Int[s](0,1) = log(0); // set once, never changed
+            log_TM_Int[s](1,1) = log(y);
+            log_TM_Int[s](2,1) = log(1-y);
+        }
+        
+    }
+    
+    //for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
+    
+    
+    
    //fixZ[bpp.moveroot] =0;
 
     //ctnutils::DispVector(fixZ);
-    //cout << endl;
+    cout << endl;
     
 }
 
@@ -303,16 +354,18 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
     for(m=0; m<(num_burn+num_mcmc); m++)
     {
         
-        // monitoring and storaging trace loglik and Z
-        if(m == 0 || changedZ.size()>0)
-        {
-            logp_Z = prior_Z_subtree(Z);
-            for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
-            {
-                if(missing[*it]) logp_Z += log_emission[*it][Z[*it]];// for missing
-            }
-            
-        }
+//        // monitoring and storaging trace loglik and Z,  0703 add prior of Z at eval2
+//        if(m == 0 || changedZ.size()>0)
+//        {
+//            //logp_Z = prior_Z_subtree(Z);
+//            for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
+//            {
+//                //if(missing[*it]) logp_Z += log_emission[*it][Z[*it]];// for missing
+//
+//
+//            }
+//
+//        }
         
         
         MonitorChain(m, bpp, log_lik_old, logp_Z, resZ);  //cout in each function
@@ -357,7 +410,7 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
 //                
 //            }
         
-        getUpdateNode(changedZ,visited);  // set lambda to zero!!
+        getUpdateNode(changedZ,visited);  // reset visited to true & set lambda to zero!!
         
         // sample r_(m+1)|Z_(m+1), r_m
         if(changedZ.size()>0)
@@ -372,10 +425,8 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
         }
         
 
-
         if( UpR )// && m%num_thin==0)  // update transition rate
         {
-            
             vector<bool> visited_neut = vector<bool>(N,true);
             vector<bool> visited_cons = vector<bool>(N,true);
     
@@ -394,53 +445,75 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
             trace_c_rate[m+1] = trace_c_rate[m];
         }
         
-       
         
-
+        // update transition probablities
+        //if(m%50==49)
+        //{
+            sample_transition(trace_g_rate[m + 1] ,trace_l_rate[m + 1] ,trace_l2_rate[m + 1] );
+//            for(size_t tempm = m + 2; tempm <= m + 50; tempm ++ )
+//            {
+//                if(tempm >= num_burn+num_mcmc) break;
+//                trace_g_rate[tempm] =  trace_g_rate[m + 1];
+//                trace_l_rate[tempm] =  trace_l_rate[m + 1];
+//                trace_l2_rate[tempm] =  trace_l2_rate[m + 1];
+//            }
+        //}
         
     }
     
     bpp.log_liks_Z[resZ][CC] = MaxLoglik;
     bpp.Max_Z[resZ][CC] = Max_Z;
     
-    if(UpHyper) {
-        bpp.log_liks_curZ[CC] = trace_loglik[m - 1]; bpp.cur_Z[resZ][CC] = Z;
-        // compute Z transition matrix for proposal
-        double loss, gain;
-        log_f_Z(Z, log_TM_Int, gain, loss);  // only do this for full model, no constraint
-        bpp.MH_ratio_gain[CC] = -gain;
-        bpp.MH_ratio_loss[CC] = -loss;
-        
-        
-        for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
-        {
-            int s = *it;
-            double z = 1 - grate_prop;
-            log_TM_Int[s](0,0) = log(z);
-            log_TM_Int[s](1,0) = log(1 - z);
-            //double y = exp(-lrate_prop *distances2[s]);
-            double y = 1 - lrate_prop;
-            log_TM_Int[s](1,1) = log(y);
-            log_TM_Int[s](2,1) = log(1-y);
-            //log_TM_Int[s] = log(TM_Int[s]);
-        }
-        
-        
-        
-        for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
-        {
-            log_TM_Int[*it](1,1) = 0;
-            log_TM_Int[*it](2,1) = log(0);
-            //log_TM_Int[*it] = log(TM_Int[*it]);
-        }
-        
-        
-        log_f_Z(Z, log_TM_Int, gain, loss);
-        bpp.MH_ratio_gain[CC] += gain;
-        bpp.MH_ratio_loss[CC] += loss;
     
-        bpp.cur_crate[CC] = trace_c_rate[m-1];
-        bpp.cur_nrate[CC] = trace_n_rate[m-1];  //doesn't matter, initalize Z with no 2, random sample r_n from prior
+    
+    if(UpHyper) {
+//        bpp.log_liks_curZ[CC] = trace_loglik[m];  bpp.cur_Z[resZ][CC] = Z; // orginially m-1 ???
+//        // compute Z transition matrix for proposal
+//        double loss, gain;
+//        log_f_Z(Z, log_TM_Int, gain, loss);  // only do this for full model, no constraint
+//        bpp.MH_ratio_gain[CC] = -gain;
+//        //bpp.MH_ratio_loss[CC] = -loss;
+//
+//
+//        for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
+//        {
+//            int s = *it;
+//            //double z = 1 - grate_prop;
+//            log_TM_Int[s](0,0) = log(1 - lrate_prop - grate_prop);
+//            log_TM_Int[s](1,0) = log(grate_prop);
+//            log_TM_Int[s](2,0) = log(lrate_prop);
+//            //double y = exp(-lrate_prop *distances2[s]);
+//            double y = 1 - lrate_prop;
+//            log_TM_Int[s](1,1) = log(y);
+//            log_TM_Int[s](2,1) = log(1-y);
+//            //log_TM_Int[s] = log(TM_Int[s]);
+//        }
+//
+//
+//
+//        for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
+//        {
+//            log_TM_Int[*it](1,1) = 0;
+//            log_TM_Int[*it](2,1) = log(0);
+//
+//            log_TM_Int[*it](0,0) = log(1 - grate_prop);
+//            log_TM_Int[*it](1,0) = log(grate_prop);
+//            log_TM_Int[*it](2,0) = log(0);
+//
+//            //log_TM_Int[*it] = log(TM_Int[*it]);
+//        }
+//
+//
+//        log_f_Z(Z, log_TM_Int, gain, loss);
+//        bpp.MH_ratio_gain[CC] += gain;
+//        //bpp.MH_ratio_loss[CC] += loss;
+//
+        bpp.cur_crate[CC] = trace_c_rate[m]; // orginially m-1 ???
+        bpp.cur_nrate[CC] = trace_n_rate[m];  // orginially m-1 ??? //doesn't matter, initalize Z with no 2, random sample r_n from prior
+        
+        bpp.cur_grate[CC] = trace_g_rate[m];
+        bpp.cur_lrate[CC] = trace_l_rate[m];
+        bpp.cur_lrate2[CC] = trace_l2_rate[m];
     }
     
     
@@ -450,7 +523,8 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
      #pragma omp critical
     {
         if(verbose) {
-            cout <<CC <<": " << Max_m << ", " << MaxLoglik << ", "<< trace_c_rate[Max_m] << ", " << trace_n_rate[Max_m] <<endl;
+            cout <<CC <<": " << Max_m << ", " << MaxLoglik << ", "<< trace_c_rate[Max_m] << ", " << trace_n_rate[Max_m];
+            cout << ", "<< trace_g_rate[Max_m] << ", " << trace_l_rate[Max_m] << ", " << trace_l2_rate[Max_m] << endl;
             for(int s=0;s<N;s++ )
             {
                 if(Max_Z[s]!=1 && !missing[s])
@@ -477,12 +551,94 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
 }
 
 
+void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
+{
+    
+    mat nZ = zeros(3,2); // record number of Z transitions
+    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+    {
+        int p = parent2[*it];
+        if(Z[p] < 2)
+        {
+            nZ(Z[*it],Z[p]) += 1;
+        }
+        
+        
+    }
+    
+    //cout << "Count matrix: " << nZ << endl;
+    gr = gsl_ran_beta(RNG, prior_g_a + nZ(1,0) + nZ(2,0) , prior_g_b + nZ(0,0));
+    
+    //for(vector<int>:: iterator it = upper_c.begin(); it < upper_c.end() -1;it++)
+    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+    {
+        if(fixZ[*it] == 1)
+        {
+            int p = parent2[*it];
+            assert(p!=N);
+            if(Z[p] < 2)
+            {
+                nZ(Z[*it],Z[p]) -= 1;
+            }
+        }
+    }
+    
+    lr = gsl_ran_beta(RNG, prior_l_a + nZ(2,1), prior_l_b + nZ(1,1));
+    if(prior_l2_a == 0)
+    {
+        lr2 = 0;
+    }else{
+        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,0), prior_l2_b + nZ(2,0));
+    }
+    
+    //cout << "Count matrix: " << nZ << endl;
+    //cout <<gr << ", " <<lr <<", " << lr2 << endl;
+    
+    //double theta[3];
+    //double alpha[3] = { prior_glr[0] + nZ(2,0), prior_glr[1] + nZ(1,0), prior_glr[2] + nZ(0,0)};
+    //gsl_ran_dirichlet (RNG, 3, alpha, theta);
+    //trace_l2_rate[m + 1] = theta[0];
+    //trace_g_rate[m + 1] = theta[1];
+    
+    
+    for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
+    {
+        int s = *it;
+        
+        if(fixZ[*it] == 1)
+        {
+            log_TM_Int[*it](1,1) = 0;
+            log_TM_Int[*it](2,1) = log(0);
+            
+            log_TM_Int[*it](0,0) = log(1 - gr);
+            log_TM_Int[*it](1,0) = log(gr);
+            log_TM_Int[*it](2,0) = log(0);
+            
+        }else{
+            log_TM_Int[s](0,0) = log(1 - gr);
+            log_TM_Int[s](1,0) = log(gr) + log(1 - lr2);
+            log_TM_Int[s](2,0) = log(gr) + log(lr2);
+            
+            double y = 1 - lr;
+            log_TM_Int[s](1,1) = log(y);
+            log_TM_Int[s](2,1) = log(1-y);
+        }
+        
+    }
 
 
-
-
-
-
+//    for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
+//    {
+//        log_TM_Int[*it](1,1) = 0;
+//        log_TM_Int[*it](2,1) = log(0);
+//
+//        log_TM_Int[*it](0,0) = log(1 - trace_g_rate[m + 1]);
+//        log_TM_Int[*it](1,0) = log(trace_g_rate[m + 1]);
+//        log_TM_Int[*it](2,0) = log(0);
+//
+//    }
+    
+}
 
 
 
@@ -636,7 +792,9 @@ void BPP_C::MonitorChain(int  m, BPP &bpp, double & loglik, const double add_log
     // add prior of Z and prior of r
     //double gain, loss;
     //log_f_Z(Z, log_TM_Int, gain, loss);
-    trace_full_loglik[m] = trace_loglik[m] + add_loglik ;
+    
+    trace_full_loglik[m] = trace_loglik[m] + add_loglik ; // 0703 add prior of Z to eval2
+    
     /*int status = gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b);
     if (status) {
         if (status == GSL_EDOM) {
@@ -684,7 +842,8 @@ void BPP_C::MonitorChain(int  m, BPP &bpp, double & loglik, const double add_log
     }
     
     if(m%500==0 && verbose){ 
-        cout <<CC <<": " << trace_loglik[m] <<", " << trace_full_loglik[m]<< ", " << trace_n_rate[m] << ", " << trace_c_rate[m] <<", " <<  prop_c <<", " << prop_n << endl;
+        cout <<CC <<": " << trace_loglik[m] <<", " << trace_full_loglik[m]<< ", " << trace_n_rate[m] << ", " << trace_c_rate[m] <<", " <<  prop_c <<", " << prop_n <<", ";
+        cout << trace_g_rate[m] <<  ", " << trace_l_rate[m] << ", " << trace_l2_rate[m] << endl;
         //cout << "changed Z: ";
         //ctnutils::DispVector(changedZ);
         //cout << "number of Z changed: " << changedZ.size();
@@ -802,14 +961,42 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
     
     double scale_adj;
     double r,cur_r = old_rate, proposal, MH_ratio,loglik_new ,prior_a,prior_b;
+    vec tmp_diag = zeros<mat>(bpp.num_base);
     
     if(neut) {prior_a = bpp.nprior_a; prior_b = bpp.nprior_b;} else {prior_a = bpp.cprior_a; prior_b = bpp.cprior_b;}
     
     if(visited[root]) {
    //     return(old_rate);
         // sample from prior
-        if(resZ!=0) old_rate = gsl_ran_gamma(RNG,prior_a,prior_b);
-        return(old_rate);
+        if(resZ!=0) {
+            cur_r = gsl_ran_gamma(RNG,prior_a,prior_b);
+            if(neut) {
+                if(bpp.ropt == 1 && cur_r <  bpp.nlb ) //trace_c_rate[m]) 0.6
+                {
+                    cur_r = old_rate;
+                }else if(bpp.ropt == 2 && cur_r < trace_c_rate[m])
+                {
+                    cur_r = old_rate;
+                }
+            }
+            else{
+                if(bpp.ropt == 1 && cur_r > bpp.cub) //trace_n_rate[m+1]) 1
+                {
+                    cur_r = old_rate;
+                }else if(bpp.ropt == 2 && cur_r > trace_n_rate[m+1])
+                {
+                    cur_r = old_rate;
+                }
+            }
+        }
+        else cur_r = old_rate;
+        
+//        if(old_rate > 4)
+//        {
+//            cout << "Sample neutral from prior: " << old_rate <<"  " << prop_n << " " <<cur_r << endl;
+//        }
+        
+        //return(cur_r);
 //        return(ratio);  // originally for acceleration
 //        if(neut)
 //        {
@@ -817,132 +1004,140 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
 //        }else{
 //            return(ratio);
 //        }
-    }
+    }else{
     
-    
-    vec tmp_diag = zeros<mat>(bpp.num_base);
-    vector<vector<vec>> lambda_tmp = vector<vector<vec>> (GG, vector<vec>(N,zeros<vec>(bpp.num_base)));
-    
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)  // only copy visited[s]
-    {
-        int s = *it;
-        if(!visited[s])
+        vector<vector<vec>> lambda_tmp = vector<vector<vec>> (GG, vector<vec>(N,zeros<vec>(bpp.num_base)));
+        
+        for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)  // only copy visited[s]
         {
+            int s = *it;
+            if(!visited[s])  continue;
             
-            continue;
+            for(int g=0;g<GG;g++) lambda_tmp[g][s] = lambda[g][s];
         }
         
-        for(int g=0;g<GG;g++)
+        for(int mm =0; mm<M;mm++)
         {
+            r = gsl_rng_uniform(RNG);
             
-            lambda_tmp[g][s] = lambda[g][s];
-            
-        }
-    }
-    
-    
-    
-    for(int mm =0; mm<M;mm++)
-    {
-        r = gsl_rng_uniform(RNG);
-        
-        
-        if(neut) {
-            //double u = r*(prop_n - 1/prop_n ) + 1/prop_n; // generate uniform from (1/prop_n, prop_n);
-            //proposal = cur_r *  u;
-            proposal =gsl_ran_gamma(RNG,cur_r/prop_n,prop_n);
-            if(bpp.ropt == 1 && proposal <  bpp.nlb ) //trace_c_rate[m]) 0.6
-            {
-                //return(cur_r);
-                continue;
-            }else if(bpp.ropt == 2 && proposal < trace_c_rate[m])
-            {
-                 //return(cur_r);
-                 continue;
-            }
-        }
-        else{
-            double u = r*(prop_c - 1/prop_c ) + 1/prop_c; // generate uniform from (1/prop_n, prop_n);
-            proposal = cur_r *  u;
-            //proposal =gsl_ran_gamma(RNG,cur_r/prop_c,prop_c);
-            if(bpp.ropt == 1 && proposal > bpp.cub) //trace_n_rate[m+1]) 1
-            {
-                continue;
-                //return(cur_r);
-            }else if(bpp.ropt == 2 && proposal > trace_n_rate[m+1])
-            {
-                continue;
-                //return(cur_r);
-            }
-        }
-       
-      #pragma omp critical
-      {
- 
-        if(proposal < 1e-12 || proposal > 1e8)
-        {
-            if(neut)
-            {
-                cerr << "WARNING: sampling accelerated rate "<< proposal <<"  " << prop_n << " " <<cur_r <<" for element "<< CC <<"at iter " << m <<"  out of range!" <<endl;
-            }else{
-                cerr << "WARNING: sampling conserved rate "<< proposal << "  " << prop_c <<"  "<< cur_r<<" for element "<< CC <<"at iter " << m << "  out of range!" <<endl;
-            }   
-        }
-      }
-      
-      if(proposal < 1e-12 || proposal > 1e8) {
-      //    verbose=1;  
-          continue;
-      }
-
-        
-        
-        loglik_new = log_f_Xz(visited, lambda_tmp, neut, proposal,bpp);  //P(X|Z), lambda not changed, lambda_tmp changed
-        
-
-        if(neut) MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(gsl_ran_gamma_pdf(cur_r,proposal/prop_n,prop_n)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_n,prop_n)); //+ log(cur_r) - log(proposal);
-        else  MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(cur_r) - log(proposal); //+ log(gsl_ran_gamma_pdf(cur_r,proposal/prop_c,prop_c)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_c,prop_c));
-        
-       
-     //if(neut) cout << cur_r << "; " << proposal <<"; " << loglik_old  << "; " << loglik_new << ";" <<loglik_new -loglik_old<< ";" << MH_ratio << endl;
-       
-        
-        if(log(r) < MH_ratio)
-        {
-            cur_r = proposal;
-            loglik_old = loglik_new;
-            //getUpdate some lambdas
-            for(vector<int>::iterator it= internal_nodes.begin(); it < internal_nodes.end(); it ++ )  // int s=S; s<=root;s++)
-            {
-                int s = *it;
-                if(visited[s]) continue; // || parent2[s] == -1
-                for(int g=0;g<GG;g++)
-                {                    
-                    lambda[g][s] = lambda_tmp[g][s];
-                    
-                }
-            }
-            
-            
-        }
-        
-        // reset lambda_tmp to zero
-        if(mm<M-1)
-        {
-            for(vector<int>::iterator it= internal_nodes.begin(); it < internal_nodes.end(); it ++ )//int s=S; s<=root;s++)
-            {
-                int s = *it;
-                if(visited[s]) continue; //|| parent2[s] == -1
-                for(int g=0;g<GG;g++)
+            if(neut) {
+                //double u = r*(prop_n - 1/prop_n ) + 1/prop_n; // generate uniform from (1/prop_n, prop_n);
+                //proposal = cur_r *  u;
+                proposal =gsl_ran_gamma(RNG,cur_r/prop_n,prop_n);
+                if(bpp.ropt == 1 && proposal <  bpp.nlb ) //trace_c_rate[m]) 0.6
                 {
-                    lambda_tmp[g][s].fill(0);
+                    //return(cur_r);
+                    continue;
+                }else if(bpp.ropt == 2 && proposal < trace_c_rate[m])
+                {
+                     //return(cur_r);
+                     continue;
                 }
             }
+            else{
+                double u = r*(prop_c - 1/prop_c ) + 1/prop_c; // generate uniform from (1/prop_n, prop_n);
+                proposal = cur_r *  u;
+                //proposal =gsl_ran_gamma(RNG,cur_r/prop_c,prop_c);
+                if(bpp.ropt == 1 && proposal > bpp.cub) //trace_n_rate[m+1]) 1
+                {
+                    continue;
+                    //return(cur_r);
+                }else if(bpp.ropt == 2 && proposal > trace_n_rate[m+1])
+                {
+                    continue;
+                    //return(cur_r);
+                }
+            }
+           
+          #pragma omp critical
+          {
+     
+            if(proposal < 1e-12 || proposal > 1e8)
+            {
+                if(neut)
+                {
+                    cerr << "WARNING: sampling accelerated rate "<< proposal <<"  " << prop_n << " " <<cur_r <<" for element "<< CC <<"at iter " << m <<"  out of range!" <<endl;
+                }else{
+                    cerr << "WARNING: sampling conserved rate "<< proposal << "  " << prop_c <<"  "<< cur_r<<" for element "<< CC <<"at iter " << m << "  out of range!" <<endl;
+                }
+            }
+          }
+          
+          if(proposal < 1e-12 || proposal > 1e8) {
+          //    verbose=1;
+              continue;
+          }
+
+            loglik_new = log_f_Xz(visited, lambda_tmp, neut, proposal,bpp);  //P(X|Z), lambda not changed, lambda_tmp changed
+
+
+            if(neut) MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(gsl_ran_gamma_pdf(cur_r,proposal/prop_n,prop_n)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_n,prop_n)); //+ log(cur_r) - log(proposal);
+            else  MH_ratio = loglik_new -loglik_old + log(gsl_ran_gamma_pdf(proposal,prior_a,prior_b)) - log(gsl_ran_gamma_pdf(cur_r,prior_a,prior_b)) + log(cur_r) - log(proposal); //+ log(gsl_ran_gamma_pdf(cur_r,proposal/prop_c,prop_c)) - log(gsl_ran_gamma_pdf(proposal,cur_r/prop_c,prop_c));
+
+           
+//            if(trace_n_rate[m] > 4)  //neut & (proposal > 4 || cur_r > 4)
+//            {
+//                 cout << cur_r << "; " << proposal <<"; " << loglik_old  << "; " << loglik_new << ";" <<loglik_new -loglik_old<< ";" << MH_ratio << endl;
+//                 for(int s=0;s<N;s++ )
+//                 {
+//                     if(Z[s]!=1)
+//                     {
+//                         cout << s << ": " <<Z[s] << ", ";
+//                     }
+//                 }
+//
+//                 cout << endl;
+//
+//                 for(vector<int>::iterator it= internal_nodes.begin(); it < internal_nodes.end(); it ++ )//int s=S; s<=root;s++)
+//                 {
+//                     int s = *it;
+//                     if(visited[s]) continue; //|| parent2[s] == -1
+//                     for(int g=0;g<GG;g++)
+//                     {
+//                         lambda_tmp[g][s].fill(0);
+//                     }
+//                 }
+//
+//                 cout << log_f_Xz(visited, lambda_tmp, neut, cur_r,bpp) << endl;
+//
+//            }
+           
+            
+            if(log(r) < MH_ratio)
+            {
+                cur_r = proposal;
+                loglik_old = loglik_new;
+                //getUpdate some lambdas
+                for(vector<int>::iterator it= internal_nodes.begin(); it < internal_nodes.end(); it ++ )  // int s=S; s<=root;s++)
+                {
+                    int s = *it;
+                    if(visited[s]) continue; // || parent2[s] == -1
+                    for(int g=0;g<GG;g++)
+                    {
+                        lambda[g][s] = lambda_tmp[g][s];
+                        
+                    }
+                }
+                
+            }
+            
+            // reset lambda_tmp to zero
+            if(mm<M-1)
+            {
+                for(vector<int>::iterator it= internal_nodes.begin(); it < internal_nodes.end(); it ++ )//int s=S; s<=root;s++)
+                {
+                    int s = *it;
+                    if(visited[s]) continue; //|| parent2[s] == -1
+                    for(int g=0;g<GG;g++)
+                    {
+                        lambda_tmp[g][s].fill(0);
+                    }
+                }
+            }
+            
         }
-        
     }
-    
-    
+        
     
     
     if(old_rate!= cur_r)
@@ -985,7 +1180,6 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
                     scale_adj = 1;
                 prop_n = prop_n * scale_adj;
                 if(prop_n > 1) prop_n = 1;
-                if(prop_n < 0.2) prop_n = 0.2;
                 accept_n_rate = 0;
             }else{
                 if((double) accept_c_rate/adaptive_freq > 0.44)
@@ -1011,16 +1205,16 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
 
 
 
-vector<int> BPP_C::Update_Z_subtree(int num_base)  //whether cal prob_back again
+vector<int> BPP_C::Update_Z_subtree(int num_base, bool prior)  //whether cal prob_back again
 {
     
-    getEmission(num_base);
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
+    if(!prior) getEmission(num_base);
+    for(vector<int>::iterator it = nodes.begin(); it < nodes.end();it++) // orginally -1 ...
     {
         int s =*it;
         //if(missing[s] ) continue; //&& s<S, for all nodes! don't update log_prob_back for missing nodes
         
-        log_prob_back[s] = log_emission[s];
+        if(!prior) log_prob_back[s] = log_emission[s]; else log_prob_back[s].fill(0);
         
         if(fixZ[s] ==1)
         {
@@ -1032,8 +1226,9 @@ vector<int> BPP_C::Update_Z_subtree(int num_base)  //whether cal prob_back again
     }
     
     
+    
     //message passing from bottom to top
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
+    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() -1;it++) 
     {
         int s = *it;
         int p = parent2[s];
@@ -1050,7 +1245,34 @@ vector<int> BPP_C::Update_Z_subtree(int num_base)  //whether cal prob_back again
     int old;
     vec log_trans_p, trans_p;
     
-    for(vector<int>::iterator it =nodes.end()-2;it>=nodes.begin();it--)  //exclude root, doesn't include missing nodes
+    // sample root
+    log_prob_back[root] += prior_z;
+    
+    vec prob = BPP::log_sample(log_prob_back[root]);
+    //cout<<prob.t() <<endl;
+    
+    unsigned int n[3];
+    gsl_ran_multinomial(RNG, 3, 1,prob.memptr(),n);
+    int nn;
+    for(nn=0; nn<3;nn++)
+    {
+        if(n[nn]>0) break;
+    }
+    
+    old = Z[root];
+    
+    Z[root] =nn;
+    if(nn>1) {
+        cout<< "Sample root Z error" <<endl;
+    }
+    
+    if(old != nn)
+    {
+        changedZ.push_back(root);
+    }
+    
+    
+    for(vector<int>::iterator it =nodes.end()-2;it>=nodes.begin();it--)  // exclude root, doesn't include missing nodes
     {
         
         int s = *it;
@@ -1348,52 +1570,52 @@ vector<int>  BPP_C::Move_Z(int & propConf, int & revConf, int & changeZ){
 
 
 
-double BPP_C::Update_f_Xz(vec log_pi, int num_base, vector<int>& Z, vector<mat> & log_cache_TM_neut, vector<mat> & log_cache_TM_cons, vector<bool> & visited)
-{
-    double result =0;
-    // 1. sending the lambda msg from leaves bottom up through the network
-    for(vector<int>::iterator it = internal_nodes.begin(); it < internal_nodes.end(); it++)//int s=S; s<=root; s++)
-    {
-        int s = *it;
-        if(visited[s] || missing[s]) continue;
-        for(int g=0;g<GG;g++)
-        {
-            
-            if(Tg[g][s]==num_base) continue;
-            
-            int* p = children2[s];
-            //lambda[g][s].fill(0);
-            
-            for(int cc=0;cc<2;cc++)
-            {
-                int chi = p[cc];
-                assert(chi != -1);
-                if(missing[chi] || Tg[g][chi]==num_base) continue;
-                
-                if(Z[chi] ==2) lambda[g][s] +=  BPP::log_multi(log_cache_TM_neut[chi],lambda[g][chi]);
-                else if (Z[chi] ==0) lambda[g][s] +=  BPP::log_multi(log_cache_TM_null[chi],lambda[g][chi]);
-                else lambda[g][s] +=  BPP::log_multi(log_cache_TM_cons[chi],lambda[g][chi]);
-            }
-        }
-        
-    }
-    
-    // 2. processing the distribution of root species
-    for(int g=0;g<GG;g++)
-    {
-        if(!visited[root]) lambda[g][root] += log_pi;
-        result += BPP::log_exp_sum(lambda[g][root]);
-    }
-    
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
-    {
-        if(missing[*it]) result += log_emission[*it][Z[*it]];// for missing
-    }
-    
-    result += prior_Z_subtree(Z);
-    return(result);
-    
-}
+//double BPP_C::Update_f_Xz(vec log_pi, int num_base, vector<int>& Z, vector<mat> & log_cache_TM_neut, vector<mat> & log_cache_TM_cons, vector<bool> & visited)
+//{
+//    double result =0;
+//    // 1. sending the lambda msg from leaves bottom up through the network
+//    for(vector<int>::iterator it = internal_nodes.begin(); it < internal_nodes.end(); it++)//int s=S; s<=root; s++)
+//    {
+//        int s = *it;
+//        if(visited[s] || missing[s]) continue;
+//        for(int g=0;g<GG;g++)
+//        {
+//            
+//            if(Tg[g][s]==num_base) continue;
+//            
+//            int* p = children2[s];
+//            //lambda[g][s].fill(0);
+//            
+//            for(int cc=0;cc<2;cc++)
+//            {
+//                int chi = p[cc];
+//                assert(chi != -1);
+//                if(missing[chi] || Tg[g][chi]==num_base) continue;
+//                
+//                if(Z[chi] ==2) lambda[g][s] +=  BPP::log_multi(log_cache_TM_neut[chi],lambda[g][chi]);
+//                else if (Z[chi] ==0) lambda[g][s] +=  BPP::log_multi(log_cache_TM_null[chi],lambda[g][chi]);
+//                else lambda[g][s] +=  BPP::log_multi(log_cache_TM_cons[chi],lambda[g][chi]);
+//            }
+//        }
+//        
+//    }
+//    
+//    // 2. processing the distribution of root species
+//    for(int g=0;g<GG;g++)
+//    {
+//        if(!visited[root]) lambda[g][root] += log_pi;
+//        result += BPP::log_exp_sum(lambda[g][root]);
+//    }
+//    
+//    for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
+//    {
+//        if(missing[*it]) result += log_emission[*it][Z[*it]];// for missing
+//    }
+//    
+//    result += prior_Z_subtree(Z);
+//    return(result);
+//    
+//}
 
 
     

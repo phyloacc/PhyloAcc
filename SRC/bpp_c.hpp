@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <string>
 #include <armadillo>
 #include <cassert>
@@ -60,7 +61,12 @@ class BPP_C
     vector<int> internal_nodes;
     vector<bool> missing;
     vector<int> upper_c;
+    vector<int> upper_conserve_c;
     
+   // double prior_glr[3];
+    double prior_l_a, prior_l_b;
+     double prior_l2_a, prior_l2_b;
+     double prior_g_a, prior_g_b;
     double ratio0;
     double ratio1;
     int num_burn;   // num of burn-in updates
@@ -87,6 +93,7 @@ class BPP_C
     
     vector<mat> log_TM_Int;
     
+    vec prior_z;
     
     vector<mat > log_cache_TM_neut;
     vector<mat > log_cache_TM_cons;
@@ -108,6 +115,10 @@ class BPP_C
     vector< vector<int> > trace_Z;  //iteration * Species * {0,1,2}, only for init
     vector <double> trace_n_rate;  //iter*element
     vector <double> trace_c_rate;
+    
+    vector <double> trace_l_rate;  //iter*element
+    vector <double> trace_l2_rate;
+    vector <double> trace_g_rate;
     
     int accept_n_rate = 0;
     int accept_c_rate = 0;  //how many accepted in current cycle
@@ -161,7 +172,26 @@ public:
         log_cache_TM_cons = vector<mat >(N, zeros<mat> (bpp.num_base,bpp.num_base));
         log_cache_TM_null = vector<mat >(N, zeros<mat> (bpp.num_base,bpp.num_base));
         
-        log_TM_Int = vector<mat >(N, zeros<mat>(3,2)); 
+        log_TM_Int = vector<mat >(N, zeros<mat>(3,2));
+        
+//        for(size_t i =0 ;i <3; i++)  // hyperparameter for loss and gain rates
+//        {
+//            prior_glr[i] = bpp.prior_glr[i];
+//        }
+       
+        
+        prior_l_a = bpp.prior_l_a;
+        prior_l_b = bpp.prior_l_b;
+        prior_g_a = bpp.prior_g_a;
+        prior_g_b = bpp.prior_g_b;
+        prior_l2_a = bpp.prior_l2_a;
+        prior_l2_b = bpp.prior_l2_b;
+        
+        
+        prior_z = zeros<vec>(3);
+        prior_z[0] = 0.5;  // prior for root
+        prior_z[1] = 0.5;
+        prior_z = log(prior_z);
         
         
         if(verbose) cout << "Init lambda" <<endl;
@@ -307,6 +337,11 @@ public:
             {
                     upper_c.push_back(*it);
             }
+            
+            if(bpp.upper_conserve.find(*it)!=bpp.upper_conserve.end())
+            {
+                upper_conserve_c.push_back(*it);
+            }
 
         }
         
@@ -334,13 +369,16 @@ public:
         trace_Z = vector<vector<int> >(num_burn+num_mcmc, vector<int>(N,1));
         trace_n_rate = vector<double >(num_burn+num_mcmc, 0);
         trace_c_rate = vector<double >(num_burn+num_mcmc, 0);
+        trace_l_rate = vector<double >(num_burn+num_mcmc, 0);
+        trace_g_rate = vector<double >(num_burn+num_mcmc, 0);
+        trace_l2_rate = vector<double >(num_burn+num_mcmc, 0);
 
         //getEmission_ambig();
         
         
         
         
-        log_emission = vector<vector<double> >(N-1, vector<double>(3,0));
+        log_emission = vector<vector<double> >(N, vector<double>(3,0));
         
         
         for(int s=0;s<N;s++)  // For all nodes !!! ....only terminal nodes, S
@@ -391,7 +429,7 @@ public:
     double log_f_Xz(vector<bool> visited, vector<vector<vec>>& lambda_tmp, bool neut, double propos, BPP& bpp);
     double sample_rate(int resZ, double old_rate, bool neut, vector<bool> visited, double & loglik_old, BPP& bpp, int M =1, bool adaptive = true, double adaptive_factor = 0.5);
     void Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string output_path2,int resZ, bool UpR, bool UpHyper, double lrate_prop, double grate_prop);
-    vector<int> Update_Z_subtree(int num_base = 5);
+    vector<int> Update_Z_subtree(int num_base = 5, bool prior = false);
     void Output_init(string output_path, string output_path2, BPP& bpp,ofstream& outZ, int resZ);
     void Output_sampling(int iter, string output_path2, BPP &bpp, int resZ);
     
@@ -404,8 +442,9 @@ public:
     
     //void Eval(BPP&bpp,int resZ); //, int numH,int numHZ);
     void Eval2(BPP&bpp, int resZ);
-    double prior_Z_subtree(vector<int> & tmpZ) ;
-    
+    //double prior_Z_subtree(vector<int> & tmpZ) ;
+    vector<double> prior_Z_subtree(vector< vector<int> > & configZ, vector< int > numConfigZ);
+    void sample_transition( double  & gr, double  & lr, double  & lr2);
     
 };
 

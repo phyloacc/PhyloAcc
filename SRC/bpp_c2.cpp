@@ -30,7 +30,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             if(trace_Z[i][s] == Max_Z[s]) posterior_Z[s]++;
         }
         
-        if(posterior_Z[s] <= 0.99 * num_mcmc)
+        if(posterior_Z[s] <= 0.999 * num_mcmc)
         {
             uncertainZ.push_back(s);
         }
@@ -110,7 +110,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             mean_nrate[j] += trace_n_rate[i];
             cov_rate[j] += trace_c_rate[i] * trace_n_rate[i];
         }
-        sum_full_loglik[j] += trace_full_loglik[i]; //[j]
+        sum_full_loglik[j] += trace_full_loglik[i]/num_mcmc; //[j]
         //if(trace_full_loglik[i] > max_full_loglik[j])  max_full_loglik[j] = trace_full_loglik[i];
         
     }
@@ -121,42 +121,81 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     
     int effective_sum = 0;
     
+    //// get P(Z |C) for each configuration
+    ////vector<double> priorZ = prior_Z_subtree(configZ, numConfigZ);
     // get log(P(X, Z)),logdet(Sigma) for each configuration
     for(unsigned int i = 0; i<numConf;i++)
     {
         double w = (double)numConfigZ[i]/num_mcmc;
         if(w < 0.1) continue; // always keep MaxZ (if only one config, same as Chib)
         
-        effective_sum += numConfigZ[i];
+        // compute P(Z|C)
+        mat nZ = zeros(3,2);
+        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+        {
+            int p = parent2[*it];
+            if(configZ[i][p] < 2)
+            {
+                nZ(configZ[i][*it],configZ[i][p]) += 1;
+            }
+        }
         
-        //VB -= w * log(w);
-        VB -= numConfigZ[i] * log(numConfigZ[i]);
+        double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
         
-        var_crate[i] -= pow(mean_crate[i],2)/numConfigZ[i] ;
-        var_nrate[i] -= pow(mean_nrate[i],2)/numConfigZ[i] ;
-        cov_rate[i] -= mean_nrate[i] * mean_crate[i]/numConfigZ[i] ;
+        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+        {
+            if(fixZ[*it] == 1)
+            {
+                int p = parent2[*it];
+                assert(p!=N);
+                if(configZ[i][p] < 2)
+                {
+                    nZ(configZ[i][*it],configZ[i][p]) -= 1;
+                }
+            }
+        }
+        
+        priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
+        if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+        
+        //root
+        priorZ += prior_z.at(configZ[i][root]);
+        
+        sum_full_loglik[i] += numConfigZ[i] * priorZ /num_mcmc;
         
         if(resZ==0)  // no or few Z==2, var_nrate[i] < 1e-6
         {
-            logdet = log(var_crate[i]) - log(numConfigZ[i]);
+            logdet = log(var_crate[i] - pow(mean_crate[i],2)/numConfigZ[i]) - log(numConfigZ[i]);
         }else{
-            logdet = log(var_crate[i] * var_nrate[i] - cov_rate[i] * cov_rate[i]) - 2*log(numConfigZ[i]);
+            double vc = var_crate[i] - pow(mean_crate[i],2)/numConfigZ[i];
+            double vn = var_nrate[i] - pow(mean_nrate[i],2)/numConfigZ[i] ;
+            double cov = cov_rate[i] - mean_nrate[i] * mean_crate[i]/numConfigZ[i] ;
+            logdet = log(vc * vn - cov * cov) - 2*log(numConfigZ[i]);
         }
         
-        if(verbose) cout << CC << ": weight: " << w << " logdet: " << logdet <<" "<<sum_full_loglik[i]/numConfigZ[i] + 0.5*logdet + log(2*M_PI) + 1 - log(w) << endl;
-
+        if(::isnan(logdet)) continue;
+        
+        effective_sum += numConfigZ[i];
+        
+        //VB -= w * log(w);
+        VB -=  w * log(numConfigZ[i]); //numConfigZ[i]
+        
         VB += sum_full_loglik[i];
+        
         // compare with chib;
         //cout << "P(x, r* Z): " <<max_full_loglik[i]<<"  avg P(x, r* Z) + 1: " << sum_full_loglik[i]/numConfigZ[i] + 1 << endl;
         //compare P(X|Z)/P(Z|X) for each configuration
-        VB += 0.5*logdet*numConfigZ[i];
+        VB += 0.5*logdet*numConfigZ[i]/num_mcmc;
+        
+        if(verbose) cout << CC << ": weight: " << w << " logdet: " << logdet <<" "<<sum_full_loglik[i]/numConfigZ[i] * num_mcmc + 0.5*logdet + log(2*M_PI) + 1 - log(w) << endl;
+        // the difference from final result is w is divided by num_mcmc not effective sum, so w is smaller, loglik is larger
     }
     //cout << endl;
-    if(verbose) cout << CC << ": Total Num of different confZ: " << numConf << " Number of MaxZ:" << numConfigZ[0] << endl; //" Conf different: " << checkConf <<
+    if(verbose) cout << CC << ": Total Num of different confZ: " << numConf << " Number of MaxZ:" << numConfigZ[0] << endl << endl ; //" Conf different: " << checkConf <<
     
     // if effective_sum == 0 (no major configuration of Z) or logdet == NAN (varince stick at one value);
     // then assume q(r, Z) = q(r) q(Z), r and Z are indepentdent; use all rate to get q(r) and all configuration to get Z
-    if(effective_sum == 0 || logdet == NAN)
+    if(effective_sum == 0 ) //|| logdet == NAN
     {
         double varn =0 , varc = 0, cov = 0, meann = 0, meanc = 0;
         VB = 0;
@@ -167,8 +206,44 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             cov += cov_rate[i];
             meann += mean_nrate[i];
             meanc += mean_crate[i];
-            VB += sum_full_loglik[i];
-            VB -= numConfigZ[i] * log(numConfigZ[i]);
+            
+            double w = (double)numConfigZ[i]/num_mcmc;
+            if(w < 0.1){
+                // compute P(Z|C)
+                mat nZ = zeros(3,2);
+                for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+                {
+                    int p = parent2[*it];
+                    if(configZ[i][p] < 2)
+                    {
+                        nZ(configZ[i][*it],configZ[i][p]) += 1;
+                    }
+                }
+                double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
+                
+                for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+                {
+                    if(fixZ[*it] == 1)
+                    {
+                        int p = parent2[*it];
+                        assert(p!=N);
+                        if(configZ[i][p] < 2)
+                        {
+                            nZ(configZ[i][*it],configZ[i][p]) -= 1;
+                        }
+                    }
+                }
+                
+                priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
+                if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+                
+                //root
+                priorZ += prior_z.at(configZ[i][root]);
+                sum_full_loglik[i] += numConfigZ[i] * priorZ/num_mcmc;
+            }
+            
+            VB += sum_full_loglik[i];  // already added prior in last step
+            VB -= w * log(numConfigZ[i]); //numConfigZ[i]
         }
         if(resZ==0)  // no or few Z==2, var_nrate[i] < 1e-6
         {
@@ -182,7 +257,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             
         }
         
-        VB += 0.5*logdet*num_mcmc;
+        VB += 0.5*logdet; //*num_mcmc;
         effective_sum = num_mcmc;
     }
     
@@ -193,21 +268,21 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         {
           bpp.log_liks_sgl[CC] = MaxLoglik;
         }else{
-          bpp.log_liks_sgl[CC] = VB/effective_sum + log(effective_sum) + log(2*M_PI) + 1;
+          bpp.log_liks_sgl[CC] = VB * ((double)num_mcmc/effective_sum) + log(effective_sum) + log(2*M_PI) + 1;
         }
-        if(verbose) cout << "P(X,Z*,r*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|resZ): " << bpp.log_liks_resZ[CC] << " P(X): " << bpp.log_liks_sgl[CC] << endl;
+        if(verbose) cout << "P(X,Z*,r*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|resZ): " << bpp.log_liks_resZ[CC] << " P(X): " << bpp.log_liks_sgl[CC] << endl << endl;
         //cout << "P(X,Z*,r*): " << MaxLoglik << " P(X): " << bpp.log_liks_sgl[CC] << endl;
 
-        if(bpp.log_liks_sgl[CC] == NAN) failure = 1;
+        if(::isnan(bpp.log_liks_sgl[CC])) failure = 1;
     }
     else if(resZ==0)
     {
-        bpp.log_liks_null[CC] = VB/effective_sum + log(effective_sum) + 0.5*(log(2*M_PI) + 1);
-        if(bpp.log_liks_null[CC] == NAN) failure = 1;
+        bpp.log_liks_null[CC] = VB* ((double)num_mcmc/effective_sum) + log(effective_sum) + 0.5*(log(2*M_PI) + 1);
+        if(::isnan(bpp.log_liks_null[CC])) failure = 1;
 
     }else{
-        bpp.log_liks_resZ[CC] = VB/effective_sum + log(effective_sum) + log(2*M_PI) + 1;
-        if(bpp.log_liks_resZ[CC] == NAN) failure = 1;
+        bpp.log_liks_resZ[CC] = VB * ((double)num_mcmc/effective_sum) + log(effective_sum) + log(2*M_PI) + 1;
+        if(::isnan(bpp.log_liks_resZ[CC])) failure = 1;
     }
     
     
@@ -289,92 +364,278 @@ double BPP_C::log_f_Xz(vec log_pi, int num_base, vector<int>& Z, vector<mat> & l
 
 void BPP_C::log_f_Z(vector<int>& Z, vector<mat> & log_Int, double & MH_ratio_g, double & MH_ratio_l)
 {
-    MH_ratio_g = 0;
-    MH_ratio_l = 0;
+//    MH_ratio_g = 0;
+//    MH_ratio_l = 0;
+//
+//
+//    for(vector<int>::iterator it = nodes.begin(); it <nodes.end() - 1; it++)
+//    {
+//        int s = *it;
+//        if(Z[parent2[s]] == 0)
+//        {
+//            //if(log_TM_Int[s](1,0) == 0 || log_TM_Int[s](0,0) == 0) continue;
+//            //MH_ratio_g +=  log_TM_Int[s](1,0) * Z[s] + log_TM_Int[s](0,0) * (1 - Z[s]);
+//            if(Z[s] == 0) {
+//                MH_ratio_g += log_TM_Int[s](0,0);
+//                if(fixZ[s] != 1) MH_ratio_l += log_TM_Int[s](0,0);
+//            }
+//            else if(Z[s] == 1) MH_ratio_g += log_TM_Int[s](1,0);
+//            else MH_ratio_l += log_TM_Int[s](2,0);
+//
+//        }else if(Z[parent2[s]] == 1){
+//            if(log_TM_Int[s](2,1) == 0 || log_TM_Int[s](1,1) == 0) continue;
+//            MH_ratio_l +=  log_TM_Int[s](2,1) * (Z[s] - 1) + log_TM_Int[s](1,1) * (2 - Z[s]);
+//        }
+//
+//
+//    }
+    
+    // sample g and l rates together
+        MH_ratio_g = 0;
     
     
-    for(vector<int>::iterator it = nodes.begin(); it <nodes.end() - 1; it++)
-    {
-        int s = *it;
-        if(Z[parent2[s]] == 0)
+        for(vector<int>::iterator it = nodes.begin(); it <nodes.end() - 1; it++)
         {
-            if(log_TM_Int[s](1,0) == 0 || log_TM_Int[s](0,0) == 0) continue;
-            MH_ratio_g +=  log_TM_Int[s](1,0) * Z[s] + log_TM_Int[s](0,0) * (1 - Z[s]);
-        }else if(Z[parent2[s]] == 1){
-            if(log_TM_Int[s](2,1) == 0 || log_TM_Int[s](1,1) == 0) continue;
-            MH_ratio_l +=  log_TM_Int[s](2,1) * (Z[s] - 1) + log_TM_Int[s](1,1) * (2 - Z[s]);
+            int s = *it;
+            if(Z[parent2[s]] < 2)
+            {
+                MH_ratio_g += log_TM_Int[s](Z[s],Z[parent2[s]]);
+            }
+            
         }
-        
-        
-    }
+    
     
     
 }
 
 
-double BPP_C::prior_Z_subtree(vector<int> & tmpZ)  //whether cal prob_back again, default cal=0
-{
-    double result =0;
-    //vector<vec> log_prob_back_temp = vector<vec> (N, zeros<vec>(3));
-    
-    // restore prior of Z (no X, no missing only constraint!)
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
-    {
-        int s = *it;
-        //if(missing[s] && s<S) continue; //don't update log_prob_back for missing nodes
-        log_prob_back[s].fill(0);
-        if(fixZ[s] ==1)
-        {
-            log_prob_back[s][2] = -INFINITY; //log_prob_back[s][0] = -INFINITY;
-        }
-        //        else if(fixZ[s] ==2)  // no use!
-        //        {
-        //            log_prob_back_temp[s][0] = -INFINITY;  //log_prob_back[s][1] = -INFINITY;
-        //        }
-    }
-    
-    
-    //message passing from bottom to top
-    mat tmp = zeros<mat> (3,2);
-    
-    //message passing from bottom to top
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
-    {
-        int s = *it;
-        int p = parent2[s];
-        
-        log_prob_back[p] += BPP::log_multi2(log_TM_Int[s], log_prob_back[s]);  //matrix * vector
-        //cout << log_prob_back[p] <<endl;
-    }
-    
-    
-    
-    //update Z from top to bottom Z[N] = 0
-    vec log_trans_p, trans_p;
-    for(vector<int>::iterator it =nodes.end()-2;it>=nodes.begin();it--)  //
-    {
-        
-        int s = *it;
-        int p = parent2[s];
-        
-        if(tmpZ[p]!=2)
-        {
-            
-            log_trans_p = log_TM_Int[s].unsafe_col(tmpZ[p]) + log_prob_back[s];
-            result += log_trans_p[tmpZ[s]] - BPP::log_exp_sum(log_trans_p);
-            
-            //trans_p = BPP::log_sample(log_trans_p);
-            
-            
-        }else if(tmpZ[s]!=2){
-            cout <<"prior_Z_subtree error, Z[s]!=2, p: " << p <<"s: "<<s <<endl;
-        }
-        
-    }
-    
-    return(result);
-    // cout << endl;
-}
+//double BPP_C::prior_Z_subtree(vector<int> & tmpZ)  //whether cal prob_back again, default cal=0
+//{
+//    double result =0;
+//    //vector<vec> log_prob_back_temp = vector<vec> (N, zeros<vec>(3));
+//
+//    // restore prior of Z (no X, no missing only constraint!)
+//    for(vector<int>::iterator it = nodes.begin(); it < nodes.end();it++) // orginally, -1 ...
+//    {
+//        int s = *it;
+//        //if(missing[s] && s<S) continue; //don't update log_prob_back for missing nodes
+//        log_prob_back[s].fill(0);
+//        if(fixZ[s] == 1)
+//        {
+//            log_prob_back[s][2] = -INFINITY; //log_prob_back[s][0] = -INFINITY;
+//        }
+//        //        else if(fixZ[s] ==2)  // no use!
+//        //        {
+//        //            log_prob_back_temp[s][0] = -INFINITY;  //log_prob_back[s][1] = -INFINITY;
+//        //        }
+//    }
+//
+//
+//    //message passing from bottom to top
+//    //mat tmp = zeros<mat> (3,2);
+//
+//    //message passing from bottom to top
+//    for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
+//    {
+//        int s = *it;
+//        int p = parent2[s];
+//
+//        log_prob_back[p] += BPP::log_multi2(log_TM_Int[s], log_prob_back[s]);  //matrix * vector
+//        //cout << log_prob_back[p] <<endl;
+//    }
+//
+//    log_prob_back[root] += prior_z;
+//
+//
+//
+//    //update Z from top to bottom Z[N] = 0 or 1
+//    result =log_prob_back[root][tmpZ[root]] - BPP::log_exp_sum(log_prob_back[root]);
+//
+//    vec log_trans_p, trans_p;
+//    for(vector<int>::iterator it =nodes.end()-2;it>=nodes.begin();it--)  //
+//    {
+//
+//        int s = *it;
+//        int p = parent2[s];
+//
+//        if(tmpZ[p]!=2)
+//        {
+//
+//            log_trans_p = log_TM_Int[s].unsafe_col(tmpZ[p]) + log_prob_back[s];
+//            result += log_trans_p[tmpZ[s]] - BPP::log_exp_sum(log_trans_p);
+//
+//            //trans_p = BPP::log_sample(log_trans_p);
+//
+//
+//        }else if(tmpZ[s]!=2){
+//            cout <<"prior_Z_subtree error, Z[s]!=2, p: " << p <<"s: "<<s <<endl;
+//        }
+//
+//    }
+//
+//    return(result);
+//    // cout << endl;
+//}
+
+
+//// no use
+//vector<double> BPP_C::prior_Z_subtree(vector< vector<int> > & configZ, vector< int > numConfigZ)  // integrate transition priob
+//{
+//
+//    vector<double> result = vector<double>(configZ.size(), 0.0);
+//    vector< vector<int> > record_nz_g = vector< vector<int> >(configZ.size(), vector<int> (2, 0));
+//    vector< vector<int> > record_nz_l = vector< vector<int> >(configZ.size(), vector<int> (2, 0));
+//    vector< vector<int> > record_nz_l2 = vector< vector<int> >(configZ.size(), vector<int> (2, 0));
+//
+//    // record number of Z transitions for each configuration
+//    for(size_t i =0; i < configZ.size(); i++)
+//    {
+//        mat nZ = zeros(3,2);
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+//        {
+//            int p = parent2[*it];
+//            if(configZ[i][p] < 2)
+//            {
+//                nZ(configZ[i][*it],configZ[i][p]) += 1;
+//            }
+//
+//
+//        }
+//
+//        record_nz_g[i][0] = nZ(1,0) + nZ(2,0);
+//        record_nz_g[i][1] = nZ(0,0);
+//
+//
+//        //for(vector<int>:: iterator it = upper_c.begin(); it < upper_c.end() -1;it++)
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+//        {
+//            if(fixZ[*it] == 1)
+//            {
+//                int p = parent2[*it];
+//                assert(p!=N);
+//                if(configZ[i][p] < 2)
+//                {
+//                    nZ(configZ[i][*it],configZ[i][p]) -= 1;
+//                }
+//            }
+//        }
+//
+//
+//        record_nz_l[i][0] = nZ(2,1);
+//        record_nz_l[i][1] = nZ(1,1);
+//
+//        record_nz_l2[i][0] = nZ(2,0);
+//        record_nz_l2[i][1] = nZ(1,0);
+//
+//
+//
+//    }
+//
+//
+//
+//    for(size_t i =0; i < configZ.size(); i++)
+//    {
+//        // get posterior mean of transition rates
+//        double grate = (prior_g_a +  record_nz_g[i][0])/(prior_g_a +  record_nz_g[i][0] + prior_g_b +  record_nz_g[i][1]);
+//        double lrate = (prior_l_a +  record_nz_l[i][0])/(prior_l_a + prior_l_b +  record_nz_l[i][0] +  record_nz_l[i][1]);
+//        double lrate2 = (prior_l2_a +  record_nz_l2[i][0])/(prior_l2_a +  record_nz_l2[i][0] + prior_l2_b +  record_nz_l2[i][1]);
+//
+//
+//        double prior = 0;  // compute prior of transition rates: P(l, g |C) sum over all config of Z
+//        for(size_t j =0; j < configZ.size(); j++)
+//        {
+//             double ll = log((double)numConfigZ[j]/ num_mcmc) + log(gsl_ran_beta_pdf(grate, prior_g_a + record_nz_g[j][0], prior_g_b + record_nz_g[j][1])) + log(gsl_ran_beta_pdf(lrate, prior_l_a +record_nz_l[j][0], prior_l_b + record_nz_l[j][1])) + log(gsl_ran_beta_pdf(lrate2, prior_l2_a + record_nz_l2[j][0], prior_l2_b + record_nz_l2[j][1]));
+//            prior += exp(ll);
+//        }
+//
+//        prior = log(prior);
+//
+//
+//        // P(Z | l, g, C)
+//        for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
+//        {
+//            int s = *it;
+//
+//            if(fixZ[s] == 1)
+//            {
+//                log_TM_Int[*it](1,1) = 0;
+//                log_TM_Int[*it](2,1) = log(0);
+//
+//                log_TM_Int[*it](0,0) = log(1 - grate);
+//                log_TM_Int[*it](1,0) = log(grate);
+//                log_TM_Int[*it](2,0) = log(0);
+//
+//            }else{
+//                log_TM_Int[s](0,0) = log(1 - grate);
+//                log_TM_Int[s](1,0) = log(grate) + log(1 - lrate2);
+//                log_TM_Int[s](2,0) = log(grate) + log(lrate2);
+//
+//                double y = 1 - lrate;
+//                log_TM_Int[s](1,1) = log(y);
+//                log_TM_Int[s](2,1) = log(1-y);
+//            }
+//
+//        }
+//
+//
+//        // compute P(Z|C, rates)
+//
+//        // restore prior of Z (no X, no missing only constraint!)
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end();it++) // orginally, -1 ...
+//        {
+//            int s = *it;
+//            //if(missing[s] && s<S) continue; //don't update log_prob_back for missing nodes
+//            log_prob_back[s].fill(0);
+//            if(fixZ[s] == 1)
+//            {
+//                log_prob_back[s][2] = -INFINITY; //log_prob_back[s][0] = -INFINITY;
+//            }
+//
+//        }
+//
+//        //message passing from bottom to top
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
+//        {
+//            int s = *it;
+//            int p = parent2[s];
+//
+//            log_prob_back[p] += BPP::log_multi2(log_TM_Int[s], log_prob_back[s]);  //matrix * vector
+//            //cout << log_prob_back[p] <<endl;
+//        }
+//
+//        log_prob_back[root] += prior_z;
+//
+//
+//
+//        //update Z from top to bottom Z[N] = 0 or 1
+//        double loglik = log_prob_back[root][configZ[i][root]] - BPP::log_exp_sum(log_prob_back[root]);
+//
+//        vec log_trans_p, trans_p;
+//        for(vector<int>::iterator it =nodes.end()-2;it>=nodes.begin();it--)  //
+//        {
+//
+//            int s = *it;
+//            int p = parent2[s];
+//
+//            if(configZ[i][p]!=2)
+//            {
+//                log_trans_p = log_TM_Int[s].unsafe_col(configZ[i][p]) + log_prob_back[s];
+//                loglik += log_trans_p[configZ[i][s]] - BPP::log_exp_sum(log_trans_p);
+//
+//            }else if(configZ[i][s]!=2){
+//                cout <<"prior_Z_subtree error, Z[s]!=2, p: " << p <<"s: "<<s <<endl;
+//            }
+//
+//        }
+//
+//       result[i] = loglik + prior - ( log(gsl_ran_beta_pdf(grate, prior_g_a + record_nz_g[i][0], prior_g_b + record_nz_g[i][1])) + log(gsl_ran_beta_pdf(lrate, prior_l_a +record_nz_l[i][0], prior_l_b + record_nz_l[i][1])) + log(gsl_ran_beta_pdf(lrate2, prior_l2_a + record_nz_l2[i][0], prior_l2_b + record_nz_l2[i][1])));
+//
+//    }
+//
+//
+//    return(result);
+//}
+
 
 
 
@@ -390,7 +651,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
       if(iter ==0)
       {
         out_lik.open(outpath_lik.c_str());
-        out_lik << "loglik\trate_n\trate_c\t";
+        out_lik << "loglik\trate_n\trate_c\tgrate\tlrate\tlrate2\t";
         for(int s =0 ;s<N;s++){  // header: species name
             out_lik<<bpp.nodes_names[s] << "\t";
         }
@@ -401,7 +662,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
         
       for(std::size_t i=0; i< trace_loglik.size();i++)
         {
-            out_lik<<trace_loglik[i]<<"\t"<<trace_n_rate[i] << "\t"<<trace_c_rate[i]<<"\t";
+            out_lik<<trace_loglik[i]<<"\t"<<trace_n_rate[i] << "\t"<<trace_c_rate[i]<<"\t"<<trace_g_rate[i]<<"\t"<<trace_l_rate[i]<<"\t"<<trace_l2_rate[i]<<"\t";
             for(int s=0; s<N;s++)
                 out_lik<<trace_Z[i][s]<<"\t";
             out_lik <<endl;
@@ -420,6 +681,15 @@ void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstre
     
     std::sort(trace_c_rate.begin(), trace_c_rate.end());
     double c_rate =  trace_c_rate[trace_c_rate.size()/2];
+    
+    std::sort(trace_g_rate.begin(), trace_g_rate.end());
+    double g_rate =  trace_g_rate[trace_g_rate.size()/2];
+    
+    std::sort(trace_l_rate.begin(), trace_l_rate.end());
+    double l_rate =  trace_l_rate[trace_l_rate.size()/2];
+    
+    std::sort(trace_l2_rate.begin(), trace_l2_rate.end());
+    double l2_rate =  trace_l2_rate[trace_l2_rate.size()/2];
     
     vector<vector<int>> countZ = vector<vector<int>> (N,vector<int>(4,0));
     for(int s=0; s<N;s++)
@@ -440,7 +710,7 @@ void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstre
     
     #pragma omp critical
     {
-        out_Z << CC << "\t" << n_rate << "\t" << c_rate;
+        out_Z << CC << "\t" << n_rate << "\t" << c_rate << "\t" << g_rate << "\t" << l_rate << "\t" << l2_rate;
         for(int s=0; s<N;s++){
             //out_Z <<"\t"<<countZ[s][0];
             for(int k=0;k<4;k++)
