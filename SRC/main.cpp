@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
     
     string outpath_hyper = output_path+"_hyper.txt";
     ofstream out_hyper(outpath_hyper.c_str());
-    out_hyper << "iter\tnprior_a\tnprior_b\tcprior_a\tcprior_b\tindel\tindel2\tgrate\tlrate\n";
+    out_hyper << "iter\tnprior_a\tnprior_b\tcprior_a\tcprior_b\tprior_l_a\tprior_l_b\tprior_g_a\tprior_g_b\n";
     
     ofstream out_lik;
     if(sample_hyper) {
@@ -427,7 +427,7 @@ int main(int argc, char* argv[])
         // sample indel, nprior_a, nprior_b, etc...
         try{
           if(sample_hyper) {
-            bpp.sample_hyperparam(lrate_prop, grate_prop, ids);
+            bpp.sample_hyperparam(iter, ids, out_hyper);
             bpp.Output_init0(profile,out_lik, ids);
           }else{
             bpp.Output_init(profile,output_path, ids);

@@ -544,7 +544,7 @@ void getUppertree(int root, vector<int>& child, set<int> & visited_init);
 
     void sample_indel(vector< string> & X, double missing_thres, string output_path, int _iter = 100, int _MH = 10, bool _verbose = true);
 void sample_proposal(int iter, double & lrate_prop, double & grate_prop, ofstream & output);
-void sample_hyperparam(double lrate_prop, double grate_prop,  vector<int> & ids); //double indel_prop, double indel2_prop, 
+void sample_hyperparam(int iter, vector<int> & ids, ofstream & output); //double indel_prop, double indel2_prop, 
 double log_lik(vector< vector<vec> > & lambda, double indel, double indel2, int iter, int block, vector<unsigned int> & v, double p);
     };
 

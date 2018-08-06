@@ -467,7 +467,8 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
     
     
     if(UpHyper) {
-//        bpp.log_liks_curZ[CC] = trace_loglik[m];  bpp.cur_Z[resZ][CC] = Z; // orginially m-1 ???
+//        bpp.log_liks_curZ[CC] = trace_loglik[m];  
+			bpp.cur_Z[resZ][CC] = Z; // orginially m-1 ???
 //        // compute Z transition matrix for proposal
 //        double loss, gain;
 //        log_f_Z(Z, log_TM_Int, gain, loss);  // only do this for full model, no constraint
