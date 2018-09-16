@@ -50,20 +50,21 @@ For our extended version modeling GC-based gene conversion (gBGC) effect, please
 Try this in PhyloAcc directory as a test, which will run simulated elements on ratite phylogeny:
 ```bash
 mkdir Simulation_ratite/result_tmp
-./PhyloAcc Simulation_ratite/param2-6-test.txt
+./PhyloAcc Simulation_ratite/param2-1-test.txt
 ```
 or this after installation:
 ```bash
-PhyloAcc Simulation_ratite/param2-6-test.txt
+PhyloAcc Simulation_ratite/param2-1-test.txt
 ```
-For testing propose, it will only run the first 10 elements of simulated data from Simulation_ratite/simu_500_200_diffr_2-6.* and output to Simulation/result_tmp/. To run the all elements, which will generate results in Simulation_ratite/result/, you could run:
+For testing propose, it will only run the first 10 elements of simulated data from Simulation_ratite/simu_500_200_diffr_2-1.* and output to Simulation_ratite/result_tmp/. To run the all elements and get results in Simulation_ratite/result_phyloAcc/, you could run:
 ```bash
 ./PhyloAcc Simulation_ratite/param2-6.txt
 ```
-Again, it will output to Simulation/result_tmp/. To run your own data, please change the paths in your parameter file.
+To run your own data, please change the paths in your parameter file.
 
 To run the model including gBGC,
 ```bash
+cd V2_GBGC
 mkdir Simulation/result_tmp
 ./PhyloAcc_gBGC paramGC-0.txt
 ```
@@ -72,4 +73,4 @@ under *V2_GBGC/*. It will output to *V2_GBGC/Simulation/result_tmp/* (which will
 There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail. R scripts to generate simulated DNA sequences are also in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R), please see [Simulation.md](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation.md) for more detail. 
 
 ## Data
-The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). 
+The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). The results for ratite and mammalian CNEEs in [mammal_result/](https://github.com/xyz111131/PhyloAcc/blob/master/mammal_result/) and [ratite_result/](https://github.com/xyz111131/PhyloAcc/blob/master/ratite_result/). 
