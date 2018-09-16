@@ -3,3 +3,5 @@ The folder contains simulation data and example result. **simu_500_200_diffr_\*.
 PhyloAcc Simulation_ratite/param2-6.txt
 ```
 under the root directory and example results are shown in [result](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result). 
+Results from PhyloAcc are shown in [result_phyloAcc/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_phyloAcc). Results from phyloP are in  [result_phyloP/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_phyloP). Input files and Results using PAML and phytools are in [PAML/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/PAML). Input files and Results using BEAST2 are in [BEAST/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/BEAST).
+
