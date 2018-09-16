@@ -11,7 +11,7 @@ registerDoParallel(cl)
 
 #### input parameters ####
 n=200  # length of subsequence
-NE = 1000 # number of elements to simulate
+NE = 500 # number of elements to simulate
 nprior_a = 15  # parameters of Gamma priors of substitution rates
 nprior_b = 0.1;
 cprior_a = 5
