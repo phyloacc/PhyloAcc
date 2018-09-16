@@ -64,6 +64,7 @@ To run your own data, please change the paths in your parameter file.
 
 To run the model including gBGC,
 ```bash
+cd V2_GBGC
 mkdir Simulation/result_tmp
 ./PhyloAcc_gBGC paramGC-0.txt
 ```
