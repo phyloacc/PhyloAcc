@@ -18,7 +18,7 @@ If sampling hyperparameters, posterior medians/means under different hyperparame
   * *loglik_Full*: marginal logliklihood under full model
   * *logBF1*: log Bayes factor between null and accelerated model
   * *logBF2*: log Bayes factor between accelerated and full model
-  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of Y (observed sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(Y, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
+  * *loglik_Max_M0, loglik_Max_M1, loglik_Max_M2*: Maximum joint likelihood of Y (observed sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(Y, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
 
 If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
   
@@ -34,4 +34,4 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 
 *prefix*\_mcmc_trace_M\_[0-2]_\*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood($P(Y|Z, r)$), accelerated substitution rate, conserved substitution rate, probability of gain and loss conservation and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. In the file name, [0-2]: under null, accelerated and full model respectively. *: element No. .
 
-The output files from the extended version including gBGC is slightly different. *prefix*\_rate_postZ\_*.txt* also contains posterior mode of gBGC coefficient (*gBC* column) and posterior of having gBGC effect on each branch (*\*_B* columns).*prefix*_1_elem_Z.txt has latent gBGC state on each branch in the first columns.
+The output files from the extended version including gBGC is slightly different. *prefix*\_rate_postZ\_\*.txt* also contains posterior mode of gBGC coefficient (*gBC* column) and posterior of having gBGC effect on each branch (*\*_B* columns).*prefix*_1_elem_Z.txt has latent gBGC state on each branch in the first columns.
