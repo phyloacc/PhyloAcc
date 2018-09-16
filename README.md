@@ -8,7 +8,7 @@ Some preliminary inputs which might be generated from other software are require
 We also need a parameter file, which contains the pathes for input files and output directory, information of species and parameters for MCMC. Please read [README_PARAMETER.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_PARAMETER.md) for more detail. 
 
 
-After running the algorithm, our method will output the posterior of latent state (Z) for each branch (indicating background, conserved or accelerated) for each element under each model in the files "*prefix*\_rate_postZ\_[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files are explained in [README_OUTPUT.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_OUTPUT.md).
+After running the algorithm, our method will output the posterior of latent state (Z) for each branch (indicating background, conserved or accelerated) for each element under each model in the files "*prefix*\_rate_postZ\_M[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files are explained in [README_OUTPUT.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_OUTPUT.md).
 
 ## Prerequisites
 * [GCC](https://gcc.gnu.org/): You might need latest GCC (verion 7) supporting openmp. If you are using Mac, you could use brew to (re)install gcc. 
