@@ -47,14 +47,14 @@ It will need:
 
 ```{r results, echo=TRUE,cache=F}
 #### read in BF scores as well as marginal log likelihood under null, accelerated and full model #### 
-score <- read.table("../Simulation_ratite/result/simu_500_200_2-6_elem_lik.txt", header=T)
+score <- read.table("../Simulation_ratite/result_phyloAcc/simu_500_200_npc_2-6_elem_lik.txt", header=T)
 ## compute BF2
 score$BF2 <- -score$loglik_all + score$loglik_RES
 ## order score by BF1
 score <- score[order(-score$log_ratio),]
 
 #### read in posteriors of substitution rates and latent conservation states ####
-postZ <- read.table("../Simulation_ratite/result/simu_500_200_2-6_rate_postZ_1.txt", header=T, check.names = F)  ## _1 is the posteriors under full model
+postZ <- read.table("../Simulation_ratite/result_phyloAcc/simu_500_200_npc_2-6_rate_postZ_1.txt", header=T, check.names = F)  
 ```
 
 Select an ratite-accelerated element (e.g. BF2 > 0 and large BF1) and plot: 
@@ -65,7 +65,7 @@ k = score[sel, 1] # get the No. of the selected element
 targets = c("strCam","rhePen","rheAme","casCas","droNov","aptRow","aptHaa","aptOwe","anoDid") # target species
 Z = unlist(postZ[postZ$No. == k, ]) # get the posteriors of conservation states
 tit = paste("BF1:", round(lk$log_ratio), "BF2:",round(lk$BF2), "  ") # use BF scores and posterior substitution rates as title
-plotZPost(Z, treeData, target_species=targets, tit=tit, offset=3) # offset= 3 indicates the posterior of Z start from 4th column
+plotZPost(Z, treeData, target_species=targets, tit=tit, offset=6) # offset= 6 indicates the posterior of Z start from 7th column
 ```
 
 ```plotAlign``` function will show the sequence alignment for an element as a heatmap. 
@@ -89,7 +89,7 @@ Next, we could compute expected number of independent acceleration and accelerat
 ```{r loss}
 sel <- score$No.[which(score$log_ratio>10 & score$BF2 > 0)] # select the ratites accelerated elements
 internal <- getInternals(treeData$tree, targets) # get common ancestors of target species that might be accelerated
-topZ = postZ[postZ$No. %in% sel, seq(7, ncol(postZ), by=4)] # get the posterior of Z==2 (being accelerated) for selected elements
+topZ = postZ[postZ$No. %in% sel, seq(10, ncol(postZ), by=4)] # get the posterior of Z==2 (being accelerated) for selected elements
 colnames(topZ) <- sapply(colnames(topZ), function(x) strsplit(x, "_")[[1]][1])
 
 acc = rowSums(topZ[,targets]); # expected number of accelerated species within target species
