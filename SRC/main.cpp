@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 
     out_species.close();
 
-    double lrate_prop, grate_prop;
+    double lrate_prop = 0.5, grate_prop = 0.5;
     
     vector<int> ids;
     if(id_path=="")
