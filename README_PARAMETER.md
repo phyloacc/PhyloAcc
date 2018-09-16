@@ -36,7 +36,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
 * **Control for MCMC and number of threads**: 
   * *BURNIN*: number of initial iterations to discard before equilibrium of the chain (default: 200). Should set to be larger.
   * *MCMC*: number of MCMC iterations (default: 800). Should set to be larger. 
-  * *ADAPT_FREQ*: number of iterations to recompute acceptance rate of Metropolis-Hastings for adaptively adjusting the proposal variances for mutation rates (default: 500).
+  * *ADAPT_FREQ*: number of iterations to recompute acceptance rate of Metropolis-Hastings for adaptively adjusting the proposal variances for substitution rates (default: 500).
   * *SEED*: seed for random sampling (default: 5)
   * *SAMPLE_HYPER*: whether to sample hyper parameters. 0, fix hyper parameters; 1, sample (default: 0). Sampling hyperparameters is time-consuming, and not recommended. If sampling hyperparamers, the algorithm will only output the posterior of Z (latent state of each branch) under full model. 
   * *CHAIN*: Numer of iterations to sample hyper parameters. If not sampling hyperparmeter, set it to 1 (default: 1).
