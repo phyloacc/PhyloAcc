@@ -1,5 +1,5 @@
 # Format of output files
-*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation  ($P(Z=0->Z=1)$ and $P(Z=1->Z=2)$), and posterior mean of latent state on each branch for each element. Columns in the file are:
+*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation  ($P(Z=0\rightarrow Z=1)$ and $P(Z=1->Z=2)$), and posterior mean of latent state on each branch for each element. Columns in the file are:
 1. element No. which is the order of the element in the input bed file starting from zero
 2. posterior median of accelerated mutation rate
 3. posterior median of conserved mutation rate
