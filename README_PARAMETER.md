@@ -14,7 +14,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *OUTGROUP*: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
   * *CONSERVE*: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species. Input conserved species should exclude target species.
   * *CONSERVE_PROP*: filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species (default: 0.8).
-  * *GAPCHAR*: the character for alignment gaps (default: -). 
+  * *GAPCHAR*: the character for alignment gaps. (default: -). Should be one char.
   * *GAP_PROP*: if the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species (default: 0.8).   
   * *CONSTOMIS*: the probability of "missing" under conserved state. Should be small (default: 0.01). 
 
