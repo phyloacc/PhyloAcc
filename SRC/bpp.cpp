@@ -542,34 +542,46 @@ void BPP::Output_init(PhyloProf & prof, string output_path, vector<int> & ids){
         string outpath_elem = output_path+ "_elem_lik.txt";
         ofstream out_lik(outpath_elem.c_str());
         out_lik.precision(8);
-        out_lik << "No.\tID\tloglik_NUll\tloglik_RES\tloglik_all\tlog_ratio\tloglik_Max1\tloglik_Max2\tloglik_Max3"<<endl;
+        out_lik << "No.\tID\tloglik_Null\tloglik_Acc\tloglik_Full\tlogBF1\tlogBF2\tloglik_Max_M0\tloglik_Max_M1\tloglik_Max_M2"<<endl;
         //for(int cc=0; cc<C;cc++)
         for(vector<int>::iterator it = ids.begin(); it !=ids.end(); it++)
         {
             int cc = *it;
-            out_lik <<cc << "\t" << prof.element_names[cc] << "\t" << log_liks_null[cc] <<"\t"  <<log_liks_resZ[cc] <<"\t"  <<log_liks_sgl[cc]<< "\t"<< log_liks_resZ[cc] -  log_liks_null[cc];
-            for(int r=0;r<3;r++) out_lik <<"\t" <<log_liks_Z[r][cc];
+            out_lik <<cc << "\t" << prof.element_names[cc] << "\t" << log_liks_null[cc] <<"\t"  <<log_liks_resZ[cc] <<"\t"  <<log_liks_sgl[cc]<< "\t";
+            out_lik << log_liks_resZ[cc] -  log_liks_null[cc] << "\t" << log_liks_resZ[cc] -  log_liks_sgl[cc];
+            //for(int r=0;r<3;r++) 
+            out_lik <<"\t" <<log_liks_Z[0][cc] << "\t" <<log_liks_Z[2][cc]<<"\t" <<log_liks_Z[1][cc];
             out_lik << endl;
         }
         
         out_lik.close();
         
     ofstream out_z;
-    for(int r =1;r<2;r++)
+    for(int r =0;r<3;r++)
     {
-            outpath_elem = output_path+"_" +to_string(r) + "_elem_Z.txt";
+            if(r == 2)
+            {
+                outpath_elem = output_path+"_M" +to_string(1) + "_elem_Z.txt";
+            }else if(r == 1)
+            {
+                outpath_elem = output_path+"_M" +to_string(2) + "_elem_Z.txt";
+            }else{
+                outpath_elem = output_path+"_M" +to_string(0) + "_elem_Z.txt";
+            }
+            
             out_z.open(outpath_elem.c_str());
-        
-                for(int s =0 ;s<N;s++){  // header: species name
-                    out_z<<nodes_names[s] << "\t";
-                }
-                out_z <<endl;
-            //for(int c=0;c<C;c++)
+            out_z<<"No."; 
+            for(int s =0 ;s<N;s++){  // header: species name
+                out_z<< "\t" << nodes_names[s] ;
+            }
+            out_z <<endl;
+            
             for(vector<int>::iterator it = ids.begin(); it !=ids.end(); it++)
             {
                 int c = *it;
+                out_z<<c; 
                 for(int s=0; s<N;s++)
-                    out_z<<Max_Z[r][c][s]<<"\t";
+                    out_z <<"\t" << Max_Z[r][c][s];
                 out_z <<endl;
             }
         out_z.close();

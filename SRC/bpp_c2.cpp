@@ -270,7 +270,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         }else{
           bpp.log_liks_sgl[CC] = VB * ((double)num_mcmc/effective_sum) + log(effective_sum) + log(2*M_PI) + 1;
         }
-        if(verbose) cout << "P(X,Z*,r*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|resZ): " << bpp.log_liks_resZ[CC] << " P(X): " << bpp.log_liks_sgl[CC] << endl << endl;
+        if(verbose) cout << "P(X,r*|Z*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|acc): " << bpp.log_liks_resZ[CC] << " P(X|full): " << bpp.log_liks_sgl[CC] << endl << endl;
         //cout << "P(X,Z*,r*): " << MaxLoglik << " P(X): " << bpp.log_liks_sgl[CC] << endl;
 
         if(::isnan(bpp.log_liks_sgl[CC])) failure = 1;
@@ -642,7 +642,7 @@ void BPP_C::log_f_Z(vector<int>& Z, vector<mat> & log_Int, double & MH_ratio_g, 
 
 void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
     
-    string outpath_lik = output_path2 +"_mcmc_trace_" + to_string(resZ) + "_" + to_string(CC) +".txt";
+    string outpath_lik = output_path2 +"_mcmc_trace_M" + to_string(resZ) + "_" + to_string(CC) +".txt";
     ofstream out_lik;
     out_lik.precision(8);
     
@@ -673,7 +673,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
 }
 
 
-void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstream & out_Z, int resZ)
+void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstream & out_Z, int resZ) //resZ no use
 {
     
     std::sort(trace_n_rate.begin(), trace_n_rate.end());

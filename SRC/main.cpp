@@ -57,7 +57,7 @@ double prep_lrate2 = 0.0;//0.1
 double prep_grate = 0.5; // initalization
 
 double prior_lrate2_a = 0,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
-double prior_lrate_a = 1 ,prior_lrate_b = 1 ; // beta prior for lrate, 2
+double prior_lrate_a = 1 ,prior_lrate_b = 2 ; // beta prior for lrate, 2
 double prior_grate_a = 1,prior_grate_b = 1 ; // beta prior for grate
 
 
@@ -71,13 +71,13 @@ int ropt = 1;
 double cub = 1;
 double nlb = 0.6;
 
-int batch =0 ;
+int batch = -1 ;
 int seed = 5;
 double indel;
 double indel2;
 bool sample_indel;
 bool sample_hyper;
-char gapchar = '*';
+char gapchar = '-';
 bool verbose = 0;
 double consToMis = 0.01;
 
@@ -130,9 +130,9 @@ void LoadParams(int argc, char* argv[])
         
         else if (tmp=="SEED")
             line_stream >> seed;
-        else if (tmp=="CONSERVE_RATE")
+        else if (tmp=="INIT_CONSERVE_RATE")
             line_stream >> ratio0;
-        else if (tmp=="ACCE_RATE")
+        else if (tmp=="INIT_ACCE_RATE")
             line_stream >> ratio1;
         else if (tmp=="CONSERVE_PRIOR_A")
             line_stream >> cprior_a;
@@ -150,6 +150,7 @@ void LoadParams(int argc, char* argv[])
             line_stream >> nlb;
 
 
+
         
         // running parameters
         else if (tmp=="BURNIN")
@@ -158,10 +159,18 @@ void LoadParams(int argc, char* argv[])
             line_stream >> num_mcmc;
         else if (tmp=="ADAPT_FREQ")
             line_stream >> num_thin;
-        else if (tmp=="PREP_LRATE")
+        else if (tmp=="INIT_LRATE")
             line_stream >> prep_lrate;
-        else if (tmp=="PREP_GRATE")
+        else if (tmp=="INIT_GRATE")
             line_stream >> prep_grate;
+        else if (tmp=="HYPER_LRATE_A")
+            line_stream >> prior_lrate_a;
+        else if (tmp=="HYPER_LRATE_B")
+            line_stream >> prior_lrate_b;
+        else if (tmp=="HYPER_GRATE_A")
+            line_stream >> prior_grate_a;
+        else if (tmp=="HYPER_GRATE_B")
+            line_stream >> prior_grate_b;
         else if (tmp=="CHAIN")
             line_stream >> num_chain;
         
@@ -185,11 +194,11 @@ void LoadParams(int argc, char* argv[])
         // treat indel as additional character
         else if (tmp == "GAPCHAR")
             line_stream >> gapchar;
-        else if (tmp == "INDEL")
+        else if (tmp == "INDEL") // not used
             line_stream >> indel;
-        else if (tmp == "INDEL2")
+        else if (tmp == "INDEL2") // not used
             line_stream >> indel2;
-        else if(tmp == "SAMPLE_INDEL")
+        else if(tmp == "SAMPLE_INDEL")  // not used
             line_stream >> sample_indel;
         else if(tmp == "SAMPLE_HYPER")
             line_stream >> sample_hyper;
@@ -282,14 +291,16 @@ int main(int argc, char* argv[])
 
     output_path = output_path + "/" + result_prefix ;
     output_path2 = output_path;
-    string outpath_Z0 = output_path + "_rate_postZ_" +to_string(0) +".txt";
-    string outpath_Z1 = output_path + "_rate_postZ_" +to_string(1) +".txt";
-    string outpath_Z2 = output_path + "_rate_postZ_" +to_string(2) +".txt";
+    string outpath_Z0 = output_path + "_rate_postZ_M" +to_string(0) +".txt";  //null
+    string outpath_Z1 = output_path + "_rate_postZ_M" +to_string(2) +".txt";  //full
+    string outpath_Z2 = output_path + "_rate_postZ_M" +to_string(1) +".txt";  // M1
     
     
     string outpath_hyper = output_path+"_hyper.txt";
     ofstream out_hyper(outpath_hyper.c_str());
     out_hyper << "iter\tnprior_a\tnprior_b\tcprior_a\tcprior_b\tprior_l_a\tprior_l_b\tprior_g_a\tprior_g_b\n";
+    out_hyper << 0 << "\t"<< nprior_a<< "\t"<< nprior_b <<"\t"<< cprior_a << "\t"<< cprior_b << "\t"<< prior_lrate_a << "\t"<< prior_lrate_b << "\t"<< prior_grate_a << "\t"<< prior_grate_b <<endl;
+
     
     ofstream out_lik;
     if(sample_hyper) {
@@ -325,7 +336,7 @@ int main(int argc, char* argv[])
     vector<int> ids;
     if(id_path=="")
     {
-        if(batch==0)
+        if(batch==-1)
         {
           for(int c =0;c<bpp.C;c++)
           {
@@ -374,11 +385,10 @@ int main(int argc, char* argv[])
         
         // Gibbs sampling
         #pragma omp parallel for schedule (guided) num_threads(num_thread)
-        for(std::size_t i = 0; i < ids.size(); i++ ) //pC bpp.C
+        for(std::size_t i = 0; i < ids.size(); i++ ) 
         {
-            int c = ids[i];//4502; //
+            int c = ids[i];
             bool filter = false;
-            //if(bppc.root<77 || bppc.parent2[76] == -1) continue;  // too many species missing
           
             // null model
             try{
@@ -404,7 +414,7 @@ int main(int argc, char* argv[])
                 //if(!bppc.failure)
                 //{
                 bppc.Eval2(bpp,2);
-                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 2);
+                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 1);
                 bppc.Output_init(output_path,output_path2,bpp,out_Z2, 2); //sort rates!!
                 //}
             }
@@ -415,7 +425,7 @@ int main(int argc, char* argv[])
             //if(!bppc.failure)
             //{
             bppc.Eval2(bpp,1);
-            if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 1);
+            if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 2);
             bppc.Output_init(output_path,output_path2,bpp,out_Z1, 1); //sort rates!!
             //}
 
