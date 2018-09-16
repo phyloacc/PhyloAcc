@@ -1,11 +1,11 @@
 # Format of output files
-*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation  ($P(Z=0\rightarrow Z=1)$ and $P(Z=1->Z=2)$), and posterior mean of latent state on each branch for each element. Columns in the file are:
+*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation ($P(Z=0\rightarrow Z=1)$ and $P(Z=1\rightarrowZ=2)$), and posterior mean of latent state on each branch for each element. Columns in the file are:
 1. element No. which is the order of the element in the input bed file starting from zero
 2. posterior median of accelerated mutation rate
 3. posterior median of conserved mutation rate
-4. posterior median of $P(Z=0->Z=1)$
-5. posterior median of $P(Z=1->Z=2)$
-6. posterior median of $P(Z=0->Z=2)$ which is 0 in current implementation
+4. posterior median of $P(Z=0\rightarrowZ=1)$
+5. posterior median of $P(Z=1\rightarrowZ=2)$
+6. posterior median of $P(Z=0\rightarrowZ=2)$, which is 0 in current implementation
 7. from 7th column and on, we have four columns for each branch:\*\_0 indicates whether it's "missing"; \*\_1, \*\_2 and \*\_3 are the posterior probability in background, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*\_elem_Z.txt. 
 
 If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), it will not appear in this file.
