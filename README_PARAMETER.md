@@ -18,7 +18,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *GAP_PROP*: if the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species (default: 0.8).   
   * *CONSTOMIS*: the probability of "missing" under conserved state. Should be small (default: 0.01). 
 
-* **(Hyper)Parameters for the model**:
+* **(Hyper)Parameters and initial values**:
   * *INIT_GRATE*: the initial transition probabily from background to conserved state (default: 0.5).
   * *INIT_LRATE*: the initial transition probabily from conserved to accelerated state (default: 0.3).
   * *HYPER_LRATE_A, HYPER_LRATE_B*: the parameters for the beta prior of loss probability (default: 1,2).
@@ -29,7 +29,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *CONSERVE_PRIOR_B*: the scale parameter for the gamma prior of conserved rate (default: 0.04).
   * *ACCE_PRIOR_A*: the shape parameter for the gamma prior of acceleraed rate (default: 10).
   * *ACCE_PRIOR_B*: the scale parameter for the gamma prior of accelerated rate (default: 0.2).
-  * *RATE_OPT*: to avoid label switching of latent state, we provide options to restrict accelerated rate larger than conserved rate. 0: no restriction on rates; 1: have lower and upper bound on acceleraed and conserved rates respectively; 2: restrict accelerated rate to be larger than conserved rate. (default: 1)
+  * *RATE_OPT*: to avoid label switching of latent state, we provide options to restrict the range of accelerated rate and conserved rate. 0: no restriction on rates; 1: have lower and upper bound on acceleraed and conserved rates respectively; 2: restrict accelerated rate to be larger than conserved rate. (default: 1)
   * *NLB*: lower bound for the accelerated rate. Only valid if *RATE_OPT* = 1. Default: 0.6.
   * *CUB*: upper bound for the conserved rate. Only valid if *RATE_OPT* = 1. Default: 1.
 
