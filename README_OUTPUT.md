@@ -8,7 +8,7 @@
 6. posterior median of $\beta_2 = P(Z=0\rightarrow Z=2)$, which is 0 in current implementation
 7. from 7th column and on, we have four columns for each branch:\*\_0 indicates whether it's "missing"; \*\_1, \*\_2 and \*\_3 are the posterior probability in background, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*\_elem_Z.txt. 
 
-If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), it will not appear in this file.
+If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README_PARAMETER.md](PhyloAcc/README_PARAMETER.md)), it will not appear in this file.
 
 *prefix*\_elem_lik.txt: marginal logliklihood for all models (integrating out parameters and latent states). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
@@ -20,10 +20,10 @@ If sampling hyperparameters, posterior medians/means under different hyperparame
   * *logBF2*: log Bayes factor between accelerated and full model
   * *loglik_Max_M0, loglik_Max_M1, loglik_Max_M2*: Maximum joint likelihood of Y (observed sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(Y, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
 
-If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
+If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README_PARAMETER.md](PhyloAcc/README_PARAMETER.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
   
 
-*prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under null, accelerated and full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(background),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
+*prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under null, accelerated and full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(background),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README_PARAMETER.md](PhyloAcc/README_PARAMETER.md)), all the columns will be zero. 
 
 *prefix*\_hyper.txt: hyperparameters at each iteration, only meaningful if adopting full Bayesian approach by sampling hyperparameters. Columns are:
 * *iter*: current iteration
