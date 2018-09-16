@@ -8,7 +8,7 @@
 6. posterior median of $\beta_2 = P(Z=0\rightarrow Z=2)$, which is 0 in current implementation
 7. from 7th column and on, we have four columns for each branch:\*\_0 indicates whether it's "missing"; \*\_1, \*\_2 and \*\_3 are the posterior probability in background, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*\_elem_Z.txt. 
 
-If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README_PARAMETER.md](README_PARAMETER.md)), it will not appear in this file.
+If sampling hyperparameters, the outputs under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README_PARAMETER.md](README_PARAMETER.md)), it will not appear in this file.
 
 *prefix*\_elem_lik.txt: marginal logliklihood for all models (integrating out parameters and latent states). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
