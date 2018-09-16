@@ -1,8 +1,8 @@
 # Format of output files
 *prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation ($\alpha = P(Z=0\rightarrow Z=1)$ and $\beta = P(Z=1\rightarrow Z=2)$), and posterior mean of the probability of being in each latent state on each branch for each element. Columns in the file are:
 1. element No. which is the order of the element in the input bed file starting from zero
-2. posterior median of accelerated mutation rate
-3. posterior median of conserved mutation rate
+2. posterior median of accelerated substitution rate
+3. posterior median of conserved substitution rate
 4. posterior median of $\alpha$
 5. posterior median of $\beta$
 6. posterior median of $\beta_2 = P(Z=0\rightarrow Z=2)$, which is 0 in current implementation
@@ -10,7 +10,7 @@
 
 If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), it will not appear in this file.
 
-*prefix*\_elem_lik.txt: marginal logliklihood for all models (integrating out parameters). The columns are:
+*prefix*\_elem_lik.txt: marginal logliklihood for all models (integrating out parameters and latent states). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
   * *ID*: The element name as in the iput bed file
   * *loglik_Null*: marginal logliklihood under null model
@@ -18,12 +18,12 @@ If sampling hyperparameters, posterior medians/means under different hyperparame
   * *loglik_Full*: marginal logliklihood under full model
   * *logBF1*: log Bayes factor between null and accelerated model
   * *logBF2*: log Bayes factor between accelerated and full model
-  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of X (sequences), r (mutation rates) and Z (latent states) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
+  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of X (sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(X, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
 
 If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
   
 
-*prefix*\_1_elem_Z.txt: maximum loglikhood configurations of latent state Z under full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(neutral),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
+*prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(neutral),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
 
 *prefix*\_hyper.txt: hyperparameters at each iteration, only meaningful if adopting full Bayesian approach by sampling hyperparameters. Columns are:
 * *iter*: the number of iteration
