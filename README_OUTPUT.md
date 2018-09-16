@@ -26,12 +26,11 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 *prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under null, accelerated and full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(background),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
 
 *prefix*\_hyper.txt: hyperparameters at each iteration, only meaningful if adopting full Bayesian approach by sampling hyperparameters. Columns are:
-* *iter*: the number of iteration
-* *nprior_a, nprior_b*: the shape and scale hyperparameter of the gamma prior of accelerated mutation rate
-* *cprior_a, cprior_b*: the shape and scale hyperparameter of the gamma prior of conserved mutation rate
-* *indel, indel2*: empty columns, place holders
-* *grate*: rate of gain conservation, i.e. the prior of transition probability of $Z=0$ to $Z=1$
-* *lrate*: rate of loss conservation, i.e. the prior of transition probability of $Z=1$ to $Z=2$
+* *iter*: current iteration
+* *nprior_a, nprior_b*: the shape and scale hyperparameter of the gamma prior of accelerated substitution rate
+* *cprior_a, cprior_b*: the shape and scale hyperparameter of the gamma prior of conserved substitution rate
+* *prior_lrate_a,prior_lrate_b*: hyperparameters of beta prior for probability of loss conservation
+* *prior_grate_a,prior_grate_b*: hyperparameters of beta prior for probability of gain conservation
 
 *prefix*\_lik\_rate\_Z\_[0-2]_\*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element No. .
 
