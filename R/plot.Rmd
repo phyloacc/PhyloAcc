@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = T)
 ```
 
 
-This Rnotebook will guide you to generate the sequence alignment and substitution rates shift pattern for each DNA element, as well as average acceleration and conservation state per branch over all input elements. It will need:
+This Rnotebook will guide you to generate the sequence alignment and substitution rates shift pattern for each DNA element, as well as the average probability of being acceleration and conservation state per branch over all input elements. It will need:
 
 1. A rooted phylogenetic tree in Newick format
 2. Output files from PhyloAcc: *xxx_species_names.txt*, *xxx_elem_lik.txt*, *xxx_rate_postZ_xxx*
@@ -41,9 +41,9 @@ treeData <- prepare_data(tree_path = "../Data/ratite/neut_ver3_final.named.mod",
 ```plotZPost``` function will show the shift pattern of substitution rates on the phylogengy. 
 It will need:
 
-1. *xxx_elem_lik.txt*: output by PhyloAcc constaining log-likelihood under different models for each element. 
+1. *xxx_elem_lik.txt*: output by PhyloAcc containing log-likelihoods under different models for each element. 
 
-2. *xxx_rate_postZ_xxx*: output by PhyloAcc having the posterior median of substitution rates under each conservation state (Z) and posterior of Z on each branch for different models. In the following example, we will use result from *xxx_rate_postZ_1.txt* and plot the conservation state under full model.
+2. *xxx_rate_postZ_xxx*: output by PhyloAcc having the posterior medians of conserved and accelerated substitution rates and the posterior probability of Z on each branch for different models. In the following example, we will use result from *xxx_rate_postZ_1.txt* and plot the conservation state under full model.
 
 ```{r results, echo=TRUE,cache=F}
 #### read in BF scores as well as marginal log likelihood under null, accelerated and full model #### 
@@ -64,8 +64,8 @@ lk = score[sel, ]
 k = score[sel, 1] # get the No. of the selected element
 targets = c("strCam","rhePen","rheAme","casCas","droNov","aptRow","aptHaa","aptOwe","anoDid") # target species
 Z = unlist(postZ[postZ$No. == k, ]) # get the posteriors of conservation states
-tit = paste("BF1:", round(lk$log_ratio), "BF2:",round(lk$BF2), "  ") # use BF scores and posterior substitution rates as title
-plotZPost(Z, treeData, target_species=targets, tit=tit, offset=6) # offset= 6 indicates the posterior of Z start from 7th column
+tit = paste("logBF1:", round(lk$log_ratio), "logBF2:",round(lk$BF2), "  ") # use BF scores and posterior substitution rates as title
+plotZPost(Z, treeData, target_species=targets, tit=tit, offset=6,cex.score = 2) # offset= 6 indicates the posterior of Z start from 7th column
 ```
 
 ```plotAlign``` function will show the sequence alignment for an element as a heatmap. 
