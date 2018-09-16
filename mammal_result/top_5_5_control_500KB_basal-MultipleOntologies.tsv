@@ -1,0 +1,34 @@
+# GREAT version 3.0.0	Species assembly: hg19	Association rule: Basal+extension: 5000 bp upstream, 1000 bp downstream, 500000 bp max extension, curated regulatory domains excluded
+# Ontology	 Term Name 	 Hyper Rank 	 Hyper Raw P-Value 	  Hyper FDR Q-Val  	 Hyper Fold Enrichment 	 Hyper Foreground Region Hits 	 Hyper Total Regions 	 Hyper Region Set Coverage 	 Hyper Foreground Gene Hits 	 Hyper Background Gene Hits 	 Total Genes Annotated
+GO Biological Process	cell fate determination	1	1.869228e-9	0.000011678936544	2.584176	51	2746	0.03591549	15	36	40	
+GO Biological Process	regulation of DNA-dependent transcription, elongation	4	1.503493e-8	0.000023484560659999998	6.604754	15	316	0.01056338	2	24	39	
+GO Biological Process	loop of Henle development	17	1.573375e-7	0.00005782615882352941	3.816812	22	802	0.01549296	5	9	11	
+GO Biological Process	regulation of translation	32	0.000004119529	0.0008043380372500001	2.086875	46	3067	0.03239437	16	168	242	
+GO Biological Process	neuron recognition	40	0.00001013689	0.0015833822180000001	2.21237	37	2327	0.02605634	11	30	30	
+GO Biological Process	innervation	43	0.00001792932	0.0026051718920930235	3.248408	18	771	0.01267606	6	16	16	
+GO Biological Process	regulation of developmental growth	45	0.00001976462	0.0027442076835555553	1.719047	67	5423	0.0471831	23	104	122	
+GO Biological Process	nephron tubule development	47	0.000022383	0.00297551029787234	2.157211	36	2322	0.02535211	11	34	36	
+GO Biological Process	renal tubule development	53	0.00003482338	0.004105216570566038	2.110849	36	2373	0.02535211	11	36	38	
+GO Biological Process	cell proliferation in forebrain	61	0.00006869279	0.007035943474098361	2.282322	28	1707	0.01971831	7	27	27	
+Mouse Phenotype	decreased retinal ganglion cell number	1	7.057028e-14	4.1128359183999996e-10	4.663915	36	1074	0.02535211	8	31	33	
+Mouse Phenotype	thin retinal ganglion layer	2	5.06312e-13	1.4753931680000002e-9	5.044847	31	855	0.02183099	5	14	15	
+Mouse Phenotype	thin retinal inner nuclear layer	3	6.836735e-11	1.3281497193333334e-7	3.830579	34	1235	0.02394366	5	30	37	
+Mouse Phenotype	decreased amacrine cell number	4	8.711106e-11	1.2692081442e-7	4.509171	28	864	0.01971831	4	18	18	
+Mouse Phenotype	increased amacrine cell number	5	9.860172e-11	1.1493016483199999e-7	6.441673	20	432	0.01408451	2	7	7	
+Mouse Phenotype	abnormal retinal inner nuclear layer thickness	6	1.498965e-10	1.4559946699999998e-7	3.716233	34	1273	0.02394366	5	31	38	
+Mouse Phenotype	abnormal retinal ganglion cell morphology	7	2.613169e-10	2.1756498474285713e-7	2.709845	52	2670	0.03661972	17	75	85	
+Mouse Phenotype	abnormal amacrine cell number	8	6.816832e-10	4.966062112e-7	3.987217	29	1012	0.02042254	5	22	22	
+Mouse Phenotype	abnormal pancreatic alpha cell morphology	12	6.865877e-8	0.000033345275963333335	2.551915	42	2290	0.02957746	16	37	40	
+Mouse Phenotype	abnormal retinal inner nuclear layer morphology	13	7.087784e-8	0.00003177508088615385	2.515991	43	2378	0.03028169	10	60	73	
+Mouse Phenotype	abnormal PP cell morphology	14	8.809223e-8	0.00003667153688857143	4.752415	18	527	0.01267606	4	7	7	
+Mouse Phenotype	abnormal pancreatic epsilon cell morphology	17	2.79357e-7	0.00009577015270588235	4.638005	17	510	0.01197183	3	6	6	
+Mouse Phenotype	abnormal pancreas development	18	3.032252e-7	0.00009817758142222222	2.474702	40	2249	0.02816901	16	39	40	
+Mouse Phenotype	abnormal adipose tissue development	19	4.434644e-7	0.00013602686964210526	5.950072	13	304	0.00915493	3	6	8	
+Mouse Phenotype	abnormal pancreatic beta cell differentiation	20	5.187236e-7	0.00015115605704	3.838349	20	725	0.01408451	7	13	13	
+Mouse Phenotype	abnormal amacrine cell morphology	21	6.806975e-7	0.00018890976333333335	2.661811	33	1725	0.02323944	8	37	39	
+Mouse Phenotype	increased physiological sensitivity to xenobiotic	24	0.000001989057	0.00048300934150000005	1.868618	65	4840	0.04577465	31	182	242	
+Mouse Phenotype	enhanced contextual conditioning behavior	29	0.000004055631	0.0008150419816551725	4.242077	15	492	0.01056338	5	14	15	
+Mouse Phenotype	abnormal retinal ganglion layer morphology	33	0.000009374547	0.0016556018156363636	1.92479	52	3759	0.03661972	17	97	111	
+Mouse Phenotype	abnormal Schwann cell morphology	34	0.00001052043	0.001803325471764706	2.857342	23	1120	0.01619718	11	41	48	
+Disease Ontology	serous neoplasm	1	1.861767e-7	0.0002585994363	3.644901	23	878	0.01619718	6	24	35	
+Disease Ontology	serous cystadenocarcinoma	1	1.861767e-7	0.0002585994363	3.644901	23	878	0.01619718	6	24	34	
