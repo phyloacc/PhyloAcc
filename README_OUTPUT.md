@@ -1,20 +1,24 @@
 # Format of output files
-*prefix*\_rate_postZ\_\*.txt: posterior median of conserved and accelerated rate and posterior mean of latent state on each branch for each element. Columns in the file are:
-1. element No. which is order of the element in the input bed file starting from zero
-2. posterior mode of accelerated mutation rate
-3. posterior mode of conserved mutation rate
-4. from 4th column and on, we have four columns for each branch:\*\_0 indicates whether it's "missing"; \*\_1, \*\_2 and \*\_3 are the posterior probability in neutral, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*\_elem_Z.txt. 
+*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation  ($P(Z=0->Z=1)$ and $P(Z=1->Z=2)$), and posterior mean of latent state on each branch for each element. Columns in the file are:
+1. element No. which is the order of the element in the input bed file starting from zero
+2. posterior median of accelerated mutation rate
+3. posterior median of conserved mutation rate
+4. posterior median of $P(Z=0->Z=1)$
+5. posterior median of $P(Z=1->Z=2)$
+6. posterior median of $P(Z=0->Z=2)$ which is 0 in current implementation
+7. from 7th column and on, we have four columns for each branch:\*\_0 indicates whether it's "missing"; \*\_1, \*\_2 and \*\_3 are the posterior probability in background, conserved and accelerated state respectively. The algorithm will prune "missing" branches within outgroup and set the latent states of them to -1 so that the three posterior probabilities are all zero. Column names indicate the branch right above the node and the order of the branch is the same as that in *prefix*\_elem_Z.txt. 
 
 If sampling hyperparameters, posterior medians/means under different hyperparameters will be concantenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), it will not appear in this file.
 
 *prefix*\_elem_lik.txt: marginal logliklihood for all models (integrating out parameters). The columns are:
   * *No.*: The order of the element in the input bed file starting from zero
   * *ID*: The element name as in the iput bed file
-  * *loglik_NUll*: marginal logliklihood under null model
-  * *loglik_RES*: marginal logliklihood under accelerated model
-  * *loglik_all*: marginal logliklihood under full model
-  * *log_ratio*: Bayes factor between null and accelerated model
-  * *loglik_Max1, loglik_Max2, loglik_Max3*: Maximum joint likelihood of X (sequences), r (mutation rates) and Z (latent states) under null ($M_0$), full ($M_2$) and accelerated ($M_1$) model respectively.
+  * *loglik_Null*: marginal logliklihood under null model
+  * *loglik_Acc*: marginal logliklihood under accelerated model
+  * *loglik_Full*: marginal logliklihood under full model
+  * *logBF1*: log Bayes factor between null and accelerated model
+  * *logBF2*: log Bayes factor between accelerated and full model
+  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of X (sequences), r (mutation rates) and Z (latent states) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
 
 If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
   
