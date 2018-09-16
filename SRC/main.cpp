@@ -73,9 +73,9 @@ double nlb = 0.6;
 
 int batch = -1 ;
 int seed = 5;
-double indel;
+double indel = 0;
 double indel2;
-bool sample_indel;
+bool sample_indel = 0;
 bool sample_hyper;
 char gapchar = '-';
 bool verbose = 0;
