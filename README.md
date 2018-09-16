@@ -76,5 +76,5 @@ There are several R scripts available in [R/](https://github.com/xyz111131/Phylo
 The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). The results for ratite and mammalian CNEEs in [mammal_result/](https://github.com/xyz111131/PhyloAcc/blob/master/mammal_result/) and [ratite_result/](https://github.com/xyz111131/PhyloAcc/blob/master/ratite_result/). 
 
 ## Reference
-Zhirui Hu, Timothy B Sackton, Scott V. Edwards, Jun S. Liu: A hierarchical Bayesian model for detecting convergent rate changes of conserved noncoding elements on phylogenetic trees, bioRxiv, 2018
+Zhirui Hu, Timothy B Sackton, Scott V. Edwards, Jun S. Liu: **A hierarchical Bayesian model for detecting convergent rate changes of conserved noncoding elements on phylogenetic trees**, *bioRxiv*, 2018.
 https://www.biorxiv.org/content/early/2018/02/22/260745.1
