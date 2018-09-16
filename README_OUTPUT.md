@@ -18,12 +18,12 @@ If sampling hyperparameters, posterior medians/means under different hyperparame
   * *loglik_Full*: marginal logliklihood under full model
   * *logBF1*: log Bayes factor between null and accelerated model
   * *logBF2*: log Bayes factor between accelerated and full model
-  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of X (sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(X, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
+  * *loglik_Max_M1, loglik_Max_M2, loglik_Max_M3*: Maximum joint likelihood of Y (observed sequences), r (substitution rates) given Z (latent states) ($\max_{r, Z} P(Y, r|Z)$) under null ($M_0$), accelerated ($M_1$) and full ($M_2$) model respectively.
 
 If updating hyperparameters, the algorithm will only compute the log-likelihood under full model. When the hyperparameters are updated, the log-likelihoods for each element will be recomputed and concatenated to this file. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. If the MCMC algorithm is trapped at some local modes or some other numerical errors occur for some elements, it will return NA.
   
 
-*prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(neutral),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
+*prefix*\_M\*_elem_Z.txt: maximum loglikhood configurations of latent state Z under null, accelerated and full model, with Z=-1(if the element is 'missing' in the branches of outgroup species),0(background),1(conserved),2(accelerated); each row is an element, ordered same as the input bed file. Output this file if not sample hyperparameters. If an element is filtered because of too many alignment gaps (criteria see [README2.md](PhyloAcc/README2.md)), all the columns will be zero. 
 
 *prefix*\_hyper.txt: hyperparameters at each iteration, only meaningful if adopting full Bayesian approach by sampling hyperparameters. Columns are:
 * *iter*: the number of iteration
