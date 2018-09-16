@@ -1,5 +1,5 @@
 # Format of output files
-*prefix*\_rate_postZ\_\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation ($\alpha = P(Z=0\rightarrow Z=1)$ and $\beta = P(Z=1\rightarrow Z=2)$), and posterior mean of the probability of being in each latent state on each branch for each element. Columns in the file are:
+*prefix*\_rate_postZ\_M\*.txt: posterior median of conserved rate, accelerated rate, probability of gain and loss conservation ($\alpha = P(Z=0\rightarrow Z=1)$ and $\beta = P(Z=1\rightarrow Z=2)$), and posterior mean of the probability of being in each latent state on each branch for each element. Columns in the file are:
 1. element No. which is the order of the element in the input bed file starting from zero
 2. posterior median of accelerated substitution rate
 3. posterior median of conserved substitution rate
@@ -32,6 +32,6 @@ If updating hyperparameters, the algorithm will only compute the log-likelihood 
 * *prior_lrate_a,prior_lrate_b*: hyperparameters of beta prior for probability of loss conservation
 * *prior_grate_a,prior_grate_b*: hyperparameters of beta prior for probability of gain conservation
 
-*prefix*\_lik\_rate\_Z\_[0-2]_\*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood, accelerated mutation rate, conserved mutation rate and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. [0-2]: under null, full and accelerated model respectively. *: element No. .
+*prefix*\_mcmc_trace_M\_[0-2]_\*.txt: Output this file if verbose=T, which contains trace of MCMC samples in each iteration for an element. Each row is one iteration and columns are: log-likelihood($P(Y|Z, r)$), accelerated substitution rate, conserved substitution rate, probability of gain and loss conservation and latent state Z of each branch. If sampling hyperparameters, MCMC samples will be concantenated together under different hyperparameters. In the file name, [0-2]: under null, accelerated and full model respectively. *: element No. .
 
 The output files from the extended version including gBGC is slightly different. *prefix*\_rate_postZ\_*.txt* also contains posterior mode of gBGC coefficient (*gBC* column) and posterior of having gBGC effect on each branch (*\*_B* columns).*prefix*_1_elem_Z.txt has latent gBGC state on each branch in the first columns.
