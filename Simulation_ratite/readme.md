@@ -4,11 +4,17 @@ PhyloAcc Simulation_ratite/param2-6.txt
 ```
 under the root directory and it will generate results in [result_phyloAcc](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_phyloAcc). 
 
-To get parameters and Z at each MCMC step for a subset of elements,  you could also try: 
+To output samples of parameters and Z's at each MCMC step for a subset of elements,  please try: 
 ```bash
-PhyloAcc Simulation_ratite/param2-6-test.txt
+PhyloAcc Simulation_ratite/param2-1-test.txt
 ```
 under the root directory and it will generate results in [result_tmp](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_tmp). 
+
+To sample hyperparameters of the priors, please try:
+```bash
+PhyloAcc Simulation_ratite/param2-1-test-hyper.txt
+```
+under the root directory and it will generate results in [result_tmp_hyper](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_tmp_hyper). 
 
 Results from PhyloAcc are shown in [result_phyloAcc/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_phyloAcc). Results from phyloP are in  [result_phyloP/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/result_phyloP). Input files and Results using PAML and phytools are in [PAML/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/PAML). Input files and Results using BEAST2 are in [BEAST/](https://github.com/xyz111131/PhyloAcc/tree/master/Simulation_ratite/BEAST).
 
