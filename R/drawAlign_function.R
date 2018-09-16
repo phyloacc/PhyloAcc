@@ -49,7 +49,7 @@ prepare_data <- function(tree_path = "Data/neut_ver3_final.named.mod", species_n
 #         offset=2, posterior of Z start from the third column
 ## output: plot of one element
 
-plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
+plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3, cex.score = 2)
 {
 
   species <- treeData$tree$tip.label
@@ -57,8 +57,8 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
   names(tip.color) <- species
   if(!is.null(target_species)) tip.color[target_species] <- 4
   
-  ratio1 = Z[offset] # c_rate
-  ratio2 = Z[offset-1] # n_rate
+  ratio1 = Z[2] # c_rate #offset-3
+  ratio2 = Z[1] # n_rate #offset-4
   #print(ratio1);print(ratio2);
  
 
@@ -87,7 +87,7 @@ plotZPost <- function(Z, treeData, target_species=NULL, tit=NULL, offset=3)
   par(mar= c(2,0,0,0))
   plot(mytree,edge.color = edge_col,tip.color = tip.color,edge.width  =3,label.offset = 0.003,no.margin =F, cex=1.1, bg=NA)
   mtext(substitute(paste(t, r[1], "=", r1, ", ", r[2], "=", r2),
-    list(t=tit, r1 =round(ratio1,2), r2 = round(ratio2,2))), side = 1, cex=1.5, line = 0.5)
+    list(t=tit, r1 =round(ratio1,2), r2 = round(ratio2,2))), side = 1, cex=cex.score, line = 0.5)
   
 }
 
@@ -122,12 +122,13 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
       z <-  rep("substitution",length(x)) 
       z[x==cb] <- "consensus";
       z[x=='-'] <- "indel";
-      z[x=='n' | x=='N'] <- "N"; #| x=='*'
+      z[x=='n' | x=='N'| x=='*'] <- "N"; #
       return(z);
   })
   
   rownames(ele_cons) <- treeData$tip
   dat_m <- melt(ele_cons) 
+ 
   p <- ggplot(dat_m, aes(as.factor(Var2), Var1)) + geom_tile(aes(fill = factor(value,levels=c("N","consensus","indel","substitution")))) + 
     scale_fill_manual(values = cols,name="", drop=F) +ylab(NULL) + xlab(paste(ncol(element1), "bp"))+ 
     theme(panel.background = element_blank(),axis.ticks.y = element_blank(),axis.text.y = element_text(size=13,colour = cols_sp), 
