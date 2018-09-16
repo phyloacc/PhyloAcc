@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.4">
+
+
+    <data
+id="test_0"
+name="alignment">
+                    <sequence id="seq_colLiv" taxon="colLiv" totalcount="4" value=ctctacaaattgtctcgtcaaactggcagtcctgcgcttcccttatataagaatagaaggggcgacgttacgaggtgtcattaatgacaacaggagtatgcgtccataaaagagatcgaataaatttatagtcgctgttagcgcggtaaaataccataaggaatcacagtcccaaactccaagacaaacaacgcttaaaatgatgatggtcagttgaggagagtagta/>
+                    <sequence id="seq_lepDis" taxon="lepDis" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgctacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgtggtaaaatatcataaggaatcacagtcctaaactccaagacaaacaacgcttaaaatgattatggtgagttgaggagagtagta/>
+                    <sequence id="seq_cryCin" taxon="cryCin" totalcount="4" value=ctccacgcattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaataggcaacgttacgaggtctcattagtaacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaacgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_aptHaa" taxon="aptHaa" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_strCam" taxon="strCam" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagaatagta/>
+                    <sequence id="seq_pseHum" taxon="pseHum" totalcount="4" value=ctctacacattgtctcttcaaactgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatagatttattgtcgctgttagcgcgctaaaataccatagggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_melUnd" taxon="melUnd" totalcount="4" value=ctctacacattgtctcctcaaattgacagtcctgcgcttcccttatataagaatagagggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatagatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtggta/>
+                    <sequence id="seq_droNov" taxon="droNov" totalcount="4" value=cgctacacattgtcccgccaaagtgacagtcctgcgctccccttgtataggaatagaatgggcaacgttacgaggtgcctctaatgacaacacaagcatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcataagatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_nipNip" taxon="nipNip" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgctttccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_anoCar" taxon="anoCar" totalcount="4" value=CTCTACAGATTGTCCCGTTAAAGTGACAGTCCTGCGCCTCCCTTATGTGAGAATATAATGGGCGACGTTTCGAGGTGTCATTAATGACGACAGGAGTATGCACCCGTAAAAGAGATCGAGTATAGTTACTGCCGTTGTTAGCGCGGTAAAATGCCATACGGATTGACGATCCACAACTCCAAGACAAACAACGATTAAATTGACAATGGTGGGTTCAGGAGAGTAGTA/>
+                    <sequence id="seq_cucCan" taxon="cucCan" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataaggatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccataaatgagatcgaataaatttattgtcgctgttagcgcggtaaaatatcatgaggaatcacagtccaaaactccaagacaaacaatgctaaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_anaPla" taxon="anaPla" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataggaatagaatgggcaacgttacgaggtgacattaatgacaacaggaatatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgtgttgaggagagtagta/>
+                    <sequence id="seq_falPer" taxon="falPer" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatagattcattgtcgctgttagcgcggtaaaataccataaggaatcatagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_pygAde" taxon="pygAde" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaaatccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_croPor" taxon="croPor" totalcount="4" value=ctctacacattgtctcgtcaaagagacagtcctgcgcttcccttatataagcataggatgggcaacgttacgaggtgtcattaatgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattgtcgttgttagcgcggtaaaatgccataaggaatcacaacccaaaactccaagacaaacgaggctaaaaatgataacggtgggttggggagagtagta/>
+                    <sequence id="seq_eudEle" taxon="eudEle" totalcount="4" value=ctccacgcgttgtctcgtcaaagtgacagtccagcgcttcccttatataagaatagaataggcaacgttaccaggtctcattaataacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaacgccataaggaatcacagtccgaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_rhePen" taxon="rhePen" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccatgaaagagatcgaataaatttattgtcgctgttagcgcggtgaaatgccataaggaatcacagtccaaaactccaagaaaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_allSin" taxon="allSin" totalcount="4" value=ctctacacattgtctcgtcaaagagacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattgtcgttgttagcgcggtaaaatgccataaggaatcacaacccaaaactccaagacaaacgaggccaaaaatgataacggtgggttgaggagagtagta/>
+                    <sequence id="seq_rheAme" taxon="rheAme" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccatgaaagagatcgaataaatttattgtcgctgttagcgcggtgaaatgccataaggaatcacagtccaaaactccaagaaaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_balReg" taxon="balReg" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgatgtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatgaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtggta/>
+                    <sequence id="seq_corBra" taxon="corBra" totalcount="4" value=ctctacacattgtctcttcaaagtgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacgacaggagtatgcgtccgtaaaagagatcgaatagatttattgtcgctattagcgcgctaaaataccataggcaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatagtgagttgaggagagtagta/>
+                    <sequence id="seq_aptOwe" taxon="aptOwe" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_galGal" taxon="galGal" totalcount="4" value=ctctgcacattgtctcgtcaaattgacagtcctgcgcttcccttatataaggaaagaatgggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccattaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagtg/>
+                    <sequence id="seq_gavGan" taxon="gavGan" totalcount="4" value=ctctacacattgtctcgtcaaagagacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattgtcgttgttagcgcggtaaaatgccataaggaatcacaacccaaaactccaagacaaacgaggctaaaaatgataacggtgggttgaggagagtagta/>
+                    <sequence id="seq_cheMyd" taxon="cheMyd" totalcount="4" value=ttctacacattatctcgtcaaagtgacagtcctgcgcttcccttatataagaataaaatgggcaacgtttcgaggtgtcattattgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattatcgttgttagcgcggtaaaatgccgtaaggaatcacaatccacaattccaagacaaacaacgcttaaaatgataatggtgggttcaggagagtagta/>
+                    <sequence id="seq_chrPic" taxon="chrPic" totalcount="4" value=ttctacacattatctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgtttcgaggtgtcattaatgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattatcgttgttagcgcggtaaaatgccgtaaggaatcacaatccacaattccaagacaaacaacgcttaaaatgataatggtgggttcaggagagtatta/>
+                    <sequence id="seq_tinGut" taxon="tinGut" totalcount="4" value=ctccacgcattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaataggcaacgttacgaggtctcattaataacaacacgagtatgcgtccataaaagagatcgaataaagttattgtcgctgttagcgcggtaaaacgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_chaVoc" taxon="chaVoc" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtgaaaaagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacagcgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_casCas" taxon="casCas" totalcount="4" value=ctctacacattgtcccgccaaagtgacagtcctgcgctccccttgtataggaatagaatgggcaacgttacgaggtatcattaatgacaacacgagcatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcataagatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_aptFor" taxon="aptFor" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttaccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_notPer" taxon="notPer" totalcount="4" value=ctccacgcattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaataggcaacgttacgaggtctcattaataacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaacgccataaggagtcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_ficAlb" taxon="ficAlb" totalcount="4" value=ctctacacattgtctcttcaaagtgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacggggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatagatttattgtcgctgttagcgcgctaaaataccatagggaatcacagtccaaaactccaagacaaacaacgcttaagatgatgatggtgagttgaggagaatagta/>
+                    <sequence id="seq_anoDid" taxon="anoDid" totalcount="4" value=ctccacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccataaaagagatcgaacaaatttattgtcgctgttagcgcggtaaaacgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_allMis" taxon="allMis" totalcount="4" value=ctctacacattgtctcgtcaaagagacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacgacaggagtatgcgcccgtaaaagagatcgaataaatttattgtcgttgttagcgcggtaaaatgccataaggaatcacaacccaaaactccaagacaaacgaggccaaaaatgataacggtgggttgaggagagtagta/>
+                    <sequence id="seq_melGal" taxon="melGal" totalcount="4" value=ctctgcacattgtctcgtcaaattgacagtcctgcgcttcccttatataaggatagaatgggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagag/>
+                    <sequence id="seq_picPub" taxon="picPub" totalcount="4" value=ctctacacattatctcgtcaaattgacggtcctgcgcttcccttatataagaatagagggggcaacattacgaggtgtcattagtgacaacaggagtatgcgtccgtagaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcgcagtccaaaactccgagacaaacgacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_halLeu" taxon="halLeu" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccgaaactccaagacaaacaacgcttaaaatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_fulGla" taxon="fulGla" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccgtaaaagagatcgaatgaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_taeGut" taxon="taeGut" totalcount="4" value=ctctacacattgtctcttcaaagtgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtatcattaatgacgaaaggagtatgcgtccgtaaaagagatcgaatagatttattgtcgctgttagcgcgctaaaataccatagggaatcacagtccaaaactccaagacatacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_mesUni" taxon="mesUni" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgctacccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccaagaaagagatcgaattaatttattgtcgctgctagcgcggtaaaataccataaggaatcacagtccaaaactccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_aptRow" taxon="aptRow" totalcount="4" value=ctctacacattgtctcgtcaaagtgacagtcctgcgcttcccttatataagaatagaatgggcaacgttacgaggtgtcattaatgacaacacgagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaatgccataaggaatcacagtccaaaactccaagacaaacaacgcttaacatgataatggtgagttgaggagagtagta/>
+                    <sequence id="seq_calAnn" taxon="calAnn" totalcount="4" value=ctttacacattgtctagtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgtcaacaggagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgccgtaaaataccataaggaatcacagtccaaagccccaagacaaacaacgcttaaaatgatgatggtgagttgaggagagtagta/>
+                    <sequence id="seq_chaPel" taxon="chaPel" totalcount="4" value=ctctacacattgtctcgtcaaattgacagtcctgcgcttcccttatataagaatagaaggggcaacgttacgaggtgtcattaatgacaacaggagtatgcgtccataaaagagatcgaataaatttattgtcgctgttagcgcggtaaaataccataaggaatcacagtccaaagctccaagacaaacaacgtttaaaatgatgatggtgagttgaggagagtagta/>
+                </data>
+
+
+    
+
+
+    
+
+
+    
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+<run id="mcmc" spec="MCMC" chainLength="1000000">
+    <state id="state" storeEvery="5000">
+        <tree id="Tree.t:test_0" name="stateNode">
+            <taxonset id="TaxonSet.test_0" spec="TaxonSet">
+                <alignment idref="test_0"/>
+            </taxonset>
+        </tree>
+        <parameter id="birthRate.t:test_0" name="stateNode">1.0</parameter>
+        <stateNode id="Indicators.c:test_0" spec="parameter.BooleanParameter" dimension="84">false</stateNode>
+        <parameter id="clockrates.c:test_0" dimension="84" name="stateNode">1.0</parameter>
+    </state>
+
+    <init spec="beast.util.TreeParser" id="NewickTree.t:test_0" initial="@Tree.t:test_0" IsLabelledNewick="true" adjustTipHeights="false" taxa="@test_0" newick="(((((((((((((((taeGut:0.0147514,ficAlb:0.0170544)taeGut-ficAlb:0.00207078,pseHum:0.0131168)taeGut-pseHum:0.00514284,corBra:0.0111057)taeGut-corBra:0.0331756,melUnd:0.0296242)taeGut-melUnd:0.00482556,falPer:0.0214473)taeGut-falPer:0.00188579,((picPub:0.0488214,lepDis:0.0179811)picPub-lepDis:0.00312725,halLeu:0.0146213)picPub-halLeu:0.000753829)taeGut-picPub:0.00159127,(((aptFor:0.00350587,pygAde:0.00418863)aptFor-pygAde:0.00686781,fulGla:0.01034)aptFor-fulGla:0.00108593,nipNip:0.0135438)aptFor-nipNip:0.00229969)taeGut-aptFor:0.00075662,(balReg:0.0164608,chaVoc:0.0177723)balReg-chaVoc:0.00154769)taeGut-balReg:0.00189993,((calAnn:0.0309707,chaPel:0.0256817)calAnn-chaPel:0.0096611,cucCan:0.0320779)calAnn-cucCan:0.00251791)taeGut-calAnn:0.000774421,(colLiv:0.0299584,mesUni:0.0269821)colLiv-mesUni:0.00405038)taeGut-colLiv:0.00963487,((galGal:0.0119428,melGal:0.0133062)galGal-melGal:0.0290056,anaPla:0.0271241)galGal-anaPla:0.0114596)taeGut-galGal:0.0128451,((((((aptHaa:0.000439712,aptOwe:0.000517521)aptHaa-aptOwe:0.000966275,aptRow:0.00130047)aptHaa-aptRow:0.00878531,(casCas:0.00365685,droNov:0.00435214)casCas-droNov:0.00867535)aptHaa-casCas:0.000912099,(rheAme:0.00148725,rhePen:0.00169043)rheAme-rhePen:0.0179314)aptHaa-rheAme:0.000586489,(((cryCin:0.0149141,tinGut:0.0123112)cryCin-tinGut:0.00545045,(eudEle:0.0207473,notPer:0.0231423)eudEle-notPer:0.00253325)cryCin-eudEle:0.0212673,anoDid:0.0177545)cryCin-anoDid:0.00797658)aptHaa-cryCin:0.0037512,strCam:0.01628)aptHaa-strCam:0.0128904)taeGut-aptHaa:0.0537689,((allMis:0.00284137,allSin:0.00245794)allMis-allSin:0.00451459,(croPor:0.00566264,gavGan:0.00458926)croPor-gavGan:0.00370247)allMis-croPor:0.0466817)taeGut-allMis:0.0100501,(chrPic:0.00911516,cheMyd:0.0100122)chrPic-cheMyd:0.026706)taeGut-chrPic:0.0786668,anoCar:0.0786668)taeGut-anoCar;">
+    </init>
+
+    <distribution id="posterior" spec="util.CompoundDistribution">
+        <distribution id="prior" spec="util.CompoundDistribution">
+            <distribution id="YuleModel.t:test_0" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate.t:test_0" tree="@Tree.t:test_0"/>
+            <prior id="RRateChangesPrior.c:test_0" name="distribution">
+                <x id="RRateChanges.c:test_0" spec="util.Sum">
+                    <arg idref="Indicators.c:test_0"/>
+                </x>
+                <distr id="Poisson.0" spec="beast.math.distributions.Poisson">
+                    <parameter id="RealParameter.13" estimate="false" name="lambda">0.6931471805599453</parameter>
+                </distr>
+            </prior>
+            <prior id="YuleBirthRatePrior.t:test_0" name="distribution" x="@birthRate.t:test_0">
+                <Uniform id="Uniform.1" name="distr" upper="Infinity"/>
+            </prior>
+            <prior id="RRatesPrior.c:stest_0" name="distribution" x="@clockrates.c:test_0">
+                <Gamma id="Gamma.0" name="distr">
+                    <parameter id="RealParameter.1" estimate="false" name="alpha">0.05</parameter>
+                    <parameter id="RealParameter.2" estimate="false" name="beta">10.0</parameter>
+                </Gamma>
+            </prior>
+        </distribution>
+        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+            <distribution id="treeLikelihood.test_0" spec="ThreadedTreeLikelihood" data="@test_0" tree="@Tree.t:test_0">
+                <siteModel id="SiteModel.s:test_0" spec="SiteModel">
+                    <parameter id="mutationRate.s:test_0" estimate="false" name="mutationRate">1.0</parameter>
+                    <parameter id="gammaShape.s:test_0" estimate="false" name="shape">1.0</parameter>
+                    <parameter id="proportionInvariant.s:test_0" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                    <substModel id="gtr.s:test_0" spec="GTR">
+                        <parameter id="rateAC.s:test_0" estimate="false" lower="0.0" name="rateAC">0.108827</parameter>
+                        <parameter id="rateAG.s:test_0" estimate="false" lower="0.0" name="rateAG">0.63059</parameter>
+                        <parameter id="rateAT.s:test_0" estimate="false" lower="0.0" name="rateAT">0.151897</parameter>
+                        <parameter id="rateCG.s:test_0" estimate="false" lower="0.0" name="rateCG">0.13007</parameter>
+                        <parameter id="rateCT.s:test_0" estimate="false" lower="0.0" name="rateCT">0.869737</parameter>
+                        <parameter id="rateGT.s:test_0" estimate="false" lower="0.0" name="rateGT">0.150099</parameter>
+                        <frequencies id="empiricalFreqs.s:test_0" spec="Frequencies" data="@test_0"/>
+                    </substModel>
+                </siteModel>
+                <branchRateModel id="RandomLocalClock.c:test_0" spec="beast.evolution.branchratemodel.RandomLocalClockModel" indicators="@Indicators.c:test_0" rates="@clockrates.c:test_0" tree="@Tree.t:test_0">
+                    <parameter id="meanClockRate.c:test_0" estimate="false" name="clock.rate">1.0</parameter>
+                </branchRateModel>
+            </distribution>
+        </distribution>
+    </distribution>
+
+    <operator id="YuleBirthRateScaler.t:test_0" spec="ScaleOperator" parameter="@birthRate.t:test_0" scaleFactor="0.75" weight="0.0"/>
+
+    <operator id="YuleModelTreeScaler.t:test_0" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelTreeRootScaler.t:test_0" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelUniformOperator.t:test_0" spec="Uniform" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelSubtreeSlide.t:test_0" spec="SubtreeSlide" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelNarrow.t:test_0" spec="Exchange" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelWide.t:test_0" spec="Exchange" isNarrow="false" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="YuleModelWilsonBalding.t:test_0" spec="WilsonBalding" tree="@Tree.t:test_0" weight="0.0"/>
+
+    <operator id="IndicatorsBitFlip.c:test_0" spec="BitFlipOperator" parameter="@Indicators.c:test_0" weight="15.0"/>
+
+    <operator id="ClockRateScaler.c:test_0" spec="ScaleOperator" parameter="@clockrates.c:test_0" scaleFactor="0.5" weight="15.0"/>
+
+    <logger id="tracelog" fileName="test_0.log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="treeLikelihood.test_0"/>
+        <log id="TreeHeight.t:test_0" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:test_0"/>
+        <log idref="YuleModel.t:test_0"/>
+        <log idref="birthRate.t:test_0"/>
+        <log idref="Indicators.c:test_0"/>
+        <log idref="clockrates.c:test_0"/>
+        <log idref="RRateChanges.c:test_0"/>
+    </logger>
+
+    <logger id="screenlog" logEvery="1000">
+        <log idref="posterior"/>
+        <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+    </logger>
+
+    <logger id="treelog.t:test_0" fileName="$(tree).trees" logEvery="1000" mode="tree">
+        <log id="TreeWithMetaDataLogger.t:test_0" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RandomLocalClock.c:test_0" tree="@Tree.t:test_0"/>
+    </logger>
+
+</run>
+
+</beast>
