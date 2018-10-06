@@ -14,9 +14,14 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *OUTGROUP*: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
   * *CONSERVE*: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species. Input conserved species should exclude target species.
   * *CONSERVE_PROP*: filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species (default: 0.8).
+  * *PRUNE_TREE*: Whether to prune "missing" branches besides outgroup. The "missing" branches are always pruned. (default: false, no prune).
+  
+* **Alignment Gaps and Filtering**:  
   * *GAPCHAR*: the character for alignment gaps. (default: -). Should be one char.
   * *GAP_PROP*: if the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species (default: 0.8).   
+  * *TRIM_GAP_PERCENT*: Trim the loci with indels or unknown base pairs in more than *TRIM_GAP_PERCENT* of all species. (default: 1, no trim).
   * *CONSTOMIS*: the probability of "missing" under the conserved state. Should be small (default: 0.01). 
+  * *MIN_LEN*: (Int) The trimmed element with length less than *MIN_LEN* will be filtered out. (default: 50)
 
 * **(Hyper)Parameters and initial values**:
   * *INIT_GRATE*: the initial transition probability from background to conserved state (default: 0.5).
