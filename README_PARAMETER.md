@@ -26,8 +26,8 @@ In the parameter file, each parameter is specified in a line with the parameter 
 * **(Hyper)Parameters and initial values**:
   * *INIT_GRATE*: the initial transition probability from background to conserved state (default: 0.5).
   * *INIT_LRATE*: the initial transition probability from conserved to accelerated state (default: 0.3).
-  * *HYPER_LRATE_A, HYPER_LRATE_B*: the parameters for the beta prior of loss probability (default: 1,2).
-  * *HYPER_GRATE_A, HYPER_GRATE_B*: the parameters for the beta prior of gain probability (default: 1,1).
+  * *HYPER_LRATE_A, HYPER_LRATE_B*: the parameters for the beta prior of loss probability (default: 1,9).
+  * *HYPER_GRATE_A, HYPER_GRATE_B*: the parameters for the beta prior of gain probability (default: 2,1).
   * *INIT_CONSERVE_RATE*: the initial conserved rate (default: 0.5).
   * *INIT_ACCE_RATE*: the initial accelerated rate (default: 1).
   * *CONSERVE_PRIOR_A*: the shape parameter for the gamma prior of conserved rate (default: 5).
