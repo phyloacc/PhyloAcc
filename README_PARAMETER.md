@@ -21,7 +21,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *GAP_PROP*: if the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species (default: 0.8).   
   * *TRIM_GAP_PERCENT*: Trim the loci with indels or unknown base pairs in more than *TRIM_GAP_PERCENT* of all species. (default: 1, no trim).
   * *CONSTOMIS*: the probability of "missing" under the conserved state. Should be small (default: 0.01). 
-  * *MIN_LEN*: (Int) The trimmed element with length less than *MIN_LEN* will be filtered out. (default: 50)
+  * *MIN_LEN*: The trimmed element with length less than *MIN_LEN* will be filtered out. (default: 50).
 
 * **(Hyper)Parameters and initial values**:
   * *INIT_GRATE*: the initial transition probability from background to conserved state (default: 0.5).
