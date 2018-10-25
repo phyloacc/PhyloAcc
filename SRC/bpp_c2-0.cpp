@@ -30,7 +30,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             if(trace_Z[i][s] == Max_Z[s]) posterior_Z[s]++;
         }
         
-        if(posterior_Z[s] < num_mcmc)
+        if(posterior_Z[s] <= 0.999 * num_mcmc)
         {
             uncertainZ.push_back(s);
         }
@@ -127,7 +127,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     for(unsigned int i = 0; i<numConf;i++)
     {
         double w = (double)numConfigZ[i]/num_mcmc;
-        if(w < 0.02) continue; // always keep MaxZ (if only one config, same as Chib)
+        if(w < 0.1) continue; // always keep MaxZ (if only one config, same as Chib)
         
         // compute P(Z|C)
         mat nZ = zeros(3,2);
@@ -201,135 +201,75 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         VB = 0;
         for(unsigned int i = 0; i < numConf;i++)
         {
-            
+            varn += var_nrate[i];
             varc += var_crate[i];
+            cov += cov_rate[i];
+            meann += mean_nrate[i];
             meanc += mean_crate[i];
-            if(resZ!=0){
-                meann += mean_nrate[i];
-                varn += var_nrate[i];
-                cov += cov_rate[i];
-            }
-           
-        }
-        
-        double rn = meann /num_mcmc; // get r*
-        double rc = meanc /num_mcmc;
-        
-        // recompute log_cache_TM at r*
-        for(vector<int>::iterator it = nodes.begin(); it < nodes.end()-1;it++)
-        {
-            int s = *it;
-            if(s==bpp.moveroot) continue; //not update rate for outgroup! s==42||, conserved rate still changing
             
-            mat tmp_diag  = exp(bpp.eigenval*distances2[s]*rc);
-            mat x = bpp.eigenvec;
-            x.each_col()%=tmp_diag;
-            log_cache_TM_cons[s] = log(bpp.eigeninv * x);
-            
-            if(resZ!=0)
-            {
-                tmp_diag  = exp(bpp.eigenval*distances2[s]*rn);
-                x = bpp.eigenvec;
-                x.each_col()%=tmp_diag;
-                
-                log_cache_TM_neut[s] = log(bpp.eigeninv * x); //transpose Q
-            }
-        }
-        
-        
-        for(unsigned int i = 0; i < numConf;i++)
-        {
-            // compute P(Z|C)
-            mat nZ = zeros(3,2);
-            for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-            {
-                int p = parent2[*it];
-                if(configZ[i][p] < 2)
-                {
-                    nZ(configZ[i][*it],configZ[i][p]) += 1;
-                }
-            }
-            double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
-            
-            for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-            {
-                if(fixZ[*it] == 1)
+            double w = (double)numConfigZ[i]/num_mcmc;
+            if(w < 0.1){
+                // compute P(Z|C)
+                mat nZ = zeros(3,2);
+                for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
                 {
                     int p = parent2[*it];
-                    assert(p!=N);
                     if(configZ[i][p] < 2)
                     {
-                        nZ(configZ[i][*it],configZ[i][p]) -= 1;
+                        nZ(configZ[i][*it],configZ[i][p]) += 1;
                     }
                 }
+                double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
+                
+                for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+                {
+                    if(fixZ[*it] == 1)
+                    {
+                        int p = parent2[*it];
+                        assert(p!=N);
+                        if(configZ[i][p] < 2)
+                        {
+                            nZ(configZ[i][*it],configZ[i][p]) -= 1;
+                        }
+                    }
+                }
+                
+                priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
+                if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+                
+                //root
+                priorZ += prior_z.at(configZ[i][root]);
+                sum_full_loglik[i] += numConfigZ[i] * priorZ/num_mcmc;
             }
             
-            priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
-            if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
-            
-            //root
-            priorZ += prior_z.at(configZ[i][root]);
-            
-            // P(X|Z, r*)
-            vector<bool> visited = vector<bool>(N,false);
-            Z = configZ[i];
-            for(int s=S; s<N; s++)
-                for(int g=0; g<GG; g++)
-                    lambda[g][s].fill(0);
-            sum_full_loglik[i] = 0;
-            
-            for(int g=0; g<GG; g++){
-                Update_Tg(g, visited, bpp, false);  //get lambda
-                sum_full_loglik[i] += BPP::log_exp_sum(lambda[g][root]);
-            }
-            
-            sum_full_loglik[i] += priorZ;
-            
-            
+            VB += sum_full_loglik[i];  // already added prior in last step
+            VB -= w * log(numConfigZ[i]); //numConfigZ[i]
         }
-        
-        VB = BPP::log_exp_sum(conv_to<mat>::from(sum_full_loglik)); //- log(numConf);
-        
-        VB += log(gsl_ran_gamma_pdf(rc,bpp.cprior_a,bpp.cprior_b));
-        if(resZ!=0) VB += log(gsl_ran_gamma_pdf(rn,bpp.nprior_a,bpp.nprior_b));
-        
-        
-        if(verbose) cout << CC <<  " P(X, r): " << VB <<" " << endl;
-        
-        
         if(resZ==0)  // no or few Z==2, var_nrate[i] < 1e-6
         {
             varc -= pow(meanc,2)/num_mcmc;
             logdet = log(varc) - log(num_mcmc);
-            VB += 0.5*logdet + 0.5*log(2*M_PI); //*num_mcmc;
         }else{
             varn -= pow(meann,2)/num_mcmc;
             varc -= pow(meanc,2)/num_mcmc;
             cov -= meann * meanc/num_mcmc ;
             logdet = log(varc * varn - cov * cov) - 2*log(num_mcmc);
-            VB += 0.5*logdet + log(2*M_PI); //*num_mcmc;
+            
         }
         
-        if(verbose) cout << CC <<  " logdet: " << logdet <<" " << endl;
-    }else{
-        //chib method
-        if(resZ!=0) // full
-        {
-            VB = VB * ((double)num_mcmc/effective_sum) + log(num_mcmc) + log(2*M_PI) + 1; //effective_sum
-            
-        }
-        else
-        {
-            VB = VB* ((double)num_mcmc/effective_sum) + log(num_mcmc) + 0.5*(log(2*M_PI) + 1);
-            
-        }
+        VB += 0.5*logdet; //*num_mcmc;
+        effective_sum = num_mcmc;
     }
     
     //chib method
     if(resZ==1) // full
     {
-        bpp.log_liks_sgl[CC] = VB;
-        
+        if(effective_sum==0)
+        {
+          bpp.log_liks_sgl[CC] = MaxLoglik;
+        }else{
+          bpp.log_liks_sgl[CC] = VB * ((double)num_mcmc/effective_sum) + log(effective_sum) + log(2*M_PI) + 1;
+        }
         if(verbose) cout << "P(X,r*|Z*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|acc): " << bpp.log_liks_resZ[CC] << " P(X|full): " << bpp.log_liks_sgl[CC] << endl << endl;
         //cout << "P(X,Z*,r*): " << MaxLoglik << " P(X): " << bpp.log_liks_sgl[CC] << endl;
 
@@ -337,11 +277,11 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     }
     else if(resZ==0)
     {
-        bpp.log_liks_null[CC] = VB;
+        bpp.log_liks_null[CC] = VB* ((double)num_mcmc/effective_sum) + log(effective_sum) + 0.5*(log(2*M_PI) + 1);
         if(::isnan(bpp.log_liks_null[CC])) failure = 1;
 
     }else{
-        bpp.log_liks_resZ[CC] = VB ;
+        bpp.log_liks_resZ[CC] = VB * ((double)num_mcmc/effective_sum) + log(effective_sum) + log(2*M_PI) + 1;
         if(::isnan(bpp.log_liks_resZ[CC])) failure = 1;
     }
     
@@ -364,7 +304,7 @@ void BPP_C::getEmission(int num_base)
         //sum over all g
         for(int g=0;g <GG;g++)
         {
-            if(Tg[g][s] >= num_base) continue;
+            if(Tg[g][s] == num_base) continue;
             
             if(Tg[g][s] ==-1){
                 emission += ambiguousS_null[g][s][Tg[g][p]];
@@ -395,7 +335,7 @@ double BPP_C::log_f_Xz(vec log_pi, int num_base, vector<int>& Z, vector<mat> & l
         for(vector<int>::iterator it = internal_nodes.begin(); it < internal_nodes.end(); it++)//int s=S; s<=root; s++)
         {
             int s = *it;
-            if(missing[s] || Tg[g][s]>=num_base) continue;
+            if(missing[s] || Tg[g][s]==num_base) continue;
             
             int* p = children2[s];
             lambda[g][s].fill(0);
@@ -404,7 +344,7 @@ double BPP_C::log_f_Xz(vec log_pi, int num_base, vector<int>& Z, vector<mat> & l
             {
                 int chi = p[cc];
                 assert(chi != -1);
-                if(missing[chi] || Tg[g][chi]>=num_base) continue;
+                if(missing[chi] || Tg[g][chi]==num_base) continue;
                 
                 if(Z[chi] ==2) lambda[g][s] +=  BPP::log_multi(log_cache_TM_neut[chi],lambda[g][chi]);
                 else if (Z[chi] ==0) lambda[g][s] +=  BPP::log_multi(log_cache_TM_null[chi],lambda[g][chi]);

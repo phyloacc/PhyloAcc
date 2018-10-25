@@ -57,8 +57,8 @@ double prep_lrate2 = 0.0;//0.1
 double prep_grate = 0.5; // initalization
 
 double prior_lrate2_a = 0,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
-double prior_lrate_a = 1 ,prior_lrate_b = 2 ; // beta prior for lrate, 2
-double prior_grate_a = 1,prior_grate_b = 1 ; // beta prior for grate
+double prior_lrate_a = 1 ,prior_lrate_b = 9 ; // beta prior for lrate, 2
+double prior_grate_a = 3,prior_grate_b = 1 ; // beta prior for grate
 
 
 double ratio0 = 0.5; //initial conserved rate
@@ -80,6 +80,9 @@ bool sample_hyper;
 char gapchar = '-';
 bool verbose = 0;
 double consToMis = 0.01;
+bool prune=0;
+double revgap=1;
+int min_length = 50;
 
 
 // load the program parameters
@@ -194,6 +197,12 @@ void LoadParams(int argc, char* argv[])
         // treat indel as additional character
         else if (tmp == "GAPCHAR")
             line_stream >> gapchar;
+        else if (tmp == "PRUNE_TREE")
+            line_stream >> prune;
+        else if (tmp == "TRIM_GAP_PERCENT")
+            line_stream >> revgap;
+        else if (tmp == "MIN_LEN")
+            line_stream >> min_length;
         else if (tmp == "INDEL") // not used
             line_stream >> indel;
         else if (tmp == "INDEL2") // not used
@@ -206,6 +215,8 @@ void LoadParams(int argc, char* argv[])
             line_stream >> verbose;
         else if(tmp == "NUM_THREAD")
             line_stream >> num_thread;
+        else if(tmp != "")
+            cout << "Unknown parameter: " << tmp <<endl;
 
 
 
@@ -392,7 +403,7 @@ int main(int argc, char* argv[])
           
             // null model
             try{
-            BPP_C bppc(c, profile, bpp, gapchar, missing_thres, filter, verbose, consToMis);  // for individual element
+            BPP_C bppc(c, profile, bpp, gapchar, missing_thres, filter, verbose, consToMis, prune, revgap, min_length);  // for individual element
             if(filter) {
               if(verbose) cerr << "filter: "<< c <<endl;
               continue;

@@ -679,14 +679,14 @@ void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // 
         for(vector<int>::iterator it = internal_nodes.begin(); it <internal_nodes.end(); it++)  // didn't use leaves
         {
             int s = *it;
-            if(visited[s] || missing[s] || Tg[g][s] == bpp.num_base)  continue; //
+            if(visited[s] || missing[s] || Tg[g][s] >= bpp.num_base)  continue; //
             int* p = children2[s];
             
             
             for(int cc=0;cc<2;cc++)
             {
                 int chi = p[cc];
-                if(missing[chi] || Tg[g][chi] == bpp.num_base ) continue; //
+                if(missing[chi] || Tg[g][chi] >= bpp.num_base ) continue; //
                 if(Z[chi] ==2) lambda[g][s] +=  BPP::log_multi(log_cache_TM_neut[chi],lambda[g][chi]);
                 else if (Z[chi] ==0) lambda[g][s] +=  BPP::log_multi(log_cache_TM_null[chi],lambda[g][chi]);
                 else lambda[g][s] +=  BPP::log_multi(log_cache_TM_cons[chi],lambda[g][chi]);
@@ -733,7 +733,7 @@ void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // 
         {
             int s = *it;
             int p = parent2[s];
-            if(missing[s] || Tg[g][s] == bpp.num_base) continue; //
+            if(missing[s] || Tg[g][s] >= bpp.num_base) continue; //
             
             if(Z[s] ==2) log_trans_p = log_cache_TM_neut[s].col(Tg[g][p]);  //trans_p *
             else if(Z[s] ==0) log_trans_p = log_cache_TM_null[s].col(Tg[g][p]);
@@ -936,7 +936,7 @@ double BPP_C::log_f_Xz(vector<bool> visited, vector<vector<vec>>& lambda_tmp, bo
             
             
             for(int g=0;g<GG;g++)
-                if(Tg[g][chi]!=bpp.num_base) lambda_tmp[g][s] += BPP::log_multi(transition,lambda_tmp[g][chi]);
+                if(Tg[g][chi]< bpp.num_base) lambda_tmp[g][s] += BPP::log_multi(transition,lambda_tmp[g][chi]);
             
             
         }

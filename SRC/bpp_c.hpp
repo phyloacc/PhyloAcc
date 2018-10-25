@@ -140,7 +140,7 @@ public:
     bool failure = false;
     bool verbose; 
     
-    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, double nconsToMis = 1)//, double _indel)
+    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, bool prune=0, double revgap=0, int min_length =50, double nconsToMis = 1)//, double _indel)
     {
         
         RNG = gsl_rng_alloc(gsl_rng_default);
@@ -154,12 +154,18 @@ public:
         N = bpp.N;
         CC = c;
         GG =bpp.element_size[c];
+        
+        if(GG < min_length)
+        {
+            filter = true;
+            return;
+        }
+        
         Tg = vector<vector<int> > (GG, vector<int>(N, -1));
         root = N-1;
         S = bpp.S;
         
         lambda = vector< vector<vec> >(GG, vector<vec>(N, zeros<vec>(bpp.num_base)));
-        ambiguousS_null = vector<vector<vec> > (GG, vector<vec>(S,zeros<vec>(bpp.num_base)));
         
         
         ratio0 = bpp.ratio0;  //no use
@@ -206,11 +212,11 @@ public:
             
             for(int g=0; g<GG; g++){
                 lambda[g][s].fill(LOG_ZERO);
-                if( y[g]== gapchar) //y[g]=='n' ||
-                {
-                    num_missing[s] ++;
-                    //Tg[g][s] = 4;  // for missing base pair
-                }
+//                if( y[g]== gapchar || y[g]=='n')
+//                {
+//                    num_missing[s] ++;
+//                    //Tg[g][s] = 4;  // for missing base pair
+//                }
                 switch (y[g])
                 {
                     case 'a':
@@ -240,22 +246,74 @@ public:
                     case 'w':
                         lambda[g][s][0] = 0;
                         lambda[g][s][3] = 0;   break;
-                    case '-':
-                        if(bpp.num_base <= 4){
-                            for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
-                        }
-                        else{
-                            lambda[g][s][4] = 0;
-                        }
-                        Tg[g][s] = 4; break;
+                    // case gapchar:
+                    //     if(bpp.num_base <= 4){
+                    //         for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
+                    //     }
+                    //     else{
+                    //         lambda[g][s][4] = 0;
+                    //     }
+                    //     Tg[g][s] = 4; break;
                     default:
                         for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
-                        Tg[g][s] = bpp.num_base;
+                        if(y[g] == gapchar) {Tg[g][s] = 4; break;}
+                        Tg[g][s] = 5; 
                 }
             }
             
         }
+        
+        
+        // remove columns with nearly all gaps
+        if(revgap < 1)
+        {
+            //remove bases with 'n'/'*' or gap in more than 80% species
+            vector<int> missingBase;
+            for(int g=0; g<GG; g++)
+            {
+                int mis = 0;
+                for(int s=0; s<S; s++){
+                    if(Tg[g][s] >= 4)
+                    {
+                        mis++;
+                    }
+                }
+                if(mis > S*revgap)
+                {
+                    missingBase.push_back(g);
+                }
+                
+            }
+            
+            if(GG - missingBase.size() < min_length)
+            {
+                filter = true;
+                return;
+            }
+            
+            for(vector<int>::reverse_iterator it = missingBase.rbegin(); it!= missingBase.rend(); it ++)
+            {
+                lambda.erase(lambda.begin() + *it);
+                Tg.erase(Tg.begin() + *it);
+            }
+            
+            GG = lambda.size();
+        }
+        
+        // get gap species after filtering
+        for(int s=0; s<S; s++)
+        {
+            for(int g= 0; g < GG; g++)
+            {
+                if( Tg[g][s] == 4)
+                {
+                    num_missing[s] ++;
+                }
+                
+            }
+        }
 
+        ambiguousS_null = vector<vector<vec> > (GG, vector<vec>(S,zeros<vec>(bpp.num_base)));
         
         
         children2    = new int[N][2];
@@ -318,12 +376,21 @@ public:
         
         
         //prune tree if outgroup not conserved, find root
-        getSubtree_missing(N-1, bpp.upper, -1);
+        if(prune)
+        {
+            set<int> alls;
+            for(int s=0; s<N; s++) alls.insert(s);
+            getSubtree_missing(N-1, alls, -1);
+        }else{
+            getSubtree_missing(N-1, bpp.upper, -1);
+        }
+        
+        
+        
         parent2[root] = N;  //parent2 not correct for all nodes, but children2 is correct
     
         if(verbose) cout << "root: " << root << endl;
         
-
         
         getSubtree(root, nodes);
         for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
@@ -351,7 +418,7 @@ public:
         {
             int* p = children2[*it];
             for(int g=0; g<GG; g++){
-                if(Tg[g][p[0]]== bpp.num_base && Tg[g][p[1]]==bpp.num_base)
+                if(Tg[g][p[0]] >= bpp.num_base && Tg[g][p[1]]>= bpp.num_base)
                 {
                     Tg[g][*it] = bpp.num_base;
                     
