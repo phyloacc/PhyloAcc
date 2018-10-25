@@ -17,7 +17,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *PRUNE_TREE*: Whether to prune "missing" branches besides outgroup. The "missing" branches are always pruned. (default: false, no prune).
   
 * **Alignment Gaps and Filtering**:  
-  * *GAPCHAR*: the character for alignment gaps. (default: -). Should be one char. (Not used)
+  * *GAPCHAR*: the character for alignment gaps. (default: -). Should be one char.
   * *GAP_PROP*: if the sequence alignment of a species contains gaps for more than *GAP_PROP* of the whole element, then we say that the element is "missing" in that species (default: 0.8).   
   * *TRIM_GAP_PERCENT*: Trim the loci with indels or unknown base pairs in more than *TRIM_GAP_PERCENT* of all species. (default: 1, no trim).
   * *CONSTOMIS*: the probability of "missing" under the conserved state. Should be small (default: 0.01). 
