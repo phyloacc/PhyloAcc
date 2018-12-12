@@ -43,28 +43,27 @@ It will need:
 
 1. *xxx_elem_lik.txt*: output by PhyloAcc containing log-likelihoods under different models for each element. 
 
-2. *xxx_rate_postZ_xxx*: output by PhyloAcc having the posterior medians of conserved and accelerated substitution rates and the posterior probability of Z on each branch for different models. In the following example, we will use the result from *xxx_rate_postZ_1.txt* and plot the conservation states under the full model.
+2. *xxx_rate_postZ_xxx*: output by PhyloAcc having the posterior medians of conserved and accelerated substitution rates and the posterior probability of Z on each branch for different models. In the following example, we will use the result from *xxx_rate_postZ_M2.txt* and plot the conservation states under the full model.
 
 ```{r results, echo=TRUE,cache=F}
 #### read in BF scores as well as marginal log likelihood under null, accelerated and full model #### 
-score <- read.table("../Simulation_ratite/result_phyloAcc/simu_500_200_npc_2-6_elem_lik.txt", header=T)
-## compute BF2
-score$BF2 <- -score$loglik_all + score$loglik_RES
+score <- read.table("../example_output/simu_500_200_npc_2-6_elem_lik.txt", header=T)
+
 ## order score by BF1
-score <- score[order(-score$log_ratio),]
+score <- score[order(-score$logBF1),]
 
 #### read in posteriors of substitution rates and latent conservation states ####
-postZ <- read.table("../Simulation_ratite/result_phyloAcc/simu_500_200_npc_2-6_rate_postZ_1.txt", header=T, check.names = F)  
+postZ <- read.table("../example_output/simu_500_200_npc_2-6_rate_postZ_M2.txt", header=T, check.names = F)  
 ```
 
-Select an ratite-accelerated element (e.g. logBF2 > 0 and large BF1) and plot: 
+Select an ratite-accelerated element (e.g. logBF2 > 1 and large BF1) and plot: 
 ```{r plotZPost, fig.height = 8}
-sel <- which(score$BF2 > 0)[1] # select the element with largest BF1 and BF2 > 0
+sel <- which(score$logBF2 > 1)[1] # select the element with largest BF1 and BF2 > 0
 lk = score[sel, ]
 k = score[sel, 1] # get the No. of the selected element
 targets = c("strCam","rhePen","rheAme","casCas","droNov","aptRow","aptHaa","aptOwe","anoDid") # target species
 Z = unlist(postZ[postZ$No. == k, -1]) # get the posteriors of conservation states
-tit = paste("logBF1:", round(lk$log_ratio), "logBF2:",round(lk$BF2), "  ") # use BF scores and posterior substitution rates as title
+tit = paste("logBF1:", round(lk$logBF1), "logBF2:",round(lk$logBF2), "  ") # use BF scores and posterior substitution rates as title
 plotZPost(Z, treeData, target_species=targets, tit=tit, offset=5,cex.score = 2) # offset= 6 indicates the posterior of Z start from 7th column
 ```
 
@@ -87,7 +86,7 @@ plotAlign(k, align, bed, treeData, target_species=targets)
 ### Expected number of independent accelerations and accelerated species per element
 Next, we compute the expected number of independent accelerations and accelerated species within target species. We will first select all the ratite-accelerated elements (in this simulation, all elements are ratite accelerated and expectedly, the algorithm selects almost all the simulated elements), and then compute and get the histogram of expected number of independent accelerations within clades of target species as well as accelerated target species for each element.
 ```{r loss}
-sel <- score$No.[which(score$log_ratio>10 & score$BF2 > 0)] # select the ratites accelerated elements
+sel <- score$No.[which(score$logBF1>10 & score$logBF2 > 1)] # select the ratites accelerated elements
 internal <- getInternals(treeData$tree, targets) # get common ancestors of target species that might be accelerated
 topZ = postZ[postZ$No. %in% sel, seq(10, ncol(postZ), by=4)] # get the posterior of Z==2 (being accelerated) for selected elements
 colnames(topZ) <- sapply(colnames(topZ), function(x) strsplit(x, "_")[[1]][1])

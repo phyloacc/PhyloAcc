@@ -448,13 +448,14 @@ static vec log_multi2(mat log_x, vec log_y)
 {
     log_x.each_col()+=log_y;
     
-    double log_xmax = log_x.max();
+   for(size_t i =0; i < log_x.n_cols; i++){
+        double log_xmax = log_x.col(i).max();
+        
+        log_x.col(i) -= log_xmax;
+        
+        log_y.row(i) = log(sum(exp(log_x.col(i)))) + log_xmax; 
     
-    log_x -= log_xmax;
-    
-    rowvec result = log(sum(exp(log_x))) + log_xmax;
-    log_y.rows(0,1) = result.t();
-    
+    } 
     return(log_y);
 }
     
