@@ -133,7 +133,7 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
     scale_fill_manual(values = cols,name="", drop=F) +ylab(NULL) + xlab(paste(ncol(element1), "bp"))+ 
     theme(panel.background = element_blank(),axis.ticks.y = element_blank(),axis.text.y = element_text(size=13,colour = cols_sp), 
           axis.ticks.x = element_blank(), axis.text.x =element_blank(),
-          axis.title.x = element_text(size = rel(2)),
+          axis.title.x = element_text(size = rel(2.5)),
           axis.title.y = element_text(size = rel(2)),
           legend.text=element_text(size=12),legend.position=legend,
           plot.background = element_rect(fill = "transparent"))
