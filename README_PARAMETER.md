@@ -14,7 +14,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *OUTGROUP*: outgroup species of the phylogeny. These species are not considered to be accelerated in our model. 
   * *CONSERVE*: species assumed to be mostly conserved. The algorithm will filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species. Input conserved species should exclude target species.
   * *CONSERVE_PROP*: filter out elements "missing" in more than *CONSERVE_PROP* of the conserved species (default: 0.8).
-  * *PRUNE_TREE*: Whether to prune "missing" branches besides outgroup. The "missing" branches are always pruned. (default: false, no prune).
+  * *PRUNE_TREE*: Whether to prune "missing" branches besides outgroup. The "missing" branches inside outgroup are always pruned. (default: false, no prune).
   
 * **Alignment Gaps and Filtering**:  
   * *GAPCHAR*: the character for alignment gaps. (default: -). Should be one char.
