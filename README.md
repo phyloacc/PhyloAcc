@@ -27,14 +27,14 @@ brew install homebrew/science/armadillo
 * To use the R functions to plot,  please install [Rstudio](https://www.rstudio.com/) with the current version of R (>=3.3.2) and install seqinr, ggplot2, reshape2, ape packages.  
 
 To install these softwares on Mac, you could follow the procedures below:
-1) make a new conda environment and activate the environment
+1) make a new conda environment called PhyloAcc for example, and activate the environment
 2) conda install gsl
 3) conda install atlas
 4) conda install lapack
 5) conda install armadillo
 6) edit your .bashrc in your home directory:
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/miniconda3/envs/PhyloAcc/lib/
-    export LD_RUN_PATH=$LD_RUN_PATH:/user/miniconda3/envs/PhyloAcc/lib/
+    export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/user/miniconda3/envs/PhyloAcc/lib/
+    export LD_RUN_PATH=\$LD_RUN_PATH:/user/miniconda3/envs/PhyloAcc/lib/
 7) source .bashrc
 8) edit the PhyloAcc Makefile for g++-9 if you are using GCC version 9
 9) edit the Makefile for the location of GSL lib and include (/user/miniconda3/envs/PhyloAcc)
