@@ -33,7 +33,8 @@ To install these softwares on Mac, you could follow the procedures below:
 4) conda install lapack
 5) conda install armadillo
 6) edit your .bashrc in your home directory:
-   ```export LD_LIBRARY_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
+   ```bash
+    export LD_LIBRARY_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
     export LD_RUN_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_RUN_PATH
     ```
     or other directory for the conda environment
@@ -41,6 +42,7 @@ To install these softwares on Mac, you could follow the procedures below:
 8) edit the PhyloAcc Makefile for g++-9 if you are using GCC version 9
 9) edit the Makefile for the location of GSL lib and include (e.g. /user/miniconda3/envs/PhyloAcc)
 10) edit the Makefile prefix for installation directory in conda env
+
 *(credited to Wei Gordon)*
 
 ## Build on Linux or Mac
