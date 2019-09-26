@@ -37,11 +37,11 @@ To install these softwares on Mac, you could follow the procedures below:
     export LD_LIBRARY_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
     export LD_RUN_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_RUN_PATH
     ```
-    or other directory for the conda environment
+    or other path for the conda environment
 7) source .bashrc
-8) edit the PhyloAcc Makefile for g++-9 if you are using GCC version 9
-9) edit the Makefile for the location of GSL lib and include (e.g. /user/miniconda3/envs/PhyloAcc)
-10) edit the Makefile prefix for installation directory in conda env
+8) change to g++-9 in the PhyloAcc Makefile if you are using GCC version 9
+9) edit the location of GSL lib and include in the Makefile: e.g. /user/miniconda3/envs/PhyloAcc
+10) edit *PREFIX* in the Makefile for the installation directory of the conda env
 
 *(credited to Wei Gordon)*
 
