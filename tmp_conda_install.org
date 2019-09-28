@@ -1,4 +1,8 @@
 ** For MAC
+
+- Install cmake
+  brew install cmake
+
 - create the env of phyloacc under conda
   - conda create -n phyloacc
   - source activate phyloacc
@@ -12,5 +16,5 @@
     - Warning: armadillo dependency gcc was built with a different C++ standard
       library (libstdc++ from clang). This may cause problems at runtime.      
     - conda install -c anaconda atlas  [not work on mac, might work for Linux]
-
-
+    - conda install -c conda-forge armadillo works for me.
+  - [MAC] conda install -c conda-forge openmp 
