@@ -1,6 +1,6 @@
 TARGET=PhyloAcc
 ifeq ($(shell uname),Darwin)
-	CXX=gcc-9
+	CXX=g++
 else
 	CXX=g++
 endif
@@ -33,9 +33,9 @@ PREFIX=/usr/local
 $(TARGET): $(SRCS) $(INCLUDES)
 	$(CXX) $(CFLAGS) -I${CONDA_ENV_INCLUDE} -L${CONDA_ENV_LIB} $(SRCS) -o $(TARGET) $(LDFLAGS)
 
-.PHONY: install
-install: $(TARGET)
-	cp $< $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+# .PHONY: install
+# install: $(TARGET)
+# 	cp $< $(DESTDIR)$(PREFIX)/bin/$(TARGET)
 
 .PHONY: uninstall
 uninstall:

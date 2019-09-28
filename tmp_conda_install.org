@@ -16,5 +16,6 @@
     - Warning: armadillo dependency gcc was built with a different C++ standard
       library (libstdc++ from clang). This may cause problems at runtime.      
     - conda install -c anaconda atlas  [not work on mac, might work for Linux]
-    - conda install -c conda-forge armadillo works for me.
+    - conda install -c conda-forge armadillo works for me, but seems not work.
+    - finally use brew install armadillo, it seems work.
   - [MAC] conda install -c conda-forge openmp 
