@@ -1,6 +1,6 @@
 TARGET=PhyloAcc
 ifeq ($(shell uname),Darwin)
-	CXX=g++-7
+	CXX=g++
 else
 	CXX=g++
 endif
