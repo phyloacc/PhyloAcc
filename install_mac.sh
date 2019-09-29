@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Install cmake, gcc, conda, and git.
+# Install gcc, conda, and git.
 # We suggest you use brew to install cmake and gcc
-brew install cmake
-brew install gcc
+# brew install gcc
+# brew install git
 
 # You can install install conda from their website.
 # We use conda as the basic vitural enviorment for the package.
