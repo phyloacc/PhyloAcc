@@ -25,19 +25,21 @@ conda create -n phyloacc
 source activate phyloacc
 
 # Install gsl, openmp
-# Note: in this way, we install gsl only for this env.
+# Note: in this way, we install them only for this env.
 conda install gsl
 conda install -c conda-forge openmp
 
 # get conda env path
+# Note: please check this value for yourself.
 export CONDA_ENV_PATH=$(conda info -e | grep "\*" | awk -F '[[:space:]]+' '{print $3}')
+# LD_LIBRARY_PARH is used for the program to find the library when it runs.
 export LD_LIBRARY_PATH=${CONDA_ENV_PATH}/lib/:$LD_LIBRARY_PATH
+# The two variables are used to tell make how to find the gsl, openmp when compiling the program.
+# Note we install armadillo with brew, we test conda install armadillo, but it seems has some problems
+# when compile. Help is needed.
 export CONDA_ENV_INCLUDE=${CONDA_ENV_PATH}/include/
 export CONDA_ENV_LIB=${CONDA_ENV_PATH}/lib/
 # export LD_RUN_PATH=${CONDA_ENV_PATH}/lib/:$LD_RUN_PATH
-
-# Check if the variable below has value by print it.
-echo ${CONDA_ENV_PATH}
 
 # Even in macOS, we use g++ to compile (not clnag).
 # In makefile, we use g++, so if you have no g++ in your local bin path,
