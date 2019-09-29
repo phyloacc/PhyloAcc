@@ -12,7 +12,6 @@ brew install gcc
 # Note: when install armadillo, the system might say warning,
 # which should be OK.
 brew install armadillo
-brew install openmp
 
 # Git clone the repo to your local path.
 # The command below will download the repo in your current path.
@@ -25,9 +24,10 @@ conda create -n phyloacc
 # enter that env
 source activate phyloacc
 
-# Install gsl
+# Install gsl, openmp
 # Note: in this way, we install gsl only for this env.
 conda install gsl
+conda install -c conda-forge openmp
 
 # get conda env path
 export CONDA_ENV_PATH=$(conda info -e | grep "\*" | awk -F '[[:space:]]+' '{print $3}')
