@@ -295,7 +295,7 @@ double BPP::log_lik(vector< vector<vec> > & lambda, double _indel, double _indel
                 x.diag().fill(0);
             }
             
-            #pragma omp parallel for schedule (guided)
+            //#pragma omp parallel for schedule (guided)
             for(int it = start1; it < end1; it++)  lambda[v[it]][s] +=  BPP::log_multi(x,lambda[v[it]][chi]);
         }
         
