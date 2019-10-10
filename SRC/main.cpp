@@ -13,7 +13,7 @@
 #include <string>
 #include <algorithm>
 #include <iomanip>
-//#include <omp.h>
+#include <omp.h>
 #include <string> 
 #include <armadillo>
 #include "profile.h"
@@ -395,7 +395,7 @@ int main(int argc, char* argv[])
        
         
         // Gibbs sampling
-        //#pragma omp parallel for schedule (guided) num_threads(num_thread)
+        #pragma omp parallel for schedule (guided) num_threads(num_thread)
         for(std::size_t i = 0; i < ids.size(); i++ ) 
         {
             int c = ids[i];
