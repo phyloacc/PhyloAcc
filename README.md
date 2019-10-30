@@ -94,6 +94,12 @@ There are several R scripts available in [R/](https://github.com/xyz111131/Phylo
 ## Data
 The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). The results for ratite and mammalian CNEEs in [mammal_result/](https://github.com/xyz111131/PhyloAcc/blob/master/mammal_result/) and [ratite_result/](https://github.com/xyz111131/PhyloAcc/blob/master/ratite_result/). 
 
+## Trouble Shooting
+After running phyloFit for background sequences to get the rate matrix and branch lengths, you might need to name all ancestral nodes in the tree. You could use tree_doctor in phast (http://compgen.cshl.edu/phast/help-pages/tree_doctor.txt): 
+``` bash
+tree_doctor --name-ancestors input.mod > output.mod
+```
+
 ## Reference
 Zhirui Hu, Timothy B Sackton, Scott V. Edwards, Jun S. Liu: **A hierarchical Bayesian model for detecting convergent rate changes of conserved noncoding elements on phylogenetic trees**, *bioRxiv*, 2018.
 https://www.biorxiv.org/content/early/2018/02/22/260745.1
