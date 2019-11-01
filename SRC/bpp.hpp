@@ -370,7 +370,7 @@ public:
     for(int i=0;i<N-1;i++)
     {
         
-        if(distances[i]>0 )
+        if(distances[i]> 1e-10 )
         {
             mat tmp_diag  = exp(eigenval*distances[i]);
             mat x = eigenvec;

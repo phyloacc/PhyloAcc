@@ -188,7 +188,7 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
     {
         
         int s = *it;
-        if(distances2[s]>0 )
+        if(distances2[s]> 1e-10 )
         {
             if(distances2[s] != bpp.distances[s])
             {
@@ -1148,6 +1148,8 @@ double BPP_C::sample_rate(int resZ, double old_rate, bool neut, vector<bool> vis
         {
             int s = *it;
             if(s==bpp.moveroot) continue; //not update rate for outgroup! s==42||, conserved rate still changing
+
+            if(distances2[s] < 1e-10) continue;
             
             tmp_diag  = exp(bpp.eigenval*distances2[s]*cur_r);
             mat x = bpp.eigenvec;
