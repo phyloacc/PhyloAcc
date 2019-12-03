@@ -10,7 +10,7 @@ library(ape)
 #        species_name is a file output by PhyloAcc containing the species name for each column in *postZ* files; 
 #        common_name is optional file with three columns: abbreviation of species name appeared in data files and output files; full species names; and species comman name shown on the plot 
 ## output: a list as input to plotZPost and plotAlign to generate plots
-prepare_data <- function(tree_path = "Data/neut_ver3_final.named.mod", species_name = "Data/species_names.txt", common_name = "Data/birdname2.txt")
+prepare_data <- function(tree_path = "Data/ratite/neut_ver3_final.named.mod", species_name = "Data/ratite/species_names.txt", common_name = "Data/ratite/birdname2.txt")
 {
  
     tree <- read.tree(tree_path) # 43 species
@@ -195,7 +195,7 @@ plotZPost_all <- function(treeData, topZ, targets)
   mytree$tip.label <- treeData$tip
   layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=c(4,1), heights=c(1,2))
   par(mar=c(0,0,0,0))
-  plot(mytree,type = "clad", edge.color = edge_col,tip.color = tip.color,edge.width  =3,label.offset = 0.01, no.margin =T, cex=1.1, font=4, bg=NA, family= "sans")
+  plot(mytree,edge.color = edge_col,tip.color = tip.color,edge.width  =3,label.offset = 0.01, no.margin =T, cex=1.5, font=4, bg=NA)#type = "clad", , family= "sans"
   color.bar(colorRampPalette(c('springgreen3','firebrick1'))(100), 0, max = max(topZ2),nticks = 0.1)
 }
 
