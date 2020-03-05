@@ -147,7 +147,7 @@ plotAlign <- function(k, align, bed, treeData, target_species =NULL, legend="top
 ## output: a list of nodes which are common ancestors of target species
 getInternals <- function(tree, targets)
 {
-  N = tree$Nnode *2 -1 #total number of nodes
+  N = tree$Nnode *2 + 1 #total number of nodes
   targets_ind <- which(tree$tip.label %in% targets)
   double_nodes <- targets_ind # nodes with both children in the targets 
   record <- rep(0, N) # record how many children of it within targets
