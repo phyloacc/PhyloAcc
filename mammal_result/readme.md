@@ -1,4 +1,9 @@
 The fold contains results for mammalian CNEEs.
+
+Example parameter file: paramM1-1-0.txt
+
+Mammalian phylogenetic tree: hg38.phyloP100way.mam-a.mod 
+
 Results for testing marine mammals specific accelerated CNEEs:
 1. **Marine_elem_lik.txt** is the marginal loglikelihood under null, accelerated and full models.
 2. **marine_top_5_5_post_Z.txt** is the posterior probabilities of Z and posterior median of substitution rates for marine-specific accelerated CNEEs (logBF1 > 5 & logBF2>5).
