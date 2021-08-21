@@ -84,6 +84,8 @@ bool prune=0;
 double revgap=1;
 int min_length = 50;
 
+bool run_null = 1, run_m1 = 1, run_full =1;
+
 
 // load the program parameters
 void LoadParams(int argc, char* argv[])
@@ -111,6 +113,14 @@ void LoadParams(int argc, char* argv[])
         in_params.getline(line_buff, BUFF_SIZE);
         istringstream line_stream(line_buff);
         string tmp; line_stream >> tmp;
+
+	// config
+        if (tmp=="RUN_NULL")
+            line_stream >> run_null;
+        if (tmp=="RUN_M1")
+            line_stream >> run_m1;
+        if (tmp=="RUN_FULL")
+            line_stream >> run_full;
         
         // input and output file paths
         if (tmp=="PHYTREE_FILE")
@@ -411,35 +421,34 @@ int main(int argc, char* argv[])
             
             if(!sample_hyper)
             {
-                bppc.initMCMC(iter,bpp,0);  //not constrain log_prob_back
-                bppc.Gibbs(iter,bpp,out_Z0,output_path,output_path2,0,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
-                //if(!bppc.failure)
-                //{
-                bppc.Eval2(bpp,0);
-                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 0);
-                bppc.Output_init(output_path,output_path2,bpp,out_Z0, 0); //sort rates!!, posterior median of nrate and crate; posterior mean of Z
-               // }
+                if(run_null)
+		{
+               	  bppc.initMCMC(iter,bpp,0);  //not constrain log_prob_back
+               	  bppc.Gibbs(iter,bpp,out_Z0,output_path,output_path2,0,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+               	  bppc.Eval2(bpp,0);
+               	  if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 0);
+               	  bppc.Output_init(output_path,output_path2,bpp,out_Z0, 0); //sort rates!!, posterior median of nrate and crate; posterior mean of Z
+                }
                 // res model, crate by null model
-                bppc.initMCMC(iter,bpp,2);  //not constrain log_prob_back
-                bppc.Gibbs(iter,bpp,out_Z2,output_path,output_path2,2,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
-                //if(!bppc.failure)
-                //{
-                bppc.Eval2(bpp,2);
-                if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 1);
-                bppc.Output_init(output_path,output_path2,bpp,out_Z2, 2); //sort rates!!
-                //}
+                if(run_m1)
+                {
+                  bppc.initMCMC(iter,bpp,2);  //not constrain log_prob_back
+                  bppc.Gibbs(iter,bpp,out_Z2,output_path,output_path2,2,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+                  bppc.Eval2(bpp,2);
+                  if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 1);
+                  bppc.Output_init(output_path,output_path2,bpp,out_Z2, 2); //sort rates!!
+                }
             }
             
             // full model, nrate, crate by res model
-            bppc.initMCMC(iter,bpp,1);  //not constrain log_prob_back
-            bppc.Gibbs(iter, bpp,out_Z1,output_path,output_path2,1, true, sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
-            //if(!bppc.failure)
-            //{
-            bppc.Eval2(bpp,1);
-            if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 2);
-            bppc.Output_init(output_path,output_path2,bpp,out_Z1, 1); //sort rates!!
-            //}
-
+            if(sample_hyper || run_full)
+	    {
+              bppc.initMCMC(iter,bpp,1);  //not constrain log_prob_back
+              bppc.Gibbs(iter, bpp,out_Z1,output_path,output_path2,1, true, sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+              bppc.Eval2(bpp,1);
+              if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, output_path2, bpp, 2);
+              bppc.Output_init(output_path,output_path2,bpp,out_Z1, 1); //sort rates!!
+            }
             }catch (exception& e){
               cout << c << " Standard exception: " << e.what() << endl;
             }
