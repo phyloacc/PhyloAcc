@@ -30,8 +30,8 @@ To install these softwares on Mac, you could follow the procedures below:
 1) make a new conda environment called "PhyloAcc" for example, and activate the environment
 2) conda install gsl
 3) conda install atlas
-4) conda install lapack
-5) conda install armadillo
+4) conda install -c conda-forge lapack
+5) conda install -c conda-forge armadillo
 6) edit your .bashrc in your home directory:
    ```bash
     export LD_LIBRARY_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
