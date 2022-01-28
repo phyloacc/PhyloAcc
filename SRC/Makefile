@@ -8,8 +8,9 @@ endif
 CFLAGS=-Wall -g -O2 -std=c++11
 LDFLAGS=-lgsl -lm -lgslcblas -larmadillo -fopenmp
 
-GSL_INCLUDE=/usr/local/include/
-GSL_LIB=/usr/local/lib/
+GSL_HOME=/usr/local/
+GSL_INCLUDE=${GSL_HOME}/include/
+GSL_LIB=${GSL_HOME}/lib/
 
 SRC_DIR=.
 SRCS=$(SRC_DIR)/*.cpp
