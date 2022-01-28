@@ -26,22 +26,27 @@ brew install homebrew/science/armadillo
 * [Open MP](http://www.openmp.org/): for parallel computing. 
 * To use the R functions to plot,  please install [Rstudio](https://www.rstudio.com/) with the current version of R (>=3.3.2) and install seqinr, ggplot2, reshape2, ape packages.  
 
-To install these softwares on Mac, you could follow the procedures below:
+Alternatively, you can use Conda to install these required packages:  
 1) make a new conda environment called "PhyloAcc" for example, and activate the environment
+```bash
+conda create -n PhyloAcc
+conda activate PhyloAcc
+```
 2) conda install gsl
-3) conda install atlas
-4) conda install -c conda-forge lapack
-5) conda install -c conda-forge armadillo
-6) edit your .bashrc in your home directory:
+3) conda install -c conda-forge lapack
+4) conda install -c conda-forge armadillo
+5) edit your .bashrc in your home directory:
    ```bash
-    export LD_LIBRARY_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
-    export LD_RUN_PATH=/user/miniconda3/envs/PhyloAcc/lib/:$LD_RUN_PATH
+    export LD_LIBRARY_PATH=/user/anaconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
     ```
     or other path of the conda environment
 7) source .bashrc
 8) change to g++-9 in the PhyloAcc Makefile if you are using GCC version 9
-9) edit the location of GSL lib and include in the Makefile: e.g. /user/miniconda3/envs/PhyloAcc
-10) edit *PREFIX* in the Makefile for the installation directory of the conda env
+9) edit the location of GSL lib and include in the Makefile: e.g. 
+```bash
+GSL_HOME=/user/anaconda3/envs/PhyloAcc/
+```
+11) edit *PREFIX* in the Makefile for the installation directory of the conda env
 
 *(credited to Wei Gordon)*
 
