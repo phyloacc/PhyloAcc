@@ -1,0 +1,3 @@
+src/PhyloAcc-interface/phyloacc_lib/__pycache__/
+*.pyc
+.snakemake
