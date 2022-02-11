@@ -130,10 +130,10 @@ def init():
         'phyloacc-opts' : [],
         # All other PhyloAcc options as a list
 
-        'phyloacc' : 'PhyloAcc',
+        'phyloacc' : 'PhyloAcc-ST',
         #'phyloacc-gbgc' : 'PhyloAcc/V2_GBGC/PhyloAcc_gBGC',
         #'phyloacc-gt' : 'PhyloAcc-GT2/SRC/PhyloAcc-GT_piQ',
-        'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
+        #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
         # Dependency paths
 
         'batch-size' : 50,

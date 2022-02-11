@@ -81,8 +81,8 @@ test:
 #   requires:
 #     - pip
   commands:
-    - phyloacc_interface.py --version
-    - phyloacc_interface.py --depcheck
+    - phyloacc.py --version
+    - phyloacc.py --depcheck
 
 about:
   home: https://xyz111131.github.io/PhyloAcc/
