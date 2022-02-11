@@ -20,4 +20,6 @@ TODO:
 - Remake the original PhyloAcc web page so that the link in the paper is still active. This page can just point to the new repo or page
 - Make release for these changes and update conda recipe (meta.yaml) to point to it
 - Fork bioconda and upload recipe
-- Add a simple way to test the PhyloAcc-ST binary, maybe --version option
+- Add a simple way to test the PhyloAcc-ST binary, maybe --version option and/or a very small test dataset
+- Remove .py extension from interface
+- Resolve or transfer interface issues
