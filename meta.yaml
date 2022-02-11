@@ -32,7 +32,8 @@ source:
 
   git_url: https://github.com/gwct/PhyloAcc.git
   #git_url: https://github.com/harvardinformatics/PhyloAcc-interface.git
-  git_tag: conda-dev
+  git-tag: master
+  #git_tag: conda-dev
   # Remote source build
 
 build:

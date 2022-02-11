@@ -34,7 +34,7 @@ CFLAGS=-Wall -g -O2 -std=c++11
 LDFLAGS=-lgsl -lm -lgslcblas -larmadillo -fopenmp
 # Options for the g++ commands
 
-SRC_DIR=src/$(TARGET)/SRC
+SRC_DIR=src/$(TARGET)/
 SRCS=$(SRC_DIR)/*.cpp
 INCLUDES=$(SRC_DIR)/*.h $(SRC_DIR)/*.hpp
 # Locations of files to compile
