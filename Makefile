@@ -7,7 +7,7 @@ ifeq ($(OS),Windows_NT)
 	GSL_LIB=${LIBRARY_LIB}
 # GSL paths with the conda environment prefix
 else
-	CXX=g++-7
+	CXX=g++
 	GSL_INCLUDE=${PREFIX}/include/
 	GSL_LIB=${PREFIX}/lib/
 # GSL paths with the conda environment prefix
