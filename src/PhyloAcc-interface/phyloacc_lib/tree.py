@@ -284,6 +284,41 @@ def getClade(c_node, c_treedict):
 
 #############################################################################
 
+def categorizeBranches(globs, tree_dict):
+# For plotting, categorizes all branches by input state (rather than just tips)
+    targets = [ tip for tip in globs['targets'] ];
+    conserved = [ tip for tip in globs['conserved'] ];
+    outgroups = [ tip for tip in globs['outgroup'] ];
+    # Get the lists of tips in each category here
+    # Internal nodes will be added to these lists, so we don't want to do that in globs
+
+    num_internals = len( [ n for n in tree_dict if tree_dict[n][2] != 'tip' ] );
+    # Get the number of internal branches for a post-order traversal
+
+    for i in range(1,num_internals+1):
+    # Go over every internal node in the tree
+
+        n = "<" + str(i) + ">";
+        # Parse the current node as a string label
+
+        d1, d2 = getDesc(n, tree_dict);
+        # Get the descendants of the current node
+
+        if d1 in outgroups or d2 in outgroups:
+            outgroups.append(n);
+        # If either of the descendants is an outgroup, this branch is also an outgroup
+        elif d1 in targets and d2 in targets:
+            targets.append(n);
+        # If both of the descendants are targets, this branch is also a target
+        else:
+            conserved.append(n);
+        # Otherwise, this is a conserved branch
+    ## End internal node loop
+
+    return targets, conserved, outgroups;
+
+#############################################################################
+
 def sampleQuartets(globs, root_desc):
 
     num_quartets = 100;

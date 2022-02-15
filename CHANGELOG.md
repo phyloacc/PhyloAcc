@@ -8,8 +8,12 @@ Version 1.1.0, 02.11.2022
 - Changed licsene from MIT to GPL3
 - Moved V2_GBGC to the src/PhyloAcc-ST/ folder
 
-
-
+02.15.2022, interface
+- Fixed coloring of branches to include internal branches in the summary page
+- Added group input specification by internal nodes
+- Added option to only re-run the summary and plot generation and ignore/don't write or overwrite the job files
+- Fixed issue where log info wasn't actually written to the log
+- Added an option to append to a previous log rather than overwrite
 
 
 TODO:
@@ -21,5 +25,5 @@ TODO:
 - Make release for these changes and update conda recipe (meta.yaml) to point to it
 - Fork bioconda and upload recipe
 - Add a simple way to test the PhyloAcc-ST binary, maybe --version option and/or a very small test dataset
-- Remove .py extension from interface
+- Remove .py extension from interface (difficult for Windows)
 - Resolve or transfer interface issues

@@ -74,9 +74,11 @@ def optParse(globs):
     parser.add_argument("--theta", dest="theta", help="Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for estimation of the theta prior. Note that a species tree with branch lengths in units of substitutions per site is still required with -m. Also note that this may add substantial runtime to the pipeline.", action="store_true", default=False);
     parser.add_argument("--labeltree", dest="labeltree", help="Simply reads the tree from the input mod file (-m), labels the internal nodes, and exits.", action="store_true", default=False);
     parser.add_argument("--overwrite", dest="ow_flag", help="Set this to overwrite existing files.", action="store_true", default=False);
+    parser.add_argument("--appendlog", dest="append_log_flag", help="Set this to keep the old log file even if --overwrite is specified. New log information will instead be appended to the previous log file.", action="store_true", default=False);
     # User options
     
     parser.add_argument("--plot", dest="plot_flag", help="Plot some summary statistics from the input data.", action="store_true", default=False);
+    parser.add_argument("--plotonly", dest="plot_only_flag", help="Only generate the input summary plots and page. Do not write batch job files. Implies --plot.", action="store_true", default=False);
     parser.add_argument("--options", dest="options_flag", help="Print the full list of PhyloAcc options that can be specified with -phyloacc and exit.", action="store_true", default=False);
     parser.add_argument("--info", dest="info_flag", help="Print some meta information about the program and exit. No other options required.", action="store_true", default=False);
     parser.add_argument("--depcheck", dest="depcheck", help="Run this to check that all dependencies are installed at the provided path. No other options necessary.", action="store_true", default=False);
@@ -225,28 +227,67 @@ def optParse(globs):
 
     ## Coalescent tree options
     ####################
+   
+    groups = { 'targets' : [], 'outgroup' : [], 'conserved' : [] };
+    # Initial lists of groups since some labels may be internal
 
     if not args.targets:
-        PC.errorOut("OP6", "Target (-t) species must be specified.", globs);       
-    globs['targets'] = args.targets.replace("; ", ";").split(";");
+        PC.errorOut("OP6", "Target (-t) species must be specified.", globs);
+    # Check that targets are specified. This is the only required group at this point.
+
+    groups['targets'] = args.targets.replace("; ", ";").split(";");
     if args.outgroup:
-        globs['outgroup'] = args.outgroup.replace("; ", ";").split(";");
+        groups['outgroup'] = args.outgroup.replace("; ", ";").split(";");
     # Read the target and outgroup groups (if provided)
 
     if args.conserved:
-        globs['conserved'] = args.conserved.replace("; ", ";").split(";");
+        groups['conserved'] = args.conserved.replace("; ", ";").split(";");
     else:
+        groups['conserved'] = [];
+    # Read the conserved group if provided, and if not infer it from the other groups
+
+    for group in ['targets', 'outgroup', 'conserved']:
+    # Check every group 
+
+        for label in groups[group]:
+        # Check every label in the current group for presence in tree and whether it is an internal label
+
+            label_found = False;
+            # A flag that lets us know if the label was found in the tree
+
+            for n in globs['tree-dict']:
+            # For every node read in the tree
+                if globs['tree-dict'][n][2] == 'tip':
+                    if label == n:
+                        label_found = True;
+                        globs[group].append(label)
+                        break;
+                # Check if the current label is a tip in the tree and if so add it to the global group and break
+
+                else:
+                    if label in [n, globs['tree-dict'][n][3]]:
+                        label_found = True;
+                        cur_clade = TREE.getClade(n, globs['tree-dict']);
+                        globs[group] += cur_clade;
+                        break;
+                # Check if the current label is an internal label (either from the tree input or from treeparse/--labeltree) and
+                # if so get all the tips descending from it to add to the global group and break
+            ## End node loop
+        
+            if not label_found:
+                PC.errorOut("OP7", "The following label was provided in a group but is not present in the tree: " + label, globs);
+            # If the current label wasn't found in the tree, exit here with an error
+
+        ## End label loop
+    ## End group loop
+    # A preliminary check here to make sure all provided labels are actually in the input tree
+
+    if not groups['conserved']:
         globs['conserved'] = [ node for node in globs['tree-dict'] 
                                 if globs['tree-dict'][node][2] =='tip' 
                                 and node not in globs['targets'] 
                                 and node not in globs['outgroup'] ];
-    # Read the conserved group if provided, and if not infer it from the other groups
-
-    for group in ['targets', 'outgroup', 'conserved']:
-        for species in globs[group]:
-            if species not in globs['tree-dict']:
-                PC.errorOut("OP7", "The following species label was provided in a group but is not present in the tree: " + species, globs);
-    # A preliminary check here to make sure all provided labels are actually in the input tree
+    # If the conserved group isn't specified, add all remaining tip species not in the other groups to it here
 
     ## Species grouping options
     ####################
@@ -325,7 +366,17 @@ def optParse(globs):
 
     if not os.path.isdir(globs['outdir']) and not globs['norun']:
         os.makedirs(globs['outdir']);
+    
     # Main output dir
+    ####################
+
+    if args.plot_only_flag:
+        args.plot_flag = True;
+        globs['batch'] = False;
+    # Set the plot_flag to True if the plot_only_flag is True
+
+    ## Batch option -- after checking input files check to see if the user wants to write the batch files or just get the summary
+    ####################   
 
     if args.plot_flag:
         globs['plot-dir'] = os.path.join(globs['outdir'], "plots");
@@ -339,35 +390,40 @@ def optParse(globs):
         #     os.makedirs(globs['html-dir']);
         globs['html-file'] = os.path.join(globs['outdir'], "phyloacc-pre-run-summary.html");
         # HTML directory
+    
     # Parse the --plot option
+    ####################  
 
-    globs['job-dir'] = os.path.join(globs['outdir'], "phyloacc-job-files");
-    if not os.path.isdir(globs['job-dir']) and not globs['norun']:
-        os.makedirs(globs['job-dir']);
-    # Main job file dir
+    if globs['batch']:
+        globs['job-dir'] = os.path.join(globs['outdir'], "phyloacc-job-files");
+        if not os.path.isdir(globs['job-dir']) and not globs['norun']:
+            os.makedirs(globs['job-dir']);
+        # Main job file dir
 
-    if not globs['norun']:
-        for subdir in job_sub_dirs:
-            globs[subdir] = os.path.join(globs['job-dir'], job_sub_dirs[subdir]);
-            if not os.path.isdir(globs[subdir]):
-                os.makedirs(globs[subdir]);
-    # Job output subdirs
+        if not globs['norun']:
+            for subdir in job_sub_dirs:
+                globs[subdir] = os.path.join(globs['job-dir'], job_sub_dirs[subdir]);
+                if not os.path.isdir(globs[subdir]):
+                    os.makedirs(globs[subdir]);
+        # Job output subdirs
 
     if globs['coal-tree-file']:
         globs['coal-tree-file'] = os.path.abspath(globs['coal-tree-file']);
 
     globs['run-name'] = os.path.basename(os.path.normpath(globs['outdir']));
     globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");
-    logfile = open(globs['logfilename'], "w");
-    logfile.write("");
-    logfile.close();
     # Log file
+
+    if not args.append_log_flag:
+        logfile = open(globs['logfilename'], "w");
+        logfile.write("");
+        logfile.close();
+    # Prep the logfile to be overwritten
 
     ## Output files and directories
     ####################
 
     if args.batch_size:
-        print(args.batch_size);
         if not PC.isPosInt(args.batch_size):
             PC.errorOut("OP10", "The number of loci per batch (-batch) must be a positive integer.", globs);
         else:
@@ -476,7 +532,8 @@ def startProg(globs):
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", pad) + globs['tree-string']);
 
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Output directory:", pad) + globs['outdir']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc run directory:", pad) + globs['job-dir']);
+    if globs['batch']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc run directory:", pad) + globs['job-dir']);
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Log file:", pad) + os.path.basename(globs['logfilename']));
     # Input/Output
     #######################
@@ -598,6 +655,20 @@ def startProg(globs):
                 PC.spacedOut(plot_status, opt_pad) + 
                 plot_status_str);
     # --plot option
+
+    ####################
+
+    if globs['batch']:
+        batch_status = "False";
+        batch_status_str = "PhyloAcc batch files will be generated and written to the job directory specified above.";
+    else:
+        batch_status = "True";
+        batch_status_str = "No PhyloAcc batch files will be generated and those existing will not be overwritten.";
+
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --plotonly", pad) + 
+                PC.spacedOut(batch_status, opt_pad) + 
+                batch_status_str);
+    # --plotonly option
 
     ####################
 

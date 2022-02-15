@@ -1,3 +1,9 @@
 src/PhyloAcc-interface/phyloacc_lib/__pycache__/
 *.pyc
 .snakemake
+*.code-workspace
+src/PhyloAcc-interface/test/
+src/PhyloAcc-interface/id-test/
+src/PhyloAcc-interface/phyloacc_lib/templates_old.py
+src/PhyloAcc-interface/test.tre
+src/PhyloAcc-interface/*.errlog

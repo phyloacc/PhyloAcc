@@ -9,7 +9,7 @@ import shutil
 import re
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
-import phyloacc_lib.templates_2 as TEMPLATES
+import phyloacc_lib.templates as TEMPLATES
 import phyloacc_lib.templates_post as TEMPLATES_POST
 import numpy as np
 import matplotlib as mpl
@@ -61,27 +61,36 @@ def genPlots(globs):
     num_spec = len(globs['tree-tips']);
     # The number of species in the input free, to adjust height of figure
 
-    tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['tree-dict'], no_label=True);
-    #print(tree_str);
-    # Re-add branch lengths and remove labels to the input tree for plotting
+    targets, conserved, outgroups = TREE.categorizeBranches(globs, globs['tree-dict']);
+    # Get full lists of branches for each category
+
+    tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['tree-dict'], no_label=True, keep_tp_label=True);
+    # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
 
     handle = StringIO(tree_str);
     tree = Phylo.read(handle, "newick");
     # Parse the tree string with Bio
     
-    for clade in tree.get_terminals():
-        if clade.name in globs['targets']:
+    target_lg, conserve_lg, outgroup_lg = False, False, False;
+    #for clade in tree.get_terminals():
+    for clade in tree.find_clades():
+        
+        if clade.name in targets:
             clade.color = branch_cols[0];
             target_lg = lines([0], [0], label="Targets", color = branch_cols[0]);
-        elif clade.name in globs['conserved']:
+        elif clade.name in conserved:
             clade.color = branch_cols[1];
             conserve_lg = lines([0], [0], label="Conserved", color = branch_cols[1]);
-        elif clade.name in globs['outgroup']:
+        elif clade.name in outgroups:
             clade.color = branch_cols[2];
             outgroup_lg = lines([0], [0], label="Outgroup", color = branch_cols[2]);
+
+        if clade.name not in globs['tree-tips']:
+            clade.name = None;
+        # For internal nodes, remove the tree parse name so it doesn't show up on the plot
     # Color the tip branches based on their input category and specify their legend entries
 
-    fig = plt.figure(figsize=(num_spec/2.54, 25.4/2.54));
+    fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
     # Specify the plot size depending on the number of species
 
     axes = fig.add_subplot(1, 1, 1);
@@ -92,7 +101,8 @@ def genPlots(globs):
     Phylo.draw(tree, axes=axes, show_confidence=False, do_show=False);
     # Draw the tree
 
-    plt.legend(loc='upper left', handles=[target_lg, conserve_lg, outgroup_lg]);
+    legend_handles = [ lg for lg in [target_lg, conserve_lg, outgroup_lg] if lg ];
+    plt.legend(loc='upper left', handles=legend_handles);
     # Add the legend
 
     plt.savefig(st_file, dpi=100, bbox_inches='tight');
@@ -333,6 +343,14 @@ def writeHTML(globs):
         coal_tree_comment_start = "<!-- This block is only displayed when -l is specified";
         coal_tree_comment_end = "-->";            
 
+
+    if globs['batch']:
+        batch_comment_start = "<!-- This block is only displayed with the --plotonly option";
+        batch_comment_end = "-->";
+    else:
+        batch_comment_start = "";
+        batch_comment_end = "";
+
     with open(globs['html-file'], "w") as htmlfile:
         htmlfile.write(TEMPLATES.htmlSummary().format(
             # mod_file=os.path.abspath(globs['mod-file']),
@@ -356,6 +374,8 @@ def writeHTML(globs):
             num_outgroups=str(len(globs['outgroup'])),
             log_file=globs['logfilename'],
             aln_stats_file=globs['alnstatsfile'],
+            batch_comment_start=batch_comment_start,
+            batch_comment_end=batch_comment_end,
             snakemake_cmd=globs['smk-cmd'],
             theta_comment_start=theta_comment_start,
             theta_comment_end=theta_comment_end,

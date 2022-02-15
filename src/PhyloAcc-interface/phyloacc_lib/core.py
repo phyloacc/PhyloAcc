@@ -401,7 +401,7 @@ def report_step(globs, step, step_start_time, step_status, start=False, full_upd
             # For full updates, print the full line to the screen
             # For others, delete the "In progress..." column and update the same status line
             
-            printWrite(globs['logfilename'], 3, "".join(file_line));
+            printWrite(globs['logfilename'], 0, "".join(file_line));
             # Write the full line to the file.
         # The final status entry
         #####
@@ -463,11 +463,16 @@ def endProg(globs, interface=True):
         printWrite(globs['logfilename'], globs['log-v'], "# ERROR: PHYLOACC FINISHED WITH ERRORS.");
         printWrite(globs['logfilename'], globs['log-v'], "# ERROR: PLEASE CHECK THE LOG FILE FOR MORE INFO: " + globs['logfilename'] + "\n#");
     elif interface:
-        printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc job files successfully generated");
-        printWrite(globs['logfilename'], 1, "# Run the following command from the Phyloacc-interface directory:\n\n");
-        printWrite(globs['logfilename'], 1, globs['smk-cmd'] + "\n\n");
-        printWrite(globs['logfilename'], 1, "# Then, if everything looks right, remove --dryrun to execute");
-        printWrite(globs['logfilename'], 1, "# You may also want to start your favorite terminal multiplexer (e.g. screen, tmux)");
+        if globs['batch']:
+            printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc job files successfully generated");
+            printWrite(globs['logfilename'], 1, "# Run the following command from the Phyloacc-interface directory:\n\n");
+            printWrite(globs['logfilename'], 1, globs['smk-cmd'] + "\n\n");
+            printWrite(globs['logfilename'], 1, "# Then, if everything looks right, remove --dryrun to execute");
+            printWrite(globs['logfilename'], 1, "# You may also want to start your favorite terminal multiplexer (e.g. screen, tmux)");
+        else:
+            printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc summary files successfully generated");
+            printWrite(globs['logfilename'], 1, "# This was a --plotonly run, so no job files were created or overwritten");
+            printWrite(globs['logfilename'], 1, "# Re-run without the --plotonly option to generate/overwrite job files");          
     # Report error or success with snakemake command
 
     ####################

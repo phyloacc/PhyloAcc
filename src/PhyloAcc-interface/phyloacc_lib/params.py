@@ -134,7 +134,11 @@ def init():
         #'phyloacc-gbgc' : 'PhyloAcc/V2_GBGC/PhyloAcc_gBGC',
         #'phyloacc-gt' : 'PhyloAcc-GT2/SRC/PhyloAcc-GT_piQ',
         #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
+        'phyloacc-gt' : 'PhyloAcc-GT',
         # Dependency paths
+
+        'batch' : True,
+        # Whether or not to write the batch files
 
         'batch-size' : 50,
         'num-batches' : 0,
