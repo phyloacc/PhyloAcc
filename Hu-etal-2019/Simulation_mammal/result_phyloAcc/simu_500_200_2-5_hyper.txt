@@ -1,0 +1,1 @@
+iter	nprior_a	nprior_b	cprior_a	cprior_b	indel	indel2	grate	lrate
