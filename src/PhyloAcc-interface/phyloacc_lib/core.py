@@ -471,8 +471,8 @@ def endProg(globs, interface=True):
             printWrite(globs['logfilename'], 1, "# You may also want to start your favorite terminal multiplexer (e.g. screen, tmux)");
         else:
             printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc summary files successfully generated");
-            printWrite(globs['logfilename'], 1, "# This was a --plotonly run, so no job files were created or overwritten");
-            printWrite(globs['logfilename'], 1, "# Re-run without the --plotonly option to generate/overwrite job files");          
+            printWrite(globs['logfilename'], 1, "# This was a --summarize run, so no job files were created or overwritten");
+            printWrite(globs['logfilename'], 1, "# Re-run without the --summarize option to generate/overwrite job files");          
     # Report error or success with snakemake command
 
     ####################

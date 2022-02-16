@@ -77,8 +77,8 @@ def optParse(globs):
     parser.add_argument("--appendlog", dest="append_log_flag", help="Set this to keep the old log file even if --overwrite is specified. New log information will instead be appended to the previous log file.", action="store_true", default=False);
     # User options
     
-    parser.add_argument("--plot", dest="plot_flag", help="Plot some summary statistics from the input data.", action="store_true", default=False);
-    parser.add_argument("--plotonly", dest="plot_only_flag", help="Only generate the input summary plots and page. Do not write batch job files. Implies --plot.", action="store_true", default=False);
+    #parser.add_argument("--plot", dest="plot_flag", help="Plot some summary statistics from the input data.", action="store_true", default=False);
+    parser.add_argument("--summarize", dest="summarize_flag", help="Only generate the input summary plots and page. Do not write or overwrite batch job files.", action="store_true", default=False);
     parser.add_argument("--options", dest="options_flag", help="Print the full list of PhyloAcc options that can be specified with -phyloacc and exit.", action="store_true", default=False);
     parser.add_argument("--info", dest="info_flag", help="Print some meta information about the program and exit. No other options required.", action="store_true", default=False);
     parser.add_argument("--depcheck", dest="depcheck", help="Run this to check that all dependencies are installed at the provided path. No other options necessary.", action="store_true", default=False);
@@ -148,7 +148,7 @@ def optParse(globs):
     ####################
 
     if not args.mod_file:
-        PC.errorOut("OP4", "A mod file must be provided with -m", globs);
+        PC.errorOut("OP3", "A mod file must be provided with -m", globs);
     globs['mod-file'] = args.mod_file;
     # Check the mod file
 
@@ -165,7 +165,7 @@ def optParse(globs):
         globs['tree-dict'], globs['labeled-tree'], globs['root-node'] = TREE.treeParse(globs['tree-string']);
         globs['tree-tips'] = [ n for n in globs['tree-dict'] if globs['tree-dict'][n][2] == "tip" ];
     except:
-        PC.errorOut("OP5", "Error reading tree from mod file!", globs);
+        PC.errorOut("OP4", "Error reading tree from mod file!", globs);
     # Read the tree as a dictionary for sCF calculations
 
     if args.labeltree:
@@ -179,9 +179,9 @@ def optParse(globs):
 
     if args.run_mode:
         if args.run_mode not in ["st", "gt", "adaptive"]:
-            PC.errorOut("OP8", "Run mode (-r) must be one of: 'st', 'gt', or 'adaptive'.", globs);
+            PC.errorOut("OP5", "Run mode (-r) must be one of: 'st', 'gt', or 'adaptive'.", globs);
         if args.run_mode in ["gt", "adaptive"] and not (args.theta or args.coal_tree):
-            PC.errorOut("OP8", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
+            PC.errorOut("OP6", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
         globs['run-mode'] = args.run_mode;
 
     if globs['run-mode'] == "st" and (args.theta or args.coal_tree):
@@ -199,7 +199,7 @@ def optParse(globs):
 
     if globs['run-mode'] != 'st':
         if args.theta and args.coal_tree:
-            PC.errorOut("OP8", "Only one of -l or --theta should be specified.", globs);
+            PC.errorOut("OP7", "Only one of -l or --theta should be specified.", globs);
         # Make sure both coalescent tree options aren't specified
 
         if args.theta:
@@ -219,7 +219,7 @@ def optParse(globs):
                 coal_tree_dict, coal_tree, coal_root = TREE.treeParse(globs['coal-tree-str']);
                 globs['tree-tips'] = [ n for n in globs['tree-dict'] if globs['tree-dict'][n][2] == "tip" ];
             except:
-                PC.errorOut("OP5", "Error reading coalescent tree from mod file!", globs);
+                PC.errorOut("OP9", "Error reading coalescent tree from mod file!", globs);
             # Read the coalescent tree as a dictionary
         # If -l is provided, check the tree file and read the tree here
 
@@ -232,7 +232,7 @@ def optParse(globs):
     # Initial lists of groups since some labels may be internal
 
     if not args.targets:
-        PC.errorOut("OP6", "Target (-t) species must be specified.", globs);
+        PC.errorOut("OP10", "Target (-t) species must be specified.", globs);
     # Check that targets are specified. This is the only required group at this point.
 
     groups['targets'] = args.targets.replace("; ", ";").split(";");
@@ -275,7 +275,7 @@ def optParse(globs):
             ## End node loop
         
             if not label_found:
-                PC.errorOut("OP7", "The following label was provided in a group but is not present in the tree: " + label, globs);
+                PC.errorOut("OP11", "The following label was provided in a group but is not present in the tree: " + label, globs);
             # If the current label wasn't found in the tree, exit here with an error
 
         ## End label loop
@@ -289,6 +289,21 @@ def optParse(globs):
                                 and node not in globs['outgroup'] ];
     # If the conserved group isn't specified, add all remaining tip species not in the other groups to it here
 
+    for tip in globs['tree-tips']:
+        num_in_groups = 0;
+        for group in groups:
+            for label in globs[group]:
+                if tip == label:
+                    num_in_groups += 1;
+        
+        if num_in_groups != 1:
+            print("parsed species groups:")
+            print("targets: ", globs['targets']);
+            print("outgroup: ", globs['outgroup']);
+            print("conserved: ", globs['conserved']);
+            PC.errorOut("OP12", "The following tip label does not appear once in only one group: " + tip + " (" + str(num_in_groups) + "). If you provided internal node labels make sure there aren't duplicate labels within that clade provided elsewhere.", globs);
+    # Go through every tip label and make sure it appears once and only once in the specified groups
+
     ## Species grouping options
     ####################
 
@@ -296,7 +311,7 @@ def optParse(globs):
     for opt in opt_keys:
         if opt_keys[opt]:
             if not PC.isPosInt(opt_keys[opt]):
-                PC.errorOut("OP8", "-b, -m, and -n must all be positive integers.", globs);
+                PC.errorOut("OP13", "-b, -m, and -n must all be positive integers.", globs);
             globs[opt] = opt_keys[opt];
     # Get the MCMC options
 
@@ -322,7 +337,7 @@ def optParse(globs):
             # PhyloAcc options are all upper case
 
             if opt not in globs['phyloacc-defaults']:
-                PC.errorOut("OP9", "One of the provided PhyloAcc options (-phyloacc) is invalid: " + opt, globs);
+                PC.errorOut("OP14", "One of the provided PhyloAcc options (-phyloacc) is invalid: " + opt, globs);
             # Check if the given option is even one of the possible ones and error out if not
 
             option_pass = True;
@@ -346,7 +361,7 @@ def optParse(globs):
             # Check each value against its possible values for its given type
 
             if not option_pass:
-                PC.errorOut("OP9", "The value of the provided PhyloAcc option " + opt + " is invalid for its type (" + globs['phyloacc-defaults'][opt]['type'] + "): " + val, globs);  
+                PC.errorOut("OP15", "The value of the provided PhyloAcc option " + opt + " is invalid for its type (" + globs['phyloacc-defaults'][opt]['type'] + "): " + val, globs);  
             # If the value is not valid, error out
 
             globs['phyloacc-opts'].append(opt + " " + val);
@@ -362,7 +377,7 @@ def optParse(globs):
         globs['outdir'] = args.out_dest;
 
     if not globs['overwrite'] and os.path.exists(globs['outdir']):
-        PC.errorOut("OP9", "Output directory already exists: " + globs['outdir'] + ". Specify new directory name OR set --overwrite to overwrite all files in that directory.", globs);
+        PC.errorOut("OP16", "Output directory already exists: " + globs['outdir'] + ". Specify new directory name OR set --overwrite to overwrite all files in that directory.", globs);
 
     if not os.path.isdir(globs['outdir']) and not globs['norun']:
         os.makedirs(globs['outdir']);
@@ -370,19 +385,17 @@ def optParse(globs):
     # Main output dir
     ####################
 
-    if args.plot_only_flag:
-        args.plot_flag = True;
+    if args.summarize_flag:
         globs['batch'] = False;
     # Set the plot_flag to True if the plot_only_flag is True
 
     ## Batch option -- after checking input files check to see if the user wants to write the batch files or just get the summary
     ####################   
 
-    if args.plot_flag:
+    if globs['plot']:
         globs['plot-dir'] = os.path.join(globs['outdir'], "plots");
         if not os.path.isdir(globs['plot-dir']) and not globs['norun']:
             os.makedirs(globs['plot-dir']);
-        globs['plot'] = True;
         # Plot option
 
         globs['html-dir'] = os.path.join(globs['outdir'], "html");
@@ -391,7 +404,7 @@ def optParse(globs):
         globs['html-file'] = os.path.join(globs['outdir'], "phyloacc-pre-run-summary.html");
         # HTML directory
     
-    # Parse the --plot option
+    # Parse the plot input and output locations
     ####################  
 
     if globs['batch']:
@@ -425,7 +438,7 @@ def optParse(globs):
 
     if args.batch_size:
         if not PC.isPosInt(args.batch_size):
-            PC.errorOut("OP10", "The number of loci per batch (-batch) must be a positive integer.", globs);
+            PC.errorOut("OP17", "The number of loci per batch (-batch) must be a positive integer.", globs);
         else:
             globs['batch-size'] = int(args.batch_size);
     # Batch size
@@ -445,28 +458,28 @@ def optParse(globs):
     ####################
 
     if not args.cluster_part:
-        PC.errorOut("OP12", "At least one cluster partition must be specified with -part.", globs);
+        PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
     else:
         globs['partition'] = args.cluster_part;
     # Cluster partition option (required)
 
     if args.cluster_nodes:
         if not PC.isPosInt(args.cluster_nodes):
-            PC.errorOut("OP13", "The number of nodes specified (-nodes) must be a positive integer.", globs);
+            PC.errorOut("OP19", "The number of nodes specified (-nodes) must be a positive integer.", globs);
         else:
             globs['num-nodes'] = args.cluster_nodes;
     # Cluster memory option
 
     if args.cluster_mem:
         if not PC.isPosInt(args.cluster_mem):
-            PC.errorOut("OP14", "The specified cluster memory (-mem) must be a positive integer in GB.", globs);
+            PC.errorOut("OP20", "The specified cluster memory (-mem) must be a positive integer in GB.", globs);
         else:
             globs['mem'] = args.cluster_mem;
     # Cluster memory option
 
     if args.cluster_time:
         if not PC.isPosInt(args.cluster_time):
-            PC.errorOut("OP15", "The specified cluster time (-time) must be a positive integer in hours.", globs);
+            PC.errorOut("OP21", "The specified cluster time (-time) must be a positive integer in hours.", globs);
         else:
             globs['time'] = args.cluster_time + ":00:00";
     # Cluster memory option
@@ -644,16 +657,16 @@ def startProg(globs):
 
     ####################
 
-    if globs['plot']:
-        plot_status = "True";
-        plot_status_str = "An HTML file summarizing the input data will be written to " + globs['html-file'];
-    else:
-        plot_status = "False";
-        plot_status_str = "No HTML summary file will be generated.";
+    # if globs['plot']:
+    #     plot_status = "True";
+    #     plot_status_str = "An HTML file summarizing the input data will be written to " + globs['html-file'];
+    # else:
+    #     plot_status = "False";
+    #     plot_status_str = "No HTML summary file will be generated.";
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --plot", pad) + 
-                PC.spacedOut(plot_status, opt_pad) + 
-                plot_status_str);
+    # PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --plot", pad) + 
+    #             PC.spacedOut(plot_status, opt_pad) + 
+    #             plot_status_str);
     # --plot option
 
     ####################
@@ -665,7 +678,7 @@ def startProg(globs):
         batch_status = "True";
         batch_status_str = "No PhyloAcc batch files will be generated and those existing will not be overwritten.";
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --plotonly", pad) + 
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --summarize", pad) + 
                 PC.spacedOut(batch_status, opt_pad) + 
                 batch_status_str);
     # --plotonly option

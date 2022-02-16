@@ -71,7 +71,7 @@ def init():
         'run-mode' : 'st',
         # Run mode option
 
-        'plot' : False,
+        'plot' : True,
         # Option to output plots/html
 
         'theta' : False,

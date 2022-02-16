@@ -15,6 +15,10 @@ Version 1.1.0, 02.11.2022
 - Fixed issue where log info wasn't actually written to the log
 - Added an option to append to a previous log rather than overwrite
 
+02.16.2022, interface
+- Added a check for duplicate labels in input groups
+- Removed --plot option and changed --plotonly option to --summarize; plots are now always generated and --summarize indicates job files should not be overwritten or generated
+- Fixed error codes in opt_parse
 
 TODO:
 - Split the Hu-etal-2019 folder into a separate repo within the PhyloAcc organization
