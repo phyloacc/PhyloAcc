@@ -20,6 +20,13 @@ Version 1.1.0, 02.11.2022
 - Removed --plot option and changed --plotonly option to --summarize; plots are now always generated and --summarize indicates job files should not be overwritten or generated
 - Fixed error codes in opt_parse
 
+02.16.2022
+- Moved the V2_GBGC source from within the PhyloAcc-ST dir to its own dir in src called PhyloAcc-ST-GBGC
+- Removed the simulation data from the GBGC folder and put it in the Hu-etal-2019 folder under the GBGC subfolder
+- Added test folder with original test data from the README (500 simulated elements on the ratite tree, but with the ID file only 10 elements are run)
+
+
+
 TODO:
 - Split the Hu-etal-2019 folder into a separate repo within the PhyloAcc organization
 - What is _config.yml? Seems to be related to building the website. Figure out where it needs to go
