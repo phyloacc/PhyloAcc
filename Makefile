@@ -1,15 +1,27 @@
 TARGET=PhyloAcc-ST
 # The name of the compiled binary
 
-ifeq ($(OS),Windows_NT)
-	CXX=g++
-	GSL_INCLUDE=${LIBRARY_INC}
-	GSL_LIB=${LIBRARY_LIB}
-# GSL paths with the conda environment prefix
+# ifeq ($(shell uname),Darwin)
+# 	CXX=g++-7
+# else
+# 	CXX=g++
+# endif
+
+# ifeq ($(OS),Windows_NT)
+# 	CXX=g++
+# 	GSL_INCLUDE=${LIBRARY_INC}
+# 	GSL_LIB=${LIBRARY_LIB}
+# # GSL paths with the conda environment prefix
+ifeq ($(shell uname),Darwin)
+	CXX=clang++
+	GSL_INCLUDE=${PREFIX}/include/
+	GSL_LIB=${PREFIX}/lib/
+	CFLAGS=-Wall -g -O2 -std=c++11 -W1, -rpath ${PREFIX}/lib 
 else
 	CXX=g++
 	GSL_INCLUDE=${PREFIX}/include/
 	GSL_LIB=${PREFIX}/lib/
+	CFLAGS=-Wall -g -O2 -std=c++11
 # GSL paths with the conda environment prefix
 endif
 
@@ -30,7 +42,6 @@ $(info $$PREFIX is [${PREFIX}])
 $(info $$GSL_INCLUDE is [${GSL_INCLUDE}])
 $(info $$GSL_LIB is [${GSL_LIB}])
 
-CFLAGS=-Wall -g -O2 -std=c++11
 LDFLAGS=-lgsl -lm -lgslcblas -larmadillo -fopenmp
 # Options for the g++ commands
 

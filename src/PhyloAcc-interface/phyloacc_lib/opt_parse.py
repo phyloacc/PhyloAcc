@@ -427,7 +427,7 @@ def optParse(globs):
     globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");
     # Log file
 
-    if not args.append_log_flag:
+    if not args.append_log_flag and not globs['norun']:
         logfile = open(globs['logfilename'], "w");
         logfile.write("");
         logfile.close();
