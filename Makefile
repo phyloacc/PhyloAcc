@@ -16,7 +16,7 @@ ifeq ($(shell uname),Darwin)
 	CXX=clang++
 	GSL_INCLUDE=${PREFIX}/include/
 	GSL_LIB=${PREFIX}/lib/
-	CFLAGS=-Wall -g -O2 -std=c++11 -W1, -rpath ${PREFIX}/lib 
+	CFLAGS=-Wall -g -O2 -std=c++11 -Wl, -rpath ${PREFIX}/lib 
 else
 	CXX=g++
 	GSL_INCLUDE=${PREFIX}/include/
