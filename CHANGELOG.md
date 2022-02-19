@@ -24,3 +24,7 @@ Version 1.1.0, 02.11.2022
 - Moved the V2_GBGC source from within the PhyloAcc-ST dir to its own dir in src called PhyloAcc-ST-GBGC
 - Removed the simulation data from the GBGC folder and put it in the Hu-etal-2019 folder under the GBGC subfolder
 - Added test folder with original test data from the README (500 simulated elements on the ratite tree, but with the ID file only 10 elements are run)
+
+02.18.2022
+- Split the Hu-etal-2019 subfolder into its own repository
+- Move the test data to a new repository, PhyloAcc-test-data
