@@ -1,5 +1,5 @@
 TODO:
-- Split the Hu-etal-2019 folder into a separate repo within the PhyloAcc organization
+- ~~Split the Hu-etal-2019 folder into a separate repo within the PhyloAcc organization~~ (completed 02.18.2022)
 - What is _config.yml? Seems to be related to building the website. Figure out where it needs to go
 - Update docs
 - Update links

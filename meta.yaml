@@ -52,7 +52,9 @@ requirements:
     # If your project compiles code (such as a C extension) then add the required compilers as separate entries here.
     # Compilers are named 'c', 'cxx' and 'fortran'.
     - {{ compiler('cxx') }}
+    - {{ compiler('clang') }} # [osx]
     - make
+    - llvm-openmp # [osx]
   host:
     - llvm-openmp # [osx]
     - gsl
@@ -64,6 +66,7 @@ requirements:
     # - biopython
     # - numpy
   run:
+    - llvm-openmp # [osx]
     - python
     - matplotlib
     - biopython
