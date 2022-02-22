@@ -173,7 +173,7 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             logdet = log(vc * vn - cov * cov) - 2*log(numConfigZ[i]);
         }
         
-        if(::isnan(logdet)) continue;
+        if(std::isnan(logdet)) continue;
         
         effective_sum += numConfigZ[i];
         
@@ -333,16 +333,16 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         if(verbose) cout << "P(X,r*|Z*): " << MaxLoglik << " P(X|null): " <<  bpp.log_liks_null[CC] <<" P(X|acc): " << bpp.log_liks_resZ[CC] << " P(X|full): " << bpp.log_liks_sgl[CC] << endl << endl;
         //cout << "P(X,Z*,r*): " << MaxLoglik << " P(X): " << bpp.log_liks_sgl[CC] << endl;
 
-        if(::isnan(bpp.log_liks_sgl[CC])) failure = 1;
+        if(std::isnan(bpp.log_liks_sgl[CC])) failure = 1;
     }
     else if(resZ==0)
     {
         bpp.log_liks_null[CC] = VB;
-        if(::isnan(bpp.log_liks_null[CC])) failure = 1;
+        if(std::isnan(bpp.log_liks_null[CC])) failure = 1;
 
     }else{
         bpp.log_liks_resZ[CC] = VB ;
-        if(::isnan(bpp.log_liks_resZ[CC])) failure = 1;
+        if(std::isnan(bpp.log_liks_resZ[CC])) failure = 1;
     }
     
     
