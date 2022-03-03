@@ -465,7 +465,7 @@ def endProg(globs, interface=True):
     elif interface:
         if globs['batch']:
             printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc job files successfully generated");
-            printWrite(globs['logfilename'], 1, "# Run the following command from the Phyloacc-interface directory:\n\n");
+            printWrite(globs['logfilename'], 1, "# Run the following command to run the PhyloAcc batches:\n\n");
             printWrite(globs['logfilename'], 1, globs['smk-cmd'] + "\n\n");
             printWrite(globs['logfilename'], 1, "# Then, if everything looks right, remove --dryrun to execute");
             printWrite(globs['logfilename'], 1, "# You may also want to start your favorite terminal multiplexer (e.g. screen, tmux)");
