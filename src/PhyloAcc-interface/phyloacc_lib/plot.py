@@ -35,14 +35,14 @@ def genPlots(globs):
     mpl.rcParams["axes.edgecolor"] = "#595959";
     mpl.rcParams["axes.linewidth"] = 1.5;
 
-    mpl.rcParams["xtick.labelcolor"] = "#595959";
+    #mpl.rcParams["xtick.labelcolor"] = "#595959";
     mpl.rcParams["xtick.labelsize"] = 14;
 
     mpl.rcParams['xtick.color'] = "#595959";
     mpl.rcParams['xtick.major.size'] = 6;
     mpl.rcParams['xtick.major.width'] = 1.5;
 
-    mpl.rcParams["ytick.labelcolor"] = "#595959";
+    #mpl.rcParams["ytick.labelcolor"] = "#595959";
     mpl.rcParams["ytick.labelsize"] = 14;
 
     mpl.rcParams['ytick.color'] = "#595959";

@@ -112,6 +112,8 @@ if __name__ == '__main__':
                 batch = batch_dir[0:batch_dir.index("-")];
                 # Parse the batch string (just a number)
 
+                print(f, batch);
+
                 if first_file:
                     id_keys[batch] = {};
                 # If this is the first file (_elem_lik.txt), initialize the sub-dict in id_keys
