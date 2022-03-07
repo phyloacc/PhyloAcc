@@ -24,11 +24,11 @@ class StrictDict(dict):
 def init():
     globs_init = {
         'phyloacc-versions' : '',
-        'interface-version' : 'Beta 1.0',
-        'releasedate' : 'NA',
+        'interface-version' : '1.1.2',
+        'releasedate' : 'March 7, 2022',
         'doi' : 'https://doi.org/10.1093/molbev/msz049',
-        'http' : 'https://xyz111131.github.io/PhyloAcc/',
-        'github' : 'https://github.com/xyz111131/PhyloAcc/issues',
+        'http' : 'https://phyloacc.github.io',
+        'github' : 'https://github.com/phyloacc/PhyloAcc',
         'starttime' : timeit.default_timer(),
         'startdatetime' : CORE.getOutTime(),
         'startdatetimenice' : CORE.getRunTimeNice(),
@@ -71,7 +71,7 @@ def init():
         'overwrite' : False,
         # I/O options
         
-        'plot' : False,
+        'plot' : True,
         # Option to output plots/html
 
         'tree-string' : False,

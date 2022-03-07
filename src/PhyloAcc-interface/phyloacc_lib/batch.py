@@ -256,8 +256,8 @@ def writeSnakemake(globs):
             smkfile.write(TEMPLATES.snakemake().format(cmd=globs['call'],
                                                         dt=PC.getDateTime(),
                                                         run_char=run_char,
-                                                        st_path=os.path.abspath(globs['phyloacc']),
-                                                        gt_path=os.path.abspath(globs['phyloacc-gt']),
+                                                        st_path=globs['phyloacc'],
+                                                        gt_path=globs['phyloacc-gt'],
                                                         coal_tree_path=globs['coal-tree-file']
                                                         ))
 
@@ -307,7 +307,7 @@ def writeSnakemake(globs):
     if not os.path.isdir(globs['profile-dir']):
         os.makedirs(globs['profile-dir']);
 
-    profile_file = os.path.join(globs['profile-dir'], "config.yaml");
+    globs['profile-file'] = os.path.join(globs['profile-dir'], "config.yaml");
     # This is a snakemake profile for SLURM
     ## TODO: Will likely need templates for different job schedulers
 
@@ -315,7 +315,7 @@ def writeSnakemake(globs):
     # A directory to save the log files from the cluster
 
     if globs['batch']:
-        with open(profile_file, "w") as profile:
+        with open(globs['profile-file'], "w") as profile:
             profile.write(TEMPLATES.snakemakeProfile().format(num_jobs=str(globs['num-jobs']),
                                                             cluster_logdir=cluster_logdir,
                                                             procs_per_job=str(globs['procs-per-job']),

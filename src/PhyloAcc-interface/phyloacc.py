@@ -102,7 +102,7 @@ if __name__ == '__main__':
     globs['smk-cmd'] = "snakemake -p -s " + os.path.abspath(globs['smk']);
     globs['smk-cmd'] += " --configfile " + os.path.abspath(globs['smk-config']);
     globs['smk-cmd'] += " --profile " + os.path.abspath(globs['profile-dir']);
-    globs['smk-cmd'] += " --cluster-status " + os.path.abspath(globs['status-script']);
+    #globs['smk-cmd'] += " --cluster-status " + os.path.abspath(globs['status-script']);
     globs['smk-cmd'] += " --dryrun";
     # The snakemake command to run PhyloAcc
 
