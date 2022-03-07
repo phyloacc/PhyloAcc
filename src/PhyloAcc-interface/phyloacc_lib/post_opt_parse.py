@@ -65,7 +65,7 @@ def optParse(globs):
     parser.add_argument("--overwrite", dest="ow_flag", help="Set this to overwrite existing files.", action="store_true", default=False);
     # User options
     
-    parser.add_argument("--plot", dest="plot_flag", help="Plot some summaries of the results.", action="store_true", default=False);
+    #parser.add_argument("--plot", dest="plot_flag", help="Plot some summaries of the results.", action="store_true", default=False);
     parser.add_argument("--info", dest="info_flag", help="Print some meta information about the program and exit. No other options required.", action="store_true", default=False);
     #parser.add_argument("--dryrun", dest="dryrun", help="With all options provided, set this to run through the whole pseudo-it pipeline without executing external commands.", action="store_true", default=False);
     parser.add_argument("--version", dest="version_flag", help="Simply print the version and exit. Can also be called as '-version', '-v', or '--v'", action="store_true", default=False);
@@ -167,15 +167,14 @@ def optParse(globs):
 
     ####################
 
-    if args.plot_flag:
-        globs['plot-dir'] = os.path.join(globs['interface-run-dir'], "plots");
-        if not os.path.isdir(globs['plot-dir']) and not globs['norun']:
-            os.makedirs(globs['plot-dir']);
-        globs['plot'] = True;
-        # Plot option
 
-        globs['html-file'] = os.path.join(globs['interface-run-dir'], globs['html-file']);
-        # HTML directory
+    globs['plot-dir'] = os.path.join(globs['interface-run-dir'], "plots");
+    if not os.path.isdir(globs['plot-dir']) and not globs['norun']:
+        os.makedirs(globs['plot-dir']);
+    # Plot option
+
+    globs['html-file'] = os.path.join(globs['interface-run-dir'], globs['html-file']);
+    # HTML directory
     # Parse the --plot option
 
     ####################
@@ -234,16 +233,16 @@ def startProg(globs):
     CORE.printWrite(globs['logfilename'], globs['log-v'], "# OPTIONS INFO:");    
     CORE.printWrite(globs['logfilename'], globs['log-v'], CORE.spacedOut("# Option", pad) + CORE.spacedOut("Current setting", opt_pad) + "Current action");
 
-    if globs['plot']:
-        plot_status = "True";
-        plot_status_str = "An HTML file summarizing the results will be written to " + globs['html-file'];
-    else:
-        plot_status = "False";
-        plot_status_str = "No HTML summary file will be generated.";
+    # if globs['plot']:
+    #     plot_status = "True";
+    #     plot_status_str = "An HTML file summarizing the results will be written to " + globs['html-file'];
+    # else:
+    #     plot_status = "False";
+    #     plot_status_str = "No HTML summary file will be generated.";
 
-    CORE.printWrite(globs['logfilename'], globs['log-v'], CORE.spacedOut("# --plot", pad) + 
-                CORE.spacedOut(plot_status, opt_pad) + 
-                plot_status_str);
+    # CORE.printWrite(globs['logfilename'], globs['log-v'], CORE.spacedOut("# --plot", pad) + 
+    #             CORE.spacedOut(plot_status, opt_pad) + 
+    #             plot_status_str);
     # --plot option
 
     ####################

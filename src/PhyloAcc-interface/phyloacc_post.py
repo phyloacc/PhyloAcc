@@ -112,6 +112,8 @@ if __name__ == '__main__':
                 batch = batch_dir[0:batch_dir.index("-")];
                 # Parse the batch string (just a number)
 
+                #print(f, outfiles[f], batch);
+
                 if first_file:
                     id_keys[batch] = {};
                 # If this is the first file (_elem_lik.txt), initialize the sub-dict in id_keys
@@ -222,10 +224,10 @@ if __name__ == '__main__':
     step_start_time = CORE.report_step(globs, step, step_start_time, "Success: files combined");
     # Status update
 
-    print();
+    # print();
 
-    print(globs['locus-stats']['elem_lik']['12-0']);
-    print(globs['locus-stats']['elem_lik']['44-0']);
+    # print(globs['locus-stats']['elem_lik']['12-0']);
+    # print(globs['locus-stats']['elem_lik']['44-0']);
     #sys.exit();
     if globs['incomplete-batches']:
         globs['incomplete-batches'] = list(set(globs['incomplete-batches']));
