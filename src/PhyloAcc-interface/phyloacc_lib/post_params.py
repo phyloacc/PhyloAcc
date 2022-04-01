@@ -5,6 +5,7 @@
 #############################################################################
 
 import sys
+import os
 import timeit
 import phyloacc_lib.core as CORE
 
@@ -23,12 +24,7 @@ class StrictDict(dict):
 
 def init():
     globs_init = {
-        'phyloacc-versions' : '',
-        'interface-version' : '1.1.2',
-        'releasedate' : 'March 7, 2022',
-        'doi' : 'https://doi.org/10.1093/molbev/msz049',
-        'http' : 'https://phyloacc.github.io',
-        'github' : 'https://github.com/phyloacc/PhyloAcc',
+
         'starttime' : timeit.default_timer(),
         'startdatetime' : CORE.getOutTime(),
         'startdatetimenice' : CORE.getRunTimeNice(),
@@ -125,6 +121,11 @@ def init():
 
     globs_init['logfilename'] = "phyloacc-post-" + globs_init['startdatetime'] + ".errlog";
     # Add the runtime to the error log file name.
+
+    for line in open(os.path.join(os.path.dirname(__file__), "info.yaml"), "r"):
+        line = line.strip().split(":\t");
+        globs_init[line[0]] = line[1];
+    # Reads meta info (version, urls, etc.) from the info.yaml file
 
     globs = StrictDict(globs_init);
     # Restrict the dict from having keys added to it after this

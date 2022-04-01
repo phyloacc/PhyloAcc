@@ -514,8 +514,8 @@ def startProg(globs):
 # A nice way to start the program.
     print("#");
     PC.printWrite(globs['logfilename'], globs['log-v'], "# Welcome to PhyloAcc -- Bayesian rate analysis of conserved non-coding genomic elements.");
-    PC.printWrite(globs['logfilename'], globs['log-v'], "# Version (interface) " + globs['interface-version'] + " released on " + globs['releasedate']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], "# PhyloAcc was developed by Zhirui Hu, Han Yan, Taehee Lee, Gregg Thomas, Tim Sackton, Scott Edwards, and Jun Liu");
+    PC.printWrite(globs['logfilename'], globs['log-v'], "# Version " + globs['version'] + " released on " + globs['releasedate']);
+    PC.printWrite(globs['logfilename'], globs['log-v'], "# PhyloAcc was developed by " + globs['devs']);
     PC.printWrite(globs['logfilename'], globs['log-v'], "# Citation:      " + globs['doi']);
     PC.printWrite(globs['logfilename'], globs['log-v'], "# Website:       " + globs['http']);
     PC.printWrite(globs['logfilename'], globs['log-v'], "# Report issues: " + globs['github']);

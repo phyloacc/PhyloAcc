@@ -1,4 +1,5 @@
-TARGET=PhyloAcc-ST
+TARGET_ST=PhyloAcc-ST
+TARGET_GT=PhyloAcc-GT
 # The name of the compiled binary
 
 CXX=g++
@@ -22,26 +23,44 @@ CFLAGS=-Wall -g -O2 -std=c++11
 LDFLAGS=-lgsl -lm -lgslcblas -larmadillo -fopenmp
 # Options for the g++ commands
 
-SRC_DIR=src/$(TARGET)/
-SRCS=$(SRC_DIR)/*.cpp
-INCLUDES=$(SRC_DIR)/*.h $(SRC_DIR)/*.hpp
+############
+
+SRC_DIR_ST=src/$(TARGET_ST)/
+SRCS_ST=$(SRC_DIR_ST)/*.cpp
+INCLUDES_ST=$(SRC_DIR_ST)/*.h $(SRC_DIR_ST)/*.hpp
 # Locations of files to compile
 
-$(TARGET): $(SRCS) $(INCLUDES)
-	$(CXX) $(CFLAGS) -I$(GSL_INCLUDE) -L$(GSL_LIB) $(SRCS) -o $(TARGET) $(LDFLAGS)
+$(TARGET_ST): $(SRCS_ST) $(INCLUDES_ST)
+	$(CXX) $(CFLAGS) -I$(GSL_INCLUDE) -L$(GSL_LIB) $(SRCS_ST) -o $(TARGET_ST) $(LDFLAGS)
 # g++ commands for each file
+# Species tree version
+############
+
+SRC_DIR_GT=src/$(TARGET_GT)/
+SRCS_GT=$(SRC_DIR_GT)/*.cpp
+INCLUDES_GT=$(SRC_DIR_GT)/*.h $(SRC_DIR_GT)/*.hpp
+# Locations of files to compile
+
+$(TARGET_GT): $(SRCS_GT) $(INCLUDES_GT)
+	$(CXX) $(CFLAGS) -I$(GSL_INCLUDE) -L$(GSL_LIB) $(SRCS_GT) -o $(TARGET_GT) $(LDFLAGS)
+# g++ commands for each file
+# Gene tree version
+############
 
 .PHONY: install
-install: $(TARGET)
-	cp $< $(PREFIX)/bin/$(TARGET)
+install: $(TARGET_ST) $(TARGET_GT)
+	cp $(TARGET_ST) $(PREFIX)/bin/$(TARGET_ST)
+	cp $(TARGET_GT) $(PREFIX)/bin/$(TARGET_GT)
 # Command to install by moving binary
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(PREFIX)/bin/$(TARGET)
+	rm -f $(PREFIX)/bin/$(TARGET_ST)
+	rm -f $(PREFIX)/bin/$(TARGET_GT)
 # Command to uninstall by removing binary
 
 .PHONY: clean
 clean:
-	rm -f *.o *~ $(TARGET)
+	rm -f *.o *~ $(TARGET_ST)
+	rm -f *.o *~ $(TARGET_GT)
 # Command to remove all compiled files to make a clean install
