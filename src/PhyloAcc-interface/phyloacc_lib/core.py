@@ -60,7 +60,7 @@ def execCheck(globs, a):
         print("   -------------------------------------------");
     # For the dependency check option (--depcheck), this initializes a neat output table.
 
-    for opt in ['phyloacc']:#, 'phyloacc-gbgc']:
+    for opt in ['phyloacc', 'phyloacc-gt']:#, 'phyloacc-gbgc']:
         dcheck_str = [spacedOut("   " + opt, dpad), spacedOut(globs[opt], dpad), "NA"];
         # Initialize the check string for --depcheck.
 
