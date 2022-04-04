@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # Get the global params as a dictionary.
     
     if any(v in sys.argv for v in ["--version", "-version", "--v", "-v"]):
-        print("# PhyloAcc version " + globs['interface-version'] + " released on " + globs['releasedate'])
+        print("# PhyloAcc version " + globs['version'] + " released on " + globs['releasedate'])
         sys.exit(0);
     # The version option to simply print the version and exit.
     # Need to get actual PhyloAcc version for this, and not just the interface version.

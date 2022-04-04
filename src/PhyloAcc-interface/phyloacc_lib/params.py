@@ -5,6 +5,7 @@
 #############################################################################
 
 import sys
+import os
 import timeit
 import phyloacc_lib.core as PC
 
@@ -23,12 +24,7 @@ class StrictDict(dict):
 
 def init():
     globs_init = {
-        'phyloacc-versions' : '',
-        'interface-version' : '1.1.2',
-        'releasedate' : 'March 7, 2022',
-        'doi' : 'https://doi.org/10.1093/molbev/msz049',
-        'http' : 'https://phyloacc.github.io',
-        'github' : 'https://github.com/phyloacc/PhyloAcc',
+
         'starttime' : timeit.default_timer(),
         'startdatetime' : PC.getOutTime(),
         'startdatetimenice' : PC.getRunTimeNice(),
@@ -272,6 +268,11 @@ def init():
         'THETA_CUTOFF'        : { 'type' : "POS_FLOAT", 'default' : "NA" }
     }
     # The default values for PhyloAcc options NOT included in the interface options
+
+    for line in open(os.path.join(os.path.dirname(__file__), "info.yaml"), "r"):
+        line = line.strip().split(":\t");
+        globs_init[line[0]] = line[1];
+    # Reads meta info (version, urls, etc.) from the info.yaml file
 
     # for line in open(globs_init['phyloacc-defaults-file']):
     #     line = line.strip().split("\t");
