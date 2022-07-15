@@ -13,8 +13,11 @@ import os
 import phyloacc_lib.core as PC
 import phyloacc_lib.params as params
 import phyloacc_lib.opt_parse as OP
+import phyloacc_lib.treeio as TREEIO
 import phyloacc_lib.seq as SEQ
 import phyloacc_lib.tree as TREE
+# import phyloacc_lib.tree_old as TREE
+import phyloacc_lib.cf as CF
 import phyloacc_lib.output as OUT
 import phyloacc_lib.batch as BATCH
 import phyloacc_lib.plot as PLOT
@@ -45,7 +48,6 @@ if __name__ == '__main__':
         print("--options set: exiting...");
         sys.exit();
     
-
     globs['script-dir'] = os.path.dirname(os.path.realpath(__file__));
 
     if "--quiet" not in sys.argv:
@@ -76,28 +78,77 @@ if __name__ == '__main__':
     step_start_time = PC.report_step(globs, "", "", "", start=True);
     # Initialize the step headers
 
+    ## Initialization
+    ####################
+
+    globs['tree-string'], globs['st'] = TREEIO.readST(globs);
+    # globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
+
+    if globs['debug-tree']:
+        TREE.debugTree(globs);
+        sys.exit(0);
+    # Print the debug stats and exit if --debugtree is set
+
+    if globs['label-tree']:
+        globs['st'].showAttrib("type", "label", "desc");
+        print("\n" + globs['st'].tree_str +"\n");
+        print(globs['labeled-tree']);
+        print();
+        sys.exit(0);
+    #else:
+    #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);
+    # Print the tree and exit if --labeltree is set
+
+    ## Read species tree
+    ####################
+
+    globs = TREEIO.readSpeciesGroups(globs);
+
+    ## Read species groups
+    ####################
+
+    if not globs['theta'] and globs['coal-tree-file']:
+        tree_str, tree = TREEIO.readST(globs, tree_type="coalescent");
+        #tree_str, tree_dict, tree, root, tips, internals = TREEIO.readST(globs, tree_type="coalescent");
+
+    ## Read coalescent tree if provided
+    ####################
+
     globs = SEQ.readSeq(globs);
-    # Library to read input sequences
+
+    ## Library to read input sequences
+    ####################
 
     globs = SEQ.alnStats(globs);
-    # Calculate some basic alignment stats
+    
+    ## Calculate some basic alignment stats
+    ####################
 
     if globs['run-mode'] == 'adaptive':
-        globs = TREE.scf(globs);
+        #globs = CF.scf(globs, globs['st'], globs['alns'], globs['scf-pool']);
+        globs = CF.scf(globs)
+        # globs = TREE.scf(globs);
+    
     # Calculate avg. sCF per locus
+    ####################
 
     globs = OUT.writeAlnStats(globs);
     # Write out the alignment summary stats
 
     if globs['run-mode'] == 'adaptive':
-        globs = OUT.writeSCFStats(globs);
+        #globs = OUT.writeSCFStats(globs);
+        globs = TREEIO.writeCF(globs);
     # Write out the sCF summary stats
+
+    ####################
 
     globs = BATCH.genJobFiles(globs);
     # Generates the locus specific job files (aln, bed, config, etc.) for phyloacc
 
     globs = BATCH.writeSnakemake(globs);
     # Generates the snakemake config and cluster profile
+
+    ####################
 
     globs['smk-cmd'] = "snakemake -p -s " + os.path.abspath(globs['smk']);
     globs['smk-cmd'] += " --configfile " + os.path.abspath(globs['smk-config']);
@@ -106,9 +157,13 @@ if __name__ == '__main__':
     globs['smk-cmd'] += " --dryrun";
     # The snakemake command to run PhyloAcc
 
+    ####################
+
     if globs['plot']:
-        PLOT.genPlots(globs);
-        globs = PLOT.writeHTML(globs);
+       PLOT.genPlots(globs);
+       globs = PLOT.writeHTML(globs);
+
+    ####################
 
     PC.endProg(globs);
 

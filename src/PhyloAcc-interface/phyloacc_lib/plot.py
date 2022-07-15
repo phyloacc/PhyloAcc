@@ -9,6 +9,7 @@ import shutil
 import re
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
+# import phyloacc_lib.tree_old as TREE
 import phyloacc_lib.templates as TEMPLATES
 import phyloacc_lib.templates_post as TEMPLATES_POST
 import numpy as np
@@ -58,13 +59,17 @@ def genPlots(globs):
     branch_cols = PC.coreCol(pal="wilke", numcol=3);
     # The colors for the target, conserved, and outgroup branches
 
-    num_spec = len(globs['tree-tips']);
+    num_spec = globs['st'].num_tips;
+    # num_spec = len(globs['tips']);
     # The number of species in the input free, to adjust height of figure
 
-    targets, conserved, outgroups = TREE.categorizeBranches(globs, globs['tree-dict']);
+    targets, conserved, outgroups = TREE.categorizeBranches(globs, globs['st']);
     # Get full lists of branches for each category
 
-    tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['tree-dict'], no_label=True, keep_tp_label=True);
+    tree_str = globs['st'].tree_str;
+    for node in globs['st'].internals:
+       tree_str = tree_str.replace(globs['st'].label[node], "");
+    # tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
     # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
 
     handle = StringIO(tree_str);
@@ -74,7 +79,6 @@ def genPlots(globs):
     target_lg, conserve_lg, outgroup_lg = False, False, False;
     #for clade in tree.get_terminals():
     for clade in tree.find_clades():
-        
         if clade.name in targets:
             clade.color = branch_cols[0];
             target_lg = lines([0], [0], label="Targets", color = branch_cols[0]);
@@ -85,12 +89,16 @@ def genPlots(globs):
             clade.color = branch_cols[2];
             outgroup_lg = lines([0], [0], label="Outgroup", color = branch_cols[2]);
 
-        if clade.name not in globs['tree-tips']:
+        if clade.name not in globs['st'].tips:
+        # if clade.name not in globs['tips']:
             clade.name = None;
         # For internal nodes, remove the tree parse name so it doesn't show up on the plot
     # Color the tip branches based on their input category and specify their legend entries
 
-    fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+    if num_spec < 20:
+        fig = plt.figure(figsize=(num_spec/4, 25.4/5.08));
+    else:
+        fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
     # Specify the plot size depending on the number of species
 
     axes = fig.add_subplot(1, 1, 1);
@@ -231,10 +239,11 @@ def genPlots(globs):
         scf_tree_file = os.path.join(globs['plot-dir'], globs['scf-tree-plot-file']);
         # The file to save the species tree figure
 
-        tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['tree-dict'], no_label=True, keep_tp_label=True);
+        tree_str = globs['st'].tree_str;
+        # tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
 
         for node in globs['scf']:
-            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['avg-quartet-scf'], 2)));
+            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['scf'], 2)) + "_");
         # For every node in the tree, add the averaged scf value over all loci to the label
 
         tree_str = re.sub("<[\d]+>[_]?", "", tree_str);
@@ -283,15 +292,14 @@ def genPlots(globs):
         bl_scf_file = os.path.join(globs['plot-dir'], globs['bl-scf-plot-file']);
 
         bls, scfs = [], [];
-        for node in globs['tree-dict']:
-            if globs['tree-dict'][node][2] != 'internal':
-                continue;
-
+        for node in globs['st'].internals:
+        # for node in globs['internals']:
             if node not in globs['scf']:
                 continue;
 
-            bls.append(float(globs['tree-dict'][node][0]));
-            scfs.append(globs['scf'][node]['avg-quartet-scf']);
+            bls.append(float(globs['st'].bl[node]));
+            # bls.append(float(globs['st'][node][0]));
+            scfs.append(globs['scf'][node]['scf']);
         # Gets the values out of their tables
 
         slope, intercept = np.polyfit(bls, scfs, 1);
@@ -368,10 +376,11 @@ def writeHTML(globs):
             num_st_batches=str(len(globs['st-batches'])),
             num_gt_batches=str(len(globs['gt-batches'])),
             num_jobs=str(globs['num-jobs']),
-            num_spec=str(len(globs['tree-tips'])),
-            num_targets=str(len(globs['targets'])),
-            num_conserved=str(len(globs['conserved'])),
-            num_outgroups=str(len(globs['outgroup'])),
+            num_spec=str(len(globs['st'].tips)),
+            # num_spec=str(len(globs['tips'])),
+            num_targets=str(len(globs['groups']['targets'])),
+            num_conserved=str(len(globs['groups']['conserved'])),
+            num_outgroups=str(len(globs['groups']['outgroup'])),
             log_file=globs['logfilename'],
             aln_stats_file=globs['alnstatsfile'],
             batch_comment_start=batch_comment_start,
@@ -558,7 +567,9 @@ def genPlotsPost(globs):
 
     step_start_time = PC.report_step(globs, step, step_start_time, "Success");
     return globs;
-
+    ############################################################################################################################################
+    ############################################################################################################################################
+    ############################################################################################################################################
     seq_len_hist_file = os.path.join(globs['plot-dir'], globs['seq-len-plot-file']);
     seq_lens = [ globs['aln-stats'][aln]['avg-nogap-seq-len'] for aln in aln_list ];
     
@@ -663,10 +674,10 @@ def genPlotsPost(globs):
         scf_tree_file = os.path.join(globs['plot-dir'], globs['scf-tree-plot-file']);
         # The file to save the species tree figure
 
-        tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['tree-dict'], no_label=True, keep_tp_label=True);
+        tree_str = TREE.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
 
         for node in globs['scf']:
-            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['avg-quartet-scf'], 2)));
+            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['scf'], 2)));
         # For every node in the tree, add the averaged scf value over all loci to the label
 
         tree_str = re.sub("<[\d]+>[_]?", "", tree_str);
@@ -715,15 +726,15 @@ def genPlotsPost(globs):
         bl_scf_file = os.path.join(globs['plot-dir'], globs['bl-scf-plot-file']);
 
         bls, scfs = [], [];
-        for node in globs['tree-dict']:
-            if globs['tree-dict'][node][2] != 'internal':
+        for node in globs['st']:
+            if globs['st'][node][2] != 'internal':
                 continue;
 
             if node not in globs['scf']:
                 continue;
 
-            bls.append(float(globs['tree-dict'][node][0]));
-            scfs.append(globs['scf'][node]['avg-quartet-scf']);
+            bls.append(float(globs['st'][node][0]));
+            scfs.append(globs['scf'][node]['scf']);
         # Gets the values out of their tables
 
         slope, intercept = np.polyfit(bls, scfs, 1);

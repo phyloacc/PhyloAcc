@@ -76,11 +76,14 @@ def init():
         # Theta estimation
 
         'tree-string' : False,
+        'st' : False,
+
         'tree-dict' : False,
         'labeled-tree' : False,
         'scf-labeled-tree' : False,
-        'root-node' : False,
-        'tree-tips' : False,
+        'root' : False,
+        'tips' : [],
+        'internals' : [],
         # Tree variables
 
         'in-seqs' : {},
@@ -99,9 +102,8 @@ def init():
         'gappy-loci' : [],
         # Alignment summary stats
 
-        'targets' : [],
-        'conserved' : [],
-        'outgroup' : [],
+        'input-groups' : { 'targets' : [], 'outgroup' : [], 'conserved' : [] },
+        'groups' : { 'targets' : [], 'outgroup' : [], 'conserved' : [] },
         # Phylo options
 
         'scf' : {},
@@ -114,6 +116,7 @@ def init():
         # ((split1-spec1, split1-spec2), (split2-spec1, split2-spec2))
 
         'min-scf' : 0.5,
+        'low-scf-branch-prop' : False,
         # sCF params
 
         'burnin' : 500,
@@ -126,11 +129,13 @@ def init():
         'phyloacc-opts' : [],
         # All other PhyloAcc options as a list
 
-        'phyloacc' : 'PhyloAcc-ST',
+        #'phyloacc' : 'PhyloAcc-ST',
+        'phyloacc' : "/n/home07/gthomas/projects/PhyloAcc-interface/PhyloAcc/PhyloAcc",
         #'phyloacc-gbgc' : 'PhyloAcc/V2_GBGC/PhyloAcc_gBGC',
         #'phyloacc-gt' : 'PhyloAcc-GT2/SRC/PhyloAcc-GT_piQ',
         #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
-        'phyloacc-gt' : 'PhyloAcc-GT',
+        #'phyloacc-gt' : 'PhyloAcc-GT',
+        'phyloacc-gt' : "/n/home07/gthomas/anaconda3/envs/phyloacc-conda/bin/PhyloAcc-GT",
         # Dependency paths
 
         'batch' : True,
@@ -206,7 +211,7 @@ def init():
         'quiet' : False,
         # Other user options
 
-        'skip-chars' : ["-", "N"],
+        'aln-skip-chars' : ["-", "N"],
         'aln-stats-written' : False,
         'scf-stats-written' : False,
         'scf-tree-written' : False,
@@ -223,6 +228,7 @@ def init():
         'psutil' : False,
         'qstats' : False,
         'norun' : False,
+        'debug-tree' : False,
         'debug' : False,
         'nolog' : False,
         # Internal stuff

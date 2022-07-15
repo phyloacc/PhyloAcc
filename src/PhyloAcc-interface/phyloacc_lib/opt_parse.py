@@ -29,9 +29,7 @@ def optParse(globs):
     parser.add_argument("-a", dest="aln_file", help="An alignment file with all loci concatenated. -b must also be specified. Expected as FASTA format for now. One of -a/-b or -d is REQUIRED.", default=False);
     parser.add_argument("-b", dest="bed_file", help="A bed file with coordinates for the loci in the concatenated alignment file. -a must also be specified. One of -a/-b or -d is REQUIRED.", default=False);
     parser.add_argument("-i", dest="id_file", help="A text file with locus names, one per line, corresponding to regions in the input bed file. -a and -b must also be specified.", default=False);
-
     parser.add_argument("-d", dest="aln_dir", help="A directory containing individual alignment files for each locus. Expected as FASTA format for now. One of -a/-b or -d is REQUIRED.", default=False);
-    
     parser.add_argument("-m", dest="mod_file", help="A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from PHAST. REQUIRED.", default=False);
     # Input
 
@@ -55,6 +53,8 @@ def optParse(globs):
     # Dependency paths
     ## Note: For now we will likely need three dependency paths for the models, but eventually these should all be consolidated
     
+    parser.add_argument("-scf", dest="low_scf", help="The value of sCF to consider as 'low' for any given branch in a locus. Default: 0.5", default=False);
+    parser.add_argument("-s", dest="scf_prop", help="The proportion of branches to consider a locus for the gene tree model. Default: 0.3333, meaning if one-third of all branches for a given locus have low sCF, this locus will be run with the gene tree model.", default=False);
     parser.add_argument("-l", dest="coal_tree", help="A file containing a rooted, Newick formatted tree with the same topology as the species tree in the mod file (-m), but with branch lengths in coalescent units. When the gene tree model is used, one of -l or --theta must be set.", default=False);
     parser.add_argument("-r", dest="run_mode", help="Determines which version of PhyloAcc will be used. gt: use the gene tree model for all loci, st: use the species tree model for all loci, adaptive: use the gene tree model on loci with many branches with low sCF and species tree model on all other loci. Default: st", default=False);
     parser.add_argument("-n", dest="num_procs", help="The number of processes that this script should use. Default: 1.", type=int, default=1);
@@ -89,6 +89,7 @@ def optParse(globs):
     parser.add_argument("--qstats", dest="qstats", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--norun", dest="norun", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--debug", dest="debug_opt", help=argparse.SUPPRESS, action="store_true", default=False);
+    parser.add_argument("--debugtree", dest="debug_tree", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--nolog", dest="nolog_opt", help=argparse.SUPPRESS, action="store_true", default=False);
     # Performance tests
     
@@ -100,6 +101,8 @@ def optParse(globs):
     globs['call'] = " ".join(sys.argv);
     # Save the program call for later
 
+    ####################
+
     if args.info_flag:
         globs['info'] = True;
         globs['log-v'] = -1;
@@ -107,10 +110,37 @@ def optParse(globs):
         return globs;
     # Parse the --info option and call startProg early if set
 
+    ####################
+
+    if args.norun:
+        globs['norun'] = True;
+        globs['log-v'] = -1;
+    # Check if norun is set
+
+    globs['overwrite'] = args.ow_flag;
+    # Check if overwrite is set
+
+    if args.debug_tree:
+        globs['debug-tree'] = True;
+        globs['log-v'] = -1;
+    # Check if tree debugging is turned on -- will just read the input species tree for testing in the tree library
+
+    ####################
+
     globs['label-tree'] = args.labeltree;
     # Parse the --labeltree option
 
-    if not globs['label-tree']:
+    ####################
+
+    if not args.mod_file:
+        PC.errorOut("OP3", "A mod file must be provided with -m", globs);
+    globs['mod-file'] = args.mod_file;
+    # Check the mod file
+
+    # Species tree/rate file
+    ####################
+
+    if not globs['label-tree'] and not globs['debug-tree']:
     ## Read main input options if --labeltree isn't set
 
         globs, deps_passed = PC.execCheck(globs, args);
@@ -122,12 +152,6 @@ def optParse(globs):
                 print("\n# Some dependencies NOT FOUND. Please check your installations and provided paths.\n");
                 sys.exit(1);
         # Check the dependency paths
-
-        if args.norun:
-            globs['norun'] = True;
-            globs['log-v'] = -1;
-        globs['overwrite'] = args.ow_flag;
-        # Check internal run mode options.
 
         if (not args.aln_file and not args.aln_dir) or (args.aln_file and args.aln_dir):
             PC.errorOut("OP1", "One input method must be specified: -a or -d", globs);
@@ -142,349 +166,275 @@ def optParse(globs):
         elif args.aln_dir:
             globs['aln-dir'] = args.aln_dir;
         # Save the input type as a global param
-    ## End main input options block
 
-    ## Input files
+        # Input files
+        ####################
+
+        if args.run_mode:
+            if args.run_mode not in ["st", "gt", "adaptive"]:
+                PC.errorOut("OP5", "Run mode (-r) must be one of: 'st', 'gt', or 'adaptive'.", globs);
+            if args.run_mode in ["gt", "adaptive"] and not (args.theta or args.coal_tree):
+                PC.errorOut("OP6", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
+            globs['run-mode'] = args.run_mode;
+
+        if globs['run-mode'] == "st" and (args.theta or args.coal_tree):
+            print("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
+        # Check the run mode option
+
+        ## Run mode
+        ####################
+
+        job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output' };
+        # Expected job directories to create
+
+        if globs['id-flag']:
+            job_sub_dirs['job-ids'] = 'ids';
+
+        if globs['run-mode'] != 'st':
+            if args.theta and args.coal_tree:
+                PC.errorOut("OP7", "Only one of -l or --theta should be specified.", globs);
+            # Make sure both coalescent tree options aren't specified
+
+            if args.theta:
+                globs['theta'] = True;
+                globs['coal-tree-file'] = "phyloacc-job-files/astral/astral-species-tree.treefile"
+                job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output', 'iqtree' : 'iqtree', 'astral' : 'astral' };
+            # If --theta is specified, set global param to True and add directories for iqtree and astral
+            elif args.coal_tree:
+                if not os.path.isfile(args.coal_tree):
+                    PC.errorOut("OP8", "Cannot find coalescent tree file (-l): " + args.coal_tree, globs);
+                globs['coal-tree-file'] = args.coal_tree;
+            # Get the file with the coalescent tree
+
+        ## Coalescent tree/theta options
+        ####################
+
+        if not args.targets:
+            PC.errorOut("OP10", "Target (-t) species must be specified.", globs);
+        # Check that targets are specified. This is the only required group at this point.
+
+        globs['input-groups']['targets'] = args.targets.replace("; ", ";").split(";");
+        if args.outgroup:
+            globs['input-groups']['outgroup'] = args.outgroup.replace("; ", ";").split(";");
+        # Read the target and outgroup groups (if provided)
+
+        if args.conserved:
+            globs['input-groups']['conserved'] = args.conserved.replace("; ", ";").split(";");
+        else:
+            globs['input-groups']['conserved'] = [];
+        # Read the conserved group if provided, and if not infer it from the other groups
+
+        ## Read species group options
+        ####################
+
+
+        if args.low_scf:
+            if not PC.isPosFloat(args.low_scf, maxval=1.0):
+                PC.errorOut("OP13", "-low-scf must be a positive float, between 0 and 1.", globs);
+            else:
+                globs['min-scf'] = float(args.low_scf);
+
+        if args.scf_prop:
+            if not PC.isPosFloat(args.scf_prop, maxval=1.0):
+                PC.errorOut("OP13", "-s must be a positive float, between 0 and 1.", globs);
+            else:
+                globs['low-scf-branch-prop'] = float(args.scf_prop);
+
+        ## sCF options
+        ####################
+
+        opt_keys = {'burnin' : args.burnin, 'mcmc' : args.mcmc, 'chain' : args.chain };
+        for opt in opt_keys:
+            if opt_keys[opt]:
+                if not PC.isPosInt(opt_keys[opt]):
+                    PC.errorOut("OP13", "-b, -m, and -n must all be positive integers.", globs);
+                globs[opt] = opt_keys[opt];
+        # Get the MCMC options
+
+        ## MCMC
+        ####################
+
+        if args.phyloacc_opts:
+            while "; " in args.phyloacc_opts:
+                args.phyloacc_opts = args.phyloacc_opts.replace("; ", ";");
+            phyloacc_opts = args.phyloacc_opts.split(";");
+            # A common error might be for users to put a space after each semi-colon, so we address that here and split the options
+
+            for opt_val in phyloacc_opts:
+            # For every option provided by the user
+
+                while "  " in opt_val:
+                    opt_val = opt_val.replace("  ", " ");
+                opt, val = opt_val.split(" ");
+                # Again a common error may be for multiple spaces to be included, so we get rid of those and split out the current
+                # option and value
+
+                opt = opt.upper();
+                # PhyloAcc options are all upper case
+
+                if opt not in globs['phyloacc-defaults']:
+                    PC.errorOut("OP14", "One of the provided PhyloAcc options (-phyloacc) is invalid: " + opt, globs);
+                # Check if the given option is even one of the possible ones and error out if not
+
+                option_pass = True;
+                if val == globs['phyloacc-defaults'][opt]['default']:
+                    continue;
+                # If the provided value for the current option is the same as the default value, just leave it out
+
+                elif globs['phyloacc-defaults'][opt]['type'] == "POS_INT":
+                    if not PC.isPosInt(val):
+                        option_pass = False;                
+                elif globs['phyloacc-defaults'][opt]['type'] == "POS_FLOAT":
+                    if not PC.isPosFloat(val):
+                        option_pass = False;           
+                elif globs['phyloacc-defaults'][opt]['type'] in ["PROB", "PERC"]:
+                    if not PC.isPosFloat(val, maxval=1.0):
+                        option_pass = False;          
+                elif globs['phyloacc-defaults'][opt]['type'] == "BOOL":
+                    val = val.upper();
+                    if val not in ["1", "0"]:
+                        option_pass = False; 
+                # Check each value against its possible values for its given type
+
+                if not option_pass:
+                    PC.errorOut("OP15", "The value of the provided PhyloAcc option " + opt + " is invalid for its type (" + globs['phyloacc-defaults'][opt]['type'] + "): " + val, globs);  
+                # If the value is not valid, error out
+
+                globs['phyloacc-opts'].append(opt + " " + val);
+                # If the value for the given option passes all checks, then add this option and value to the global list
+            ## End option loop
+
+        ## Phyloacc options
+        ####################
+
+        if not args.out_dest:
+            globs['outdir'] = "phyloacc-out-" + globs['startdatetime'];
+        else:
+            globs['outdir'] = args.out_dest;
+        # Get the output directory
+
+        if not globs['overwrite'] and os.path.exists(globs['outdir']):
+            PC.errorOut("OP16", "Output directory already exists: " + globs['outdir'] + ". Specify new directory name OR set --overwrite to overwrite all files in that directory.", globs);
+        if not os.path.isdir(globs['outdir']) and not globs['norun'] and not globs['info'] and not globs['debug-tree']:
+            os.makedirs(globs['outdir']);
+        # Main output dir
+
+        ####################
+
+        if args.summarize_flag:
+            globs['batch'] = False;
+        # Set the plot_flag to True if the plot_only_flag is True
+
+        ## Batch option -- after checking input files check to see if the user wants to write the batch files or just get the summary
+        ####################   
+
+        if globs['plot']:
+            globs['plot-dir'] = os.path.join(globs['outdir'], "plots");
+            if not os.path.isdir(globs['plot-dir']) and not globs['norun']:
+                os.makedirs(globs['plot-dir']);
+            # Plot option
+
+            globs['html-dir'] = os.path.join(globs['outdir'], "html");
+            # if not os.path.isdir(globs['html-dir']) and not globs['norun']:
+            #     os.makedirs(globs['html-dir']);
+            globs['html-file'] = os.path.join(globs['outdir'], "phyloacc-pre-run-summary.html");
+            # HTML directory
+        
+        # Parse the plot input and output locations
+        ####################  
+
+        if globs['batch']:
+            globs['job-dir'] = os.path.join(globs['outdir'], "phyloacc-job-files");
+            if not os.path.isdir(globs['job-dir']) and not globs['norun']:
+                os.makedirs(globs['job-dir']);
+            # Main job file dir
+
+            if not globs['norun']:
+                for subdir in job_sub_dirs:
+                    globs[subdir] = os.path.join(globs['job-dir'], job_sub_dirs[subdir]);
+                    if not os.path.isdir(globs[subdir]):
+                        os.makedirs(globs[subdir]);
+            # Job output subdirs
+
+        if globs['coal-tree-file']:
+            globs['coal-tree-file'] = os.path.abspath(globs['coal-tree-file']);
+
+        globs['run-name'] = os.path.basename(os.path.normpath(globs['outdir']));
+        globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");
+        # Log file
+
+        if not args.append_log_flag and not globs['norun'] and not globs['debug-tree']:
+            logfile = open(globs['logfilename'], "w");
+            logfile.write("");
+            logfile.close();
+        # Prep the logfile to be overwritten
+
+        ## Output files and directories
+        ####################
+
+        if args.batch_size:
+            if not PC.isPosInt(args.batch_size):
+                PC.errorOut("OP17", "The number of loci per batch (-batch) must be a positive integer.", globs);
+            else:
+                globs['batch-size'] = int(args.batch_size);
+        # Batch size
+
+        globs['procs-per-job'] = PC.isPosInt(args.procs_per_batch, default=1);
+        globs['num-jobs'] = PC.isPosInt(args.num_jobs, default=1);
+        globs['total-procs'] = globs['procs-per-job'] * globs['num-jobs'];
+        # Determine resource allocation for PhyloAcc
+
+        globs['num-procs'] = PC.isPosInt(args.num_procs, default=1);
+        globs['aln-pool'] = mp.Pool(processes=globs['num-procs']);
+        #globs['aln-pool'] = mp.Pool(processes=48);
+        globs['scf-pool'] = mp.Pool(processes=globs['num-procs']);
+        # Create the pool of processes for sCF calculation here so we copy the memory profile of the parent process
+        # before we've read any large data in
+
+        # Batch size and resource allocation
+        ####################
+
+        if not args.cluster_part:
+            PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
+        else:
+            globs['partition'] = args.cluster_part;
+        # Cluster partition option (required)
+
+        if args.cluster_nodes:
+            if not PC.isPosInt(args.cluster_nodes):
+                PC.errorOut("OP19", "The number of nodes specified (-nodes) must be a positive integer.", globs);
+            else:
+                globs['num-nodes'] = args.cluster_nodes;
+        # Cluster memory option
+
+        if args.cluster_mem:
+            if not PC.isPosInt(args.cluster_mem):
+                PC.errorOut("OP20", "The specified cluster memory (-mem) must be a positive integer in GB.", globs);
+            else:
+                globs['mem'] = args.cluster_mem;
+        # Cluster memory option
+
+        if args.cluster_time:
+            if not PC.isPosInt(args.cluster_time):
+                PC.errorOut("OP21", "The specified cluster time (-time) must be a positive integer in hours.", globs);
+            else:
+                globs['time'] = args.cluster_time + ":00:00";
+        # Cluster memory option
+
+        ## Cluster options
+        ####################
+    ## End --labeltree check
+
+    else:
+        globs['log-v'] = -1;
+    # If --labeltree or --debugtree is set, turn off log reporting
+
     ####################
-
-    if not args.mod_file:
-        PC.errorOut("OP3", "A mod file must be provided with -m", globs);
-    globs['mod-file'] = args.mod_file;
-    # Check the mod file
 
     globs = PC.fileCheck(globs);
     # Make sure all the input file actually exist, and get their
     # full paths
 
-    for line in open(globs['mod-file']):
-        if line.startswith("TREE: "):
-            globs['tree-string'] = line.strip().replace("TREE: ", "");
-    # Read the tree string from the MOD file
-
-    try:
-        globs['tree-dict'], globs['labeled-tree'], globs['root-node'] = TREE.treeParse(globs['tree-string']);
-        globs['tree-tips'] = [ n for n in globs['tree-dict'] if globs['tree-dict'][n][2] == "tip" ];
-    except:
-        PC.errorOut("OP4", "Error reading tree from mod file!", globs);
-    # Read the tree as a dictionary for sCF calculations
-
-    if args.labeltree:
-        print("# --labeltree SET. LABELING INPUT TREE AND EXITING:\n")
-        print(globs['labeled-tree']);
-        sys.exit(0);
-    # If --labeltree is set, print the tree here and exit
-
-    ## Tree
-    ####################
-
-    if args.run_mode:
-        if args.run_mode not in ["st", "gt", "adaptive"]:
-            PC.errorOut("OP5", "Run mode (-r) must be one of: 'st', 'gt', or 'adaptive'.", globs);
-        if args.run_mode in ["gt", "adaptive"] and not (args.theta or args.coal_tree):
-            PC.errorOut("OP6", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
-        globs['run-mode'] = args.run_mode;
-
-    if globs['run-mode'] == "st" and (args.theta or args.coal_tree):
-        print("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
-    # Check the run mode option
-
-    ## Main run mode
-    ####################
-
-    job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output' };
-    # Expected job directories to create
-
-    if globs['id-flag']:
-        job_sub_dirs['job-ids'] = 'ids';
-
-    if globs['run-mode'] != 'st':
-        if args.theta and args.coal_tree:
-            PC.errorOut("OP7", "Only one of -l or --theta should be specified.", globs);
-        # Make sure both coalescent tree options aren't specified
-
-        if args.theta:
-            globs['theta'] = True;
-            globs['coal-tree-file'] = "phyloacc-job-files/astral/astral-species-tree.treefile"
-            job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output', 'iqtree' : 'iqtree', 'astral' : 'astral' };
-        # If --theta is specified, set global param to True and add directories for iqtree and astral
-        elif args.coal_tree:
-            if not os.path.isfile(args.coal_tree):
-                PC.errorOut("OP8", "Cannot find coalescent tree file (-l): " + args.coal_tree, globs);
-
-            globs['coal-tree-file'] = args.coal_tree;
-            globs['coal-tree-str'] = open(globs['coal-tree-file'], "r").read();
-            # Read the tree string
-
-            try:
-                coal_tree_dict, coal_tree, coal_root = TREE.treeParse(globs['coal-tree-str']);
-                globs['tree-tips'] = [ n for n in globs['tree-dict'] if globs['tree-dict'][n][2] == "tip" ];
-            except:
-                PC.errorOut("OP9", "Error reading coalescent tree from mod file!", globs);
-            # Read the coalescent tree as a dictionary
-        # If -l is provided, check the tree file and read the tree here
-
-    ## TODO: Compare tree topologies
-
-    ## Coalescent tree options
-    ####################
-   
-    groups = { 'targets' : [], 'outgroup' : [], 'conserved' : [] };
-    # Initial lists of groups since some labels may be internal
-
-    if not args.targets:
-        PC.errorOut("OP10", "Target (-t) species must be specified.", globs);
-    # Check that targets are specified. This is the only required group at this point.
-
-    groups['targets'] = args.targets.replace("; ", ";").split(";");
-    if args.outgroup:
-        groups['outgroup'] = args.outgroup.replace("; ", ";").split(";");
-    # Read the target and outgroup groups (if provided)
-
-    if args.conserved:
-        groups['conserved'] = args.conserved.replace("; ", ";").split(";");
-    else:
-        groups['conserved'] = [];
-    # Read the conserved group if provided, and if not infer it from the other groups
-
-    for group in ['targets', 'outgroup', 'conserved']:
-    # Check every group 
-
-        for label in groups[group]:
-        # Check every label in the current group for presence in tree and whether it is an internal label
-
-            label_found = False;
-            # A flag that lets us know if the label was found in the tree
-
-            for n in globs['tree-dict']:
-            # For every node read in the tree
-                if globs['tree-dict'][n][2] == 'tip':
-                    if label == n:
-                        label_found = True;
-                        globs[group].append(label)
-                        break;
-                # Check if the current label is a tip in the tree and if so add it to the global group and break
-
-                else:
-                    if label in [n, globs['tree-dict'][n][3]]:
-                        label_found = True;
-                        cur_clade = TREE.getClade(n, globs['tree-dict']);
-                        globs[group] += cur_clade;
-                        break;
-                # Check if the current label is an internal label (either from the tree input or from treeparse/--labeltree) and
-                # if so get all the tips descending from it to add to the global group and break
-            ## End node loop
-        
-            if not label_found:
-                PC.errorOut("OP11", "The following label was provided in a group but is not present in the tree: " + label, globs);
-            # If the current label wasn't found in the tree, exit here with an error
-
-        ## End label loop
-    ## End group loop
-    # A preliminary check here to make sure all provided labels are actually in the input tree
-
-    if not groups['conserved']:
-        globs['conserved'] = [ node for node in globs['tree-dict'] 
-                                if globs['tree-dict'][node][2] =='tip' 
-                                and node not in globs['targets'] 
-                                and node not in globs['outgroup'] ];
-    # If the conserved group isn't specified, add all remaining tip species not in the other groups to it here
-
-    for tip in globs['tree-tips']:
-        num_in_groups = 0;
-        for group in groups:
-            for label in globs[group]:
-                if tip == label:
-                    num_in_groups += 1;
-        
-        if num_in_groups != 1:
-            print("parsed species groups:")
-            print("targets: ", globs['targets']);
-            print("outgroup: ", globs['outgroup']);
-            print("conserved: ", globs['conserved']);
-            PC.errorOut("OP12", "The following tip label does not appear once in only one group: " + tip + " (" + str(num_in_groups) + "). If you provided internal node labels make sure there aren't duplicate labels within that clade provided elsewhere.", globs);
-    # Go through every tip label and make sure it appears once and only once in the specified groups
-
-    ## Species grouping options
-    ####################
-
-    opt_keys = {'burnin' : args.burnin, 'mcmc' : args.mcmc, 'chain' : args.chain };
-    for opt in opt_keys:
-        if opt_keys[opt]:
-            if not PC.isPosInt(opt_keys[opt]):
-                PC.errorOut("OP13", "-b, -m, and -n must all be positive integers.", globs);
-            globs[opt] = opt_keys[opt];
-    # Get the MCMC options
-
-    ## MCMC
-    ####################
-
-    if args.phyloacc_opts:
-        while "; " in args.phyloacc_opts:
-            args.phyloacc_opts = args.phyloacc_opts.replace("; ", ";");
-        phyloacc_opts = args.phyloacc_opts.split(";");
-        # A common error might be for users to put a space after each semi-colon, so we address that here and split the options
-
-        for opt_val in phyloacc_opts:
-        # For every option provided by the user
-
-            while "  " in opt_val:
-                opt_val = opt_val.replace("  ", " ");
-            opt, val = opt_val.split(" ");
-            # Again a common error may be for multiple spaces to be included, so we get rid of those and split out the current
-            # option and value
-
-            opt = opt.upper();
-            # PhyloAcc options are all upper case
-
-            if opt not in globs['phyloacc-defaults']:
-                PC.errorOut("OP14", "One of the provided PhyloAcc options (-phyloacc) is invalid: " + opt, globs);
-            # Check if the given option is even one of the possible ones and error out if not
-
-            option_pass = True;
-            if val == globs['phyloacc-defaults'][opt]['default']:
-                continue;
-            # If the provided value for the current option is the same as the default value, just leave it out
-
-            elif globs['phyloacc-defaults'][opt]['type'] == "POS_INT":
-                if not PC.isPosInt(val):
-                    option_pass = False;                
-            elif globs['phyloacc-defaults'][opt]['type'] == "POS_FLOAT":
-                if not PC.isPosFloat(val):
-                    option_pass = False;           
-            elif globs['phyloacc-defaults'][opt]['type'] in ["PROB", "PERC"]:
-                if not PC.isPosFloat(val, maxval=1.0):
-                    option_pass = False;          
-            elif globs['phyloacc-defaults'][opt]['type'] == "BOOL":
-                val = val.upper();
-                if val not in ["1", "0"]:
-                    option_pass = False; 
-            # Check each value against its possible values for its given type
-
-            if not option_pass:
-                PC.errorOut("OP15", "The value of the provided PhyloAcc option " + opt + " is invalid for its type (" + globs['phyloacc-defaults'][opt]['type'] + "): " + val, globs);  
-            # If the value is not valid, error out
-
-            globs['phyloacc-opts'].append(opt + " " + val);
-            # If the value for the given option passes all checks, then add this option and value to the global list
-        ## End option loop
-
-    ## Phyloacc options
-    ####################
-
-    if not args.out_dest:
-        globs['outdir'] = "phyloacc-out-" + globs['startdatetime'];
-    else:
-        globs['outdir'] = args.out_dest;
-
-    if not globs['overwrite'] and os.path.exists(globs['outdir']):
-        PC.errorOut("OP16", "Output directory already exists: " + globs['outdir'] + ". Specify new directory name OR set --overwrite to overwrite all files in that directory.", globs);
-
-    if not os.path.isdir(globs['outdir']) and not globs['norun']:
-        os.makedirs(globs['outdir']);
-    
-    # Main output dir
-    ####################
-
-    if args.summarize_flag:
-        globs['batch'] = False;
-    # Set the plot_flag to True if the plot_only_flag is True
-
-    ## Batch option -- after checking input files check to see if the user wants to write the batch files or just get the summary
-    ####################   
-
-    if globs['plot']:
-        globs['plot-dir'] = os.path.join(globs['outdir'], "plots");
-        if not os.path.isdir(globs['plot-dir']) and not globs['norun']:
-            os.makedirs(globs['plot-dir']);
-        # Plot option
-
-        globs['html-dir'] = os.path.join(globs['outdir'], "html");
-        # if not os.path.isdir(globs['html-dir']) and not globs['norun']:
-        #     os.makedirs(globs['html-dir']);
-        globs['html-file'] = os.path.join(globs['outdir'], "phyloacc-pre-run-summary.html");
-        # HTML directory
-    
-    # Parse the plot input and output locations
-    ####################  
-
-    if globs['batch']:
-        globs['job-dir'] = os.path.join(globs['outdir'], "phyloacc-job-files");
-        if not os.path.isdir(globs['job-dir']) and not globs['norun']:
-            os.makedirs(globs['job-dir']);
-        # Main job file dir
-
-        if not globs['norun']:
-            for subdir in job_sub_dirs:
-                globs[subdir] = os.path.join(globs['job-dir'], job_sub_dirs[subdir]);
-                if not os.path.isdir(globs[subdir]):
-                    os.makedirs(globs[subdir]);
-        # Job output subdirs
-
-    if globs['coal-tree-file']:
-        globs['coal-tree-file'] = os.path.abspath(globs['coal-tree-file']);
-
-    globs['run-name'] = os.path.basename(os.path.normpath(globs['outdir']));
-    globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");
-    # Log file
-
-    if not args.append_log_flag and not globs['norun']:
-        logfile = open(globs['logfilename'], "w");
-        logfile.write("");
-        logfile.close();
-    # Prep the logfile to be overwritten
-
-    ## Output files and directories
-    ####################
-
-    if args.batch_size:
-        if not PC.isPosInt(args.batch_size):
-            PC.errorOut("OP17", "The number of loci per batch (-batch) must be a positive integer.", globs);
-        else:
-            globs['batch-size'] = int(args.batch_size);
-    # Batch size
-
-    globs['procs-per-job'] = PC.isPosInt(args.procs_per_batch, default=1);
-    globs['num-jobs'] = PC.isPosInt(args.num_jobs, default=1);
-    globs['total-procs'] = globs['procs-per-job'] * globs['num-jobs'];
-    # Determine resource allocation for PhyloAcc
-
-    globs['num-procs'] = PC.isPosInt(args.num_procs, default=1);
-    globs['aln-pool'] = mp.Pool(processes=globs['num-procs']);
-    globs['scf-pool'] = mp.Pool(processes=globs['num-procs']);
-    # Create the pool of processes for sCF calculation here so we copy the memory profile of the parent process
-    # before we've read any large data in
-
-    # Batch size and resource allocation
-    ####################
-
-    if not args.cluster_part:
-        PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
-    else:
-        globs['partition'] = args.cluster_part;
-    # Cluster partition option (required)
-
-    if args.cluster_nodes:
-        if not PC.isPosInt(args.cluster_nodes):
-            PC.errorOut("OP19", "The number of nodes specified (-nodes) must be a positive integer.", globs);
-        else:
-            globs['num-nodes'] = args.cluster_nodes;
-    # Cluster memory option
-
-    if args.cluster_mem:
-        if not PC.isPosInt(args.cluster_mem):
-            PC.errorOut("OP20", "The specified cluster memory (-mem) must be a positive integer in GB.", globs);
-        else:
-            globs['mem'] = args.cluster_mem;
-    # Cluster memory option
-
-    if args.cluster_time:
-        if not PC.isPosInt(args.cluster_time):
-            PC.errorOut("OP21", "The specified cluster time (-time) must be a positive integer in hours.", globs);
-        else:
-            globs['time'] = args.cluster_time + ":00:00";
-    # Cluster memory option
-
-    ## Cluster options
     ####################
 
     if args.quiet_flag:
@@ -541,8 +491,17 @@ def startProg(globs):
     elif globs['aln-dir']:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Alignment directory:", pad) + globs['aln-dir']);
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree/rate file (mod file from PHAST):", pad) + globs['mod-file']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", pad) + globs['tree-string']);
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree/rate file (mod file from phyloFit):", pad) + globs['mod-file']);
+    #PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", pad) + globs['tree-string']);
+
+    if globs['debug-tree']:
+        print("\n--debugtree SET. READING TREE AND EXITING.\n");
+        return;       
+
+    if globs['label-tree']:
+        print("\n--labeltree SET. READING TREE AND EXITING.\n");
+        return;
+    # If --labeltree is set, print a message and return. 
 
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Output directory:", pad) + globs['outdir']);
     if globs['batch']:
@@ -564,10 +523,11 @@ def startProg(globs):
     PC.printWrite(globs['logfilename'], globs['log-v'], "# SPECIES GROUPS:");    
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Group", pad) + PC.spacedOut("Species", opt_pad));
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Targets (-t)", pad) + ";".join(globs['targets'])); 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Conserved (-c)", pad) + ";".join(globs['conserved']));
-    if globs['outgroup']:
-        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Outgroups (-g)", pad) + ";".join(globs['outgroup']));
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Targets (-t)", pad) + ";".join(globs['input-groups']['targets']));
+    if globs['input-groups']['conserved']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Conserved (-c)", pad) + ";".join(globs['input-groups']['conserved']));
+    if globs['input-groups']['outgroup']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Outgroups (-g)", pad) + ";".join(globs['input-groups']['outgroup']));
     # Species groups
     #######################
 
@@ -621,6 +581,22 @@ def startProg(globs):
                 PC.spacedOut(str(globs['run-mode']), opt_pad) +
                 info_str);                  
     # Run mode option
+
+    ####################
+
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -low-scf:", pad) + 
+                PC.spacedOut(str(globs['min-scf']), opt_pad) +
+                "The sCF value to consider as low");
+
+    if globs['low-scf-branch-prop']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -s:", pad) + 
+                    PC.spacedOut(str(globs['low-scf-branch-prop']), opt_pad) +
+                    "The proportion of branches in a locus with low sCF to consider it for the gene tree model");
+    else:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -s:", pad) + 
+                    PC.spacedOut("NA", opt_pad) +
+                    "Branch sCF values will be averaged for each locus and if the average is below the min sCF it will be run with the gene tree model");        
+    # sCF
 
     ####################
 

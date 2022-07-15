@@ -50,7 +50,8 @@ def readFasta(filename, globs):
 
         #print(header, len(seq));
 
-        if curkey in globs['tree-tips']:
+        if curkey in globs['st'].tips:
+        # if curkey in globs['tips']:
             seqdict[curkey] = seq;
         # Save the sequence in seqdict if it belongs to a tip branch in the input tree  
 
@@ -199,7 +200,7 @@ def readSeq(globs):
         # step_start_time = PC.report_step(globs, step, False, "In progress...");
         # written = 0;
         # for aln in globs['alns']:
-        #     outdir = "/n/holylfs05/LABS/informatics/Users/gthomas/PhyloAcc-interface-data/data/ratite_data/ratite-1000/";
+        #     outdir = "/n/holylfs05/LABS/informatics/Everyone/phyloacc-data/GTpost/Tree4/Theta2/Len4/Simu/alns/";
         #     if not os.path.isdir(outdir):
         #         os.system("mkdir " + outdir);
         #     outfile = os.path.join(outdir, aln + ".fa");
@@ -331,7 +332,7 @@ def alnStats(globs):
     # Status update
 
     with globs['aln-pool'] as pool:
-        for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['skip-chars']) for locus in globs['alns'])):
+        for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['aln-skip-chars']) for locus in globs['alns'])):
         # Loop over every locus in parallel to calculate stats
         # Have to do it this way so it doesn't terminate the pool for sCF calculations
 
