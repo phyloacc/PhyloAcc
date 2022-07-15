@@ -129,13 +129,13 @@ def init():
         'phyloacc-opts' : [],
         # All other PhyloAcc options as a list
 
-        #'phyloacc' : 'PhyloAcc-ST',
-        'phyloacc' : "/n/home07/gthomas/projects/PhyloAcc-interface/PhyloAcc/PhyloAcc",
+        'phyloacc' : 'PhyloAcc-ST',
+        #'phyloacc' : "/n/home07/gthomas/projects/PhyloAcc-interface/PhyloAcc/PhyloAcc",
         #'phyloacc-gbgc' : 'PhyloAcc/V2_GBGC/PhyloAcc_gBGC',
         #'phyloacc-gt' : 'PhyloAcc-GT2/SRC/PhyloAcc-GT_piQ',
         #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
-        #'phyloacc-gt' : 'PhyloAcc-GT',
-        'phyloacc-gt' : "/n/home07/gthomas/anaconda3/envs/phyloacc-conda/bin/PhyloAcc-GT",
+        'phyloacc-gt' : 'PhyloAcc-GT',
+        #'phyloacc-gt' : "/n/home07/gthomas/anaconda3/envs/phyloacc-conda/bin/PhyloAcc-GT",
         # Dependency paths
 
         'batch' : True,

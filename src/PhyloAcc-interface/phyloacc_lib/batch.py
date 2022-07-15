@@ -130,7 +130,7 @@ def genJobFiles(globs):
                     os.makedirs(cur_out_dir);
                 # Make the phyloacc output directory for the current batch
 
-                batch_concat = { label : "" for label in globs['tree-tips'] };
+                batch_concat = { label : "" for label in globs['st'].tips };
                 # Dictionary to concatenate alignments for the current batch
 
                 batch_aln_list = [];
@@ -140,14 +140,14 @@ def genJobFiles(globs):
                 for aln in batch:
                     #print(aln);
                     batch_aln_list.append(aln);
-                    for label in globs['tree-tips']:
+                    for label in globs['st'].tips:
                         batch_concat[label] += batch[aln][label];
                     # May need a check here for missing sequences
                 # Concatenate alignments in the current batch together
 
                 cur_aln_file = os.path.join(globs['job-alns'], batch_num_str + "-" + model_type + ".fa");
                 with open(cur_aln_file, "w") as alnfile:
-                    for spec in globs['tree-tips']:
+                    for spec in globs['st'].tips:
                         alnfile.write(">" + spec + "\n");
                         alnfile.write(batch_concat[spec] + "\n");
                 # Write the current concatenated alignment to file
@@ -208,9 +208,9 @@ def genJobFiles(globs):
                                                                             burnin=str(globs['burnin']),
                                                                             mcmc=str(globs['mcmc']),
                                                                             chain=str(globs['chain']),
-                                                                            targets= ";".join(globs['targets']),
-                                                                            outgroup=";".join(globs['outgroup']),
-                                                                            conserved=";".join(globs['conserved']),
+                                                                            targets= ";".join(globs['groups']['targets']),
+                                                                            outgroup=";".join(globs['groups']['outgroup']),
+                                                                            conserved=";".join(globs['groups']['conserved']),
                                                                             procs_per_job=str(globs['procs-per-job']),
                                                                             phyloacc_opts=phyloacc_opt_str
                                                                             ))
