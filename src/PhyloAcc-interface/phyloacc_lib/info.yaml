@@ -1,5 +1,7 @@
-version:	2.0.0
-releasedate:	April 1, 2022
+version:	2.0.1
+releasedate-major:	April 1, 2022
+releasedate-minor:	April 1, 2022
+releasedate-patch:	July 15, 2022
 devs:	Zhirui Hu, Han Yan, Gregg Thomas, Tim Sackton, Scott Edwards, and Jun Liu
 doi:	https://doi.org/10.1093/molbev/msz049
 http:	https://phyloacc.github.io
