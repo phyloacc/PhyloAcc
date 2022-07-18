@@ -1,110 +1,119 @@
-# PhyloAcc
-This is a software to detect the shift pattern of DNA substitution rate of a genomic region and identify genomic elements accelerated in some specific species from a set of conserved elements. The underlying model assumes a latent discrete state (Z) of relative substitution rate of each branch on the phylogeny which can be neutral, conserved and accelerated. For each genomic element, it will start from a neutral or conserved state at the common ancestor of the phylogeny, transit to conserved state if not yet being conserved and then reach an accelerated state in some lineages. Our method utilizes adaptive collapsed Gibbs sampling to obtain the pattern of substitution rate shifts (posterior distribution of Z) as well as relative substitution rates of conserved and accelerated state. To identify DNA elements with accelerating on specific branches, we compare marginal likelihoods under three models: null model (M0) where all branches are neutral or conserved; accelerated model (M1) in which branches leading to target species are accelerated; and full model (M2), with no constraints on latent states. Then we use two Bayes factors: between M1 and M0 (BF1) and between M1 and M2 (BF2) as criteria to identify DNA elements accelerated exclusively in target lineages.
+# <p align="center"><a href="https://phyloacc.github.io/" target="_blank"><img align="center" width="360" height="210" src="https://phyloacc.github.io/img/logo2.png"></a></p>
 
-## Getting Started
-Some preliminary inputs which might be generated from other software are required: (1) a Phylogeny in mod format. The file can be output from phyloFit in PHAST package, with the transition rate matrix of bases and branch lengths. Our model assumes that these branch lengths represent the expected number of substitutions in the background state and will estimate the conserved and accelerated rate relative to the background rate. In our study, we used genome-wide four-fold degenerate sites to estimate the rate matrix and branch lengths. (2) a multiple alignment files concatenating sequences of all input conserved elements in FASTA format, and (3) a bed file with the position of each individual element in the coordinate of concatenated alignment file (0-based).
+## PhyloAcc: Substitution rate estimate and rate shift inference along branches of a phylogeny
 
+[![Install](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](https://phyloacc.github.io/install.html)
+[![OS](https://anaconda.org/bioconda/phyloacc/badges/platforms.svg)](https://phyloacc.github.io/index.html)
+[![Version](https://img.shields.io/conda/vn/bioconda/phyloacc?label=version)](https://bioconda.github.io/recipes/phyloacc/README.html)
+[![Release Date](https://anaconda.org/bioconda/phyloacc/badges/latest_release_date.svg)](https://bioconda.github.io/recipes/phyloacc/README.html)
+[![Downloads](https://img.shields.io/conda/dn/bioconda/phyloacc.svg?style=flat)](https://bioconda.github.io/recipes/phyloacc/README.html)
+[![Commits](https://img.shields.io/github/commits-since/phyloacc/PhyloAcc/v2.0.0)](https://github.com/phyloacc/PhyloAcc/commits/main)
+[![License](https://anaconda.org/bioconda/phyloacc/badges/license.svg)](https://github.com/phyloacc/PhyloAcc/blob/main/LICENSE.md)
 
-We also need a parameter file, which contains the paths for input files and output directory, information of species and parameters for MCMC. Please read [README_PARAMETER.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_PARAMETER.md) for more detail. 
+# Authors
+### Han Yan, Zhirui Hu, Gregg Thomas, Scott Edwards, Jun Liu, Tim Sackton
 
+---
+</br>
 
-After running the algorithm, our method will output the posterior of latent state (Z) for each branch (indicating background, conserved or accelerated) for each element under each model in the files "*prefix*\_rate_postZ\_M[0-2].txt" and the marginal loglikelihoods for each element are in the file "*prefix*_elem_lik.txt". The format of output files is explained in [README_OUTPUT.md](https://github.com/xyz111131/PhyloAcc/blob/master/README_OUTPUT.md).
+# Please see [the PhyloAcc website](https://phyloacc.github.io/) for full installation and usage instructions. What follows is only basic info.
+</br>
 
-## Prerequisites
-* [GCC](https://gcc.gnu.org/): You might need latest GCC (version 7) supporting openmp. If you are using Mac, you could use brew to (re)install gcc. 
-```bash
-brew update ## update the formulae and Homebrew itself, if your brew is out-dated
-brew install gcc
-```
-* [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/): a numerical library for C and C++. PhyloAcc has been
-  tested with version 2.4 of GSL.
-* [Armadillo](http://arma.sourceforge.net/): C++ linear algebra library. You could install Armadillo following the steps on its website. For Linux, before installing Armadillo, you need to install CMAKE, LAPACK, BLAS (OPENBLAS) and ATLAS, along with the corresponding development/header files. PhyloAcc has been tested with version 7.800.2.
-For Mac, you could use brew (tested and Recommended): 
-```bash
-brew install homebrew/science/armadillo
-```
-* [Open MP](http://www.openmp.org/): for parallel computing. 
-* To use the R functions to plot,  please install [Rstudio](https://www.rstudio.com/) with the current version of R (>=3.3.2) and install seqinr, ggplot2, reshape2, ape packages.  
-
-Alternatively, you can use Conda to install these required packages:  
-1) make a new conda environment called "PhyloAcc" for example, and activate the environment
-```bash
-conda create -n PhyloAcc
-conda activate PhyloAcc
-```
-2) conda install gsl
-3) conda install -c conda-forge lapack
-4) conda install -c conda-forge armadillo
-5) edit your .bashrc in your home directory:
-   ```bash
-    export LD_LIBRARY_PATH=/user/anaconda3/envs/PhyloAcc/lib/:$LD_LIBRARY_PATH
-    ```
-    or other path of the conda environment
-7) source .bashrc
-8) change to g++-9 in the PhyloAcc Makefile if you are using GCC version 9
-9) edit the location of GSL lib and include in the Makefile: e.g. 
-```bash
-GSL_HOME=/user/anaconda3/envs/PhyloAcc/
-```
-11) edit *PREFIX* in the Makefile for the installation directory of the conda env
-
-*(credited to Wei Gordon)*
-
-## Build on Linux or Mac
-Run:
-```bash
-make
-```
-in PhyloAcc directory to generate the 'PhyloAcc' executable.
+# Basic info
 
 ## Installation
-Run:
-```bash
-sudo make install
-```
-to install in default path /usr/local/bin, and 
-```bash
-sudo make uninstall
-```
-to uninstall.
 
-For our extended version modeling GC-based gene conversion (gBGC) effect, please go to [V2_GBGC/](https://github.com/xyz111131/PhyloAcc/blob/master/V2_GBGC) and make & install under that directory.
+If conda/bioconda is already set up on your system, you can install PhyloAcc with a single command:
+
+```bash
+conda install phyloacc
+```
+
+For more detailed instructions and troubleshooting, see [the Installation page](https://phyloacc.github.io/install.html). If you have other questions or trouble let us know with [an issue](https://github.com/phyloacc/PhyloAcc/issues).
 
 ## Usage
-Try this in PhyloAcc directory as a test, which will run simulated elements on ratite phylogeny:
-```bash
-mkdir Simulation_ratite/result_tmp
-./PhyloAcc Simulation_ratite/param2-1-test.txt
-```
-or this after installation:
-```bash
-PhyloAcc Simulation_ratite/param2-1-test.txt
-```
-For testing propose, it will only run the first 10 elements of simulated data from Simulation_ratite/simu_500_200_diffr_2-1.* and output to Simulation_ratite/result_tmp/. To run all the elements and get results in Simulation_ratite/result_phyloAcc/, you could run:
-```bash
-./PhyloAcc Simulation_ratite/param2-6.txt
-```
-To run your own data, please change the paths in your parameter file.
 
-To run the model including gBGC,
-```bash
-cd V2_GBGC
-mkdir Simulation/result_tmp
-./PhyloAcc_gBGC paramGC-0.txt
-```
-under *V2_GBGC/*. It will output to *V2_GBGC/Simulation/result_tmp/* (which will be the same as in V2_GBGC/Simulation/result/).
+For more detailed information and example commands, see [the README on the PhyloAcc website](https://phyloacc.github.io/readme.html)
 
-There are several R scripts available in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R) which read the output from PhyloAcc and generate plots in the main paper (e.g. "scaled" phylogenetic tree and sequence alignment for one element). Please read [plot.html](https://xyz111131.github.io/PhyloAcc/R/plot.html) and run [plot.Rmd](https://github.com/xyz111131/PhyloAcc/blob/master/R/plot.Rmd) for detail. R scripts to generate simulated DNA sequences are also in [R/](https://github.com/xyz111131/PhyloAcc/blob/master/R), please see [Simulation.md](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation.md) for more detail. 
+### Input
 
-## Data
-The species names and phylogenetic trees used in the PhyloAcc manuscript are in [Data/](https://github.com/xyz111131/PhyloAcc/blob/master/Data/). The simulated sequences and results are in [Simulation_mammal/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_mammal/) and [Simulation_ratite/](https://github.com/xyz111131/PhyloAcc/blob/master/Simulation_ratite/). The results for ratite and mammalian CNEEs in [mammal_result/](https://github.com/xyz111131/PhyloAcc/blob/master/mammal_result/) and [ratite_result/](https://github.com/xyz111131/PhyloAcc/blob/master/ratite_result/). 
+* A species tree and background substitution rate estimates in `.mod` file format from [phyloFit](http://compgen.cshl.edu/phast/phyloFit-tutorial.php). [Example file](https://github.com/phyloacc/PhyloAcc-test-data/blob/main/ratite.mod)
 
-## Trouble Shooting
-After running phyloFit for background sequences to get the rate matrix and branch lengths, you might need to name all ancestral nodes in the tree. You could use tree_doctor in phast (http://compgen.cshl.edu/phast/help-pages/tree_doctor.txt): 
-``` bash
-tree_doctor --name-ancestors input.mod > output.mod
-```
+* Either a single concatenated alignment in FASTA format with all elements to test ([Example file](https://github.com/phyloacc/PhyloAcc-test-data/blob/main/simu_500_200_diffr_2-1.fa)) AND a bed file that designates the coordinates of the elements ([Example file](https://github.com/phyloacc/PhyloAcc-test-data/blob/main/simu_500_200_diffr_2-1.bed); note that only the first 3 columns are required) __OR__ a directory containing separate alignments for each element in FASTA format.
 
-## Reference
-Zhirui Hu, Timothy B Sackton, Scott V. Edwards, Jun S. Liu: **A hierarchical Bayesian model for detecting convergent rate changes of conserved noncoding elements on phylogenetic trees**, *bioRxiv*, 2018.
-https://www.biorxiv.org/content/early/2018/02/22/260745.1
+* For the gene tree model, a species tree with the same topology as the one in the `.mod` file, but with branch lengths in coalescent units. If this isn't easily available one can be estimated from the input elements with the `--theta` option, though this will increase runtime and using these elements may not result in the most accurate branch length estimates.
+
+## Options
+
+**Use `phyloacc.py -h` to print out a help menu listing all the options.**
+
+### Input/output options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-a [FASTA FILE]` | An alignment file with all loci concatenated. `-b` must also be specified. Expected as FASTA format for now. | **One of `-a`/`-b` or `-d` is REQUIRED.** |
+| `-b [BED FILE]` | A bed file with coordinates for the loci in the concatenated alignment file. `-a` must also be specified. | **One of `-a`/`-b` or `-d` is REQUIRED.**  |
+| `-i [TEXT FILE]` | A text file with locus names, one per line, corresponding to regions in the input bed file. If provided, PhyloAcc will only be run on these loci. | Optional. **-a and -b must also be specified.**  |
+| `-d [DIRECTORY]` | A directory containing individual alignment files for each locus. Expected as FASTA format for now. | **One of `-a`/`-b` or `-d` is REQUIRED.**  | 
+| `-m [MOD FILE]` | A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit. |**REQUIRED.** |
+| `-o [DIRECTORY]` | Desired output directory. This will be created for you if it doesn't exist. | phyloacc-[date]-[time]  |
+| `-t "[STRING]"` | Tip labels in the input tree to be used as target species. Enter multiple labels separated by semi-colons (;). |**REQUIRED.** | 
+| `-c "[STRING]"` | Tip labels in the input tree to be used as conserved species. Enter multiple labels separated by semi-colons (;). | Optional. Any species not specified in `-t` or `-g` will be inferred as conserved.  |
+| `-g "[STRING]"` | Tip labels in the input tree to be used as outgroup species. Enter multiple labels separated by semi-colons (;). | Optional. |
+| `-l [NEWICK FILE]` | A file containing a rooted, Newick formatted tree with the same topology as the species tree in the mod file (`-m`), but with branch lengths in coalescent units. | When the gene tree model is used, one of `-l` or `--theta` must be set. |
+| `--theta` | Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for estimation of the theta prior. Note that a species tree with branch lengths in units of substitutions per site is still required with `-m`. Also note that this may add substantial runtime to the pipeline. | When the gene tree model is used, one of `-l` or `--theta` must be set. |
+| `-r [STRING]` | Determines which version of PhyloAcc will be used. gt: use the gene tree model for all loci, st: use the species tree model for all loci, adaptive: use the gene tree model on loci with many branches with low sCF and species tree model on all other loci. | st  |
+| `-n [INT]` |  	The number of processes that this script should use. | 1 |
+
+### MCMC options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-burnin [INT]` | The number of steps to be discarded in the Markov chain as burnin. | 500 |
+| `-mcmc [INT]` | The total number of steps in the Markov chain. | 1000 |
+
+### sCF options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-scf [FLOAT]` | The value of sCF to consider as low for any given branch or locus. Must be between 0 and 1. | 0.5  |
+| `-s [FLOAT]` | A value between 0 and 1. If provided, this proportion of branches must have sCF below `-scf` to be considered for the gene tree model. Otherwise, branch sCF values will be averaged for each locus. | Optional |
+
+### Batching options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-p [INT]` | The number of processes to use for each batch of PhyloAcc. | 1 |
+| `-j [INT]` | The number of jobs (batches) to run in parallel. | 1 |
+| `-batch [INT]` | The number of loci to run per batch. | 50 |
+
+### Cluster options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-part "[STRING]"` | The SLURM partition or list of partitions (separated by commas) on which to run PhyloAcc jobs. | **REQUIRED** |
+| `-nodes [INT]` | The number of nodes on the specified partition to submit jobs to. | 1 |
+| `-mem [INT]` | The max memory for each job in GB. | 4 |
+| `-time [INT]` | The time in hours to give each job. | 1 |
+
+### Other PhyloAcc options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `-path [STRING]` | The path to the PhyloAcc binary. | PhyloAcc |
+| `-phyloacc "[STRING]"` | A catch-all option for other PhyloAcc parameters. Enter as a semi-colon delimited list of options: 'OPT1 value;OPT2 value' | Optional |
+| `--options` | Print the full list of PhyloAcc options that can be specified with `-phyloacc` and exit. | Optional |
+
+### Miscellaneous  options
+
+| Option | Description | Default value |
+| ------ | ----------- |---------------|
+| `--labeltree` | Simply reads the tree from the input mod file (`-m`), labels the internal nodes, and exits.  | Optional |
+| `--overwrite` | Set this to overwrite existing files in the specified output directory. | Optional |
+| `--appendlog` | Set this to keep the old log file even if `--overwrite` is specified. New log information will instead be appended to the previous log file. | Optional |
+| `--summarize` | Only generate the input summary plots and page. Do not write or overwrite batch job files.  | Optional |
+| `--info` | Print some meta information about the program and exit. No other options required. | Optional |
+| `--depcheck` | Run this to check that all dependencies are installed at the provided path. No other options necessary. | Optional |
+| `--version` | Simply print the version and exit. Can also be called as `-version`, `-v`, or `--v`. | Optional |
+| `--qiuet` | Set this flag to prevent PhyloAcc from reporting detailed information about each step. | Optional |
+| `-h` | Print a help menu and exit. Can also be called as `--help`. | Optional |
