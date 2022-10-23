@@ -9,6 +9,7 @@ SEG_FILE {bed_file}{id_line}
 ALIGN_FILE {aln_file}
 RESULT_FOLDER {outdir}{coal_tree_line}
 PREFIX {batch}
+THIN {thin}
 BURNIN {burnin}
 MCMC {mcmc}
 CHAIN {chain}

@@ -121,6 +121,7 @@ def init():
 
         'burnin' : 500,
         'mcmc' : 1000,
+        'thin' : 1,
         'chain' : 1,
         # MCMC options
 
@@ -217,6 +218,9 @@ def init():
         'scf-tree-written' : False,
         'html-summary-written' : False,
 
+        'tree-data-type' : "class",
+        'scf-site-type' : "loop",
+        'count-disco-sites' : True,
         'pad' : 82,
         'endprog' : False,
         'exit-code' : 0,

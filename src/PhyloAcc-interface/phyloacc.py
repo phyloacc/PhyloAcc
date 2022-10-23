@@ -16,11 +16,12 @@ import phyloacc_lib.opt_parse as OP
 import phyloacc_lib.treeio as TREEIO
 import phyloacc_lib.seq as SEQ
 import phyloacc_lib.tree as TREE
-# import phyloacc_lib.tree_old as TREE
+import phyloacc_lib.tree_old as TREEF
 import phyloacc_lib.cf as CF
 import phyloacc_lib.output as OUT
 import phyloacc_lib.batch as BATCH
 import phyloacc_lib.plot as PLOT
+import phyloacc_lib.html as HTML
 
 #############################################################################
 
@@ -67,6 +68,9 @@ if __name__ == '__main__':
     globs = OP.optParse(globs);
     # Getting the input parameters from optParse.
 
+    print(globs['tree-data-type']);
+    print(globs['scf-site-type']);
+
     if globs['info']:
         print("# --info SET. EXITING AFTER PRINTING PROGRAM INFO...\n#")
         sys.exit(0);
@@ -81,8 +85,10 @@ if __name__ == '__main__':
     ## Initialization
     ####################
 
-    globs['tree-string'], globs['st'] = TREEIO.readST(globs);
-    # globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
+    if globs['tree-data-type'] == 'class':
+        globs['tree-string'], globs['st'] = TREEIO.readST(globs);
+    elif globs['tree-data-type'] == 'func':
+        globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
 
     if globs['debug-tree']:
         TREE.debugTree(globs);
@@ -90,8 +96,9 @@ if __name__ == '__main__':
     # Print the debug stats and exit if --debugtree is set
 
     if globs['label-tree']:
-        globs['st'].showAttrib("type", "label", "desc");
-        print("\n" + globs['st'].tree_str +"\n");
+        if globs['tree-data-type'] == 'class':
+            globs['st'].showAttrib("type", "label", "desc");
+            print("\n" + globs['st'].tree_str +"\n");
         print(globs['labeled-tree']);
         print();
         sys.exit(0);
@@ -108,8 +115,10 @@ if __name__ == '__main__':
     ####################
 
     if not globs['theta'] and globs['coal-tree-file']:
-        tree_str, tree = TREEIO.readST(globs, tree_type="coalescent");
-        #tree_str, tree_dict, tree, root, tips, internals = TREEIO.readST(globs, tree_type="coalescent");
+        if globs['tree-data-type'] == 'class':
+            tree_str, tree = TREEIO.readST(globs, tree_type="coalescent");
+        elif globs['tree-data-type'] == 'func':
+            tree_str, tree_dict, tree, root, tips, internals = TREEIO.readST(globs, tree_type="coalescent");
 
     ## Read coalescent tree if provided
     ####################
@@ -126,7 +135,7 @@ if __name__ == '__main__':
 
     if globs['run-mode'] == 'adaptive':
         #globs = CF.scf(globs, globs['st'], globs['alns'], globs['scf-pool']);
-        globs = CF.scf(globs)
+        globs = CF.scf(globs);
         # globs = TREE.scf(globs);
     
     # Calculate avg. sCF per locus
@@ -161,7 +170,7 @@ if __name__ == '__main__':
 
     if globs['plot']:
        PLOT.genPlots(globs);
-       globs = PLOT.writeHTML(globs);
+       globs = HTML.writeHTML(globs);
 
     ####################
 

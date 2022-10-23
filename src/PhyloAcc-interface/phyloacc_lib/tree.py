@@ -207,7 +207,10 @@ class Tree:
         self.internals.append(anc_label);
         self.type[anc_label] = "internal";
         self.root = anc_label;
-        self.label[anc_label] = "NA";
+        orig_root_label = tree.replace(anc_label, "").replace(";", "");
+        if orig_root_label == "":
+            orig_root_label = "root";
+        self.label[anc_label] = orig_root_label;
         self.bl[anc_label] = "NA";
         self.anc[anc_label] = "NA";
         self.sis[anc_label] = "NA";
@@ -387,7 +390,6 @@ class Tree:
 
                     q1 = set(self.getClade(d1));
                     q2 = set(self.getClade(d2));
-
 
                     sis_desc = self.desc[self.sis[node][0]];
                     q3 = set(self.getClade(sis_desc[0]));

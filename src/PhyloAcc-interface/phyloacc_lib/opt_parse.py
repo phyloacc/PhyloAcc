@@ -43,6 +43,7 @@ def optParse(globs):
     
     parser.add_argument("-burnin", dest="burnin", help="The number of steps to be discarded in the Markov chain as burnin. Default: 500", default=False);
     parser.add_argument("-mcmc", dest="mcmc", help="The total number of steps in the Markov chain. Default: 1000", default=False);
+    parser.add_argument("-thin", dest="thin", help="For the gene tree model, the number of MCMC steps between gene tree sampling. The total number of MCMC steps specified with -mcmc will be scaled by this as mcmc*thin Default: 1", default=False);
     parser.add_argument("-chain", dest="chain", help="The number of chains. Default: 1", default=False);
     # MCMC options
 
@@ -227,7 +228,6 @@ def optParse(globs):
         ## Read species group options
         ####################
 
-
         if args.low_scf:
             if not PC.isPosFloat(args.low_scf, maxval=1.0):
                 PC.errorOut("OP13", "-low-scf must be a positive float, between 0 and 1.", globs);
@@ -243,7 +243,7 @@ def optParse(globs):
         ## sCF options
         ####################
 
-        opt_keys = {'burnin' : args.burnin, 'mcmc' : args.mcmc, 'chain' : args.chain };
+        opt_keys = {'burnin' : args.burnin, 'mcmc' : args.mcmc, 'thin' : args.thin, 'chain' : args.chain };
         for opt in opt_keys:
             if opt_keys[opt]:
                 if not PC.isPosInt(opt_keys[opt]):
@@ -600,12 +600,15 @@ def startProg(globs):
 
     ####################
 
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -gt:", pad) + 
+                PC.spacedOut(str(globs['thin']), opt_pad) +
+                "The number of MCMC steps between gene tree sampling for the gene tree model. -mcmc will be scaled up by this number.");   
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -burnin:", pad) + 
                 PC.spacedOut(str(globs['burnin']), opt_pad) +
-                "This number of steps in the chain will discarded as burnin");         
+                "This number of steps in the chain will discarded as burnin (-burnin*-gt)");         
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -mcmc:", pad) + 
                 PC.spacedOut(str(globs['mcmc']), opt_pad) +
-                "The number of steps in each chain");      
+                "The number of steps in each chain  (-burnin*-mcmc)");
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -chain:", pad) + 
                 PC.spacedOut(str(globs['chain']), opt_pad) +
                 "The number of chains to run");      

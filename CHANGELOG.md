@@ -40,3 +40,10 @@ Version 1.1.0, 02.11.2022
 - Organized option parsing and main code
 - Added `-scf` and `-s` options for sCF user cutoffs
 - Updated README and moved version 1 READMEs to `docs/`
+
+10.21.2022
+- More testing of tree class
+- Added `thin` as a user option
+- Split the HTML functions out of `plot.py` into `html.py`
+- Added new plots and output tables for `phyloacc_post.py`
+- Fixed default path of config file in PhyloAcc-GT `main.cpp`, now exits rather than trying a non-existant file

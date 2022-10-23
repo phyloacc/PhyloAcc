@@ -7,11 +7,14 @@ import sys
 import os
 import phyloacc_lib.core as CORE
 import phyloacc_lib.tree as TREE
-# import phyloacc_lib.tree_old as TREE
+import phyloacc_lib.tree_old as TREEF
 
 #############################################################################
 
 def readST(globs, tree_type="species", rf_to_st=False):
+
+    result = [];
+    # The list of objects to return; differs based on tree type
 
     step = "Reading input " + tree_type + " tree";
     step_start_time = CORE.report_step(globs, step, False, "In progress...");
@@ -23,48 +26,80 @@ def readST(globs, tree_type="species", rf_to_st=False):
                 if line.startswith("TREE: "):
                     tree_str = line.strip().replace("TREE: ", "");
             # Read the tree string from the MOD file
-        else:
+
+        elif tree_type == "from-log":
+            for line in open(globs['interface-logfile']):
+                if line.startswith("# Tree read from mod file:"):
+                    tree_str = line.strip().replace("# Tree read from mod file:", "");
+                    while tree_str[0] == " ":
+                        tree_str = tree_str[1:];
+                # Read the tree string from the interface log file
+
+                if line.startswith("# Loci per batch (-batch)"):
+                    batch_size = line.strip().replace("# Loci per batch (-batch)", "");
+                    batch_size = list(filter(None, batch_size.split(" ")))[0];
+
+                if line.startswith("# Processes per job (-p)"):
+                    procs_per_batch = line.strip().replace("# Processes per job (-p)", "");
+                    procs_per_batch = list(filter(None, procs_per_batch.split(" ")))[0];
+
+        elif tree_type == "coalescent":
             tree_str = open(globs['coal-tree-file'], "r").read();
 
-        tree = TREE.Tree(tree_str);
+        else:
+            CORE.errorOut("IO1", "INTERNAL: invalid tree type to read", globs);
 
-        # tree_dict, tree, root = TREE.treeParse(tree_str);
+        if globs['tree-data-type'] == 'class':
+            tree = TREE.Tree(tree_str);
+        elif globs['tree-data-type'] == 'func':
+            tree_dict, tree, root = TREEF.treeParse(tree_str);
         # Parse the tree string to the tree class
     except:
-        if tree_type == "species":
-            CORE.errorOut("IO3", "Error reading species tree from .mod file!");
-        else:
-            CORE.errorOut("IO3", "Error reading tree from file!");
+        CORE.errorOut("IO2", "Error reading tree from file!", globs);
     # Read the tree
 
-    tree.subtree = tree.genSubtrees();
-    tree.tree_str = tree.subtree[tree.root];
-    del tree.subtree;
+    if globs['tree-data-type'] == 'class':
+        tree.subtree = tree.genSubtrees();
+        tree.tree_str = tree.subtree[tree.root];
+        del tree.subtree;
 
-    root_str = "unrooted";
-    add_root_node = 0;
-    if tree.rooted:
-       root_str = "rooted";
-       add_root_node = 1;
-    # Node counting for log
+        root_str = "unrooted";
+        add_root_node = 0;
+        if tree.rooted:
+            root_str = "rooted";
+            add_root_node = 1;
+        # Node counting for log
 
-    # tips, internals = [], [];
-    # for node in tree_dict:
-    #     if tree_dict[node][2] == "tip":
-    #         tips.append(node);
-    #     else:
-    #         internals.append(node);
+        step_start_time = CORE.report_step(globs, step, step_start_time, "Success: " + root_str + " tree read");
+        CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Tree has "+ str(tree.num_tips) + " tips and " + str(tree.num_internals + add_root_node) + " internal nodes");
+        # Status update
 
-    step_start_time = CORE.report_step(globs, step, step_start_time, "Success: " + root_str + " tree read");
-    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Tree has "+ str(tree.num_tips) + " tips and " + str(tree.num_internals + add_root_node) + " internal nodes");
-    
-    # step_start_time = CORE.report_step(globs, step, step_start_time, "Success: tree read");
-    # CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Tree has "+ str(len(tips)) + " tips and " + str(len(internals)) + " internal nodes");
-    # Status updates
+    elif globs['tree-data-type'] == 'func':
+        tips, internals = [], [];
+        for node in tree_dict:
+            if tree_dict[node][2] == "tip":
+                tips.append(node);
+            else:
+                internals.append(node);
+
+
+        step_start_time = CORE.report_step(globs, step, step_start_time, "Success: tree read");
+        CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Tree has "+ str(len(tips)) + " tips and " + str(len(internals)) + " internal nodes");
+        # Status update
 
     ## TODO: Compare tree topologies
 
-    return tree_str, tree
+    if tree_type == "species":
+        if globs['tree-data-type'] == 'class':
+            result = [tree_str, tree];
+        elif globs['tree-data-type'] == 'func':
+            result = [tree_str, tree_dict, tree, root, tips, internals];
+    elif tree_type == "from-log":
+        result = [tree_str, tree, batch_size, procs_per_batch];
+    else:
+        result = [tree_str, tree];
+
+    return result;
     # return tree_str, tree_dict, tree, root, tips, internals;
 
 #############################################################################
@@ -75,6 +110,13 @@ def readSpeciesGroups(globs):
     step_start_time = CORE.report_step(globs, step, False, "In progress...");
     # Status update
 
+    if globs['tree-data-type'] == 'class':
+        nodes = globs['st'].nodes;
+        tips = globs['st'].tips;
+    elif globs['tree-data-type'] == 'func':
+        nodes = list(globs['st'].keys());
+        tips = globs['tips']
+
     for group in globs['groups']:
     # Check every group 
 
@@ -84,12 +126,14 @@ def readSpeciesGroups(globs):
             label_found = False;
             # A flag that lets us know if the label was found in the tree
 
-            for node in globs['st'].nodes:
+            # for node in globs['st'].nodes:
             # for node in globs['st']:
-             # For every node read in the tree
+            for node in nodes:
+            # For every node read in the tree
 
-                if node in globs['st'].tips:
+                # if node in globs['st'].tips:
                 # if node in globs['tips']:
+                if node in tips:
                     if label == node:
                         label_found = True;
                         globs['groups'][group].append(label);
@@ -97,13 +141,17 @@ def readSpeciesGroups(globs):
                 # Check if the current label is a tip in the tree and if so add it to the global group and break
 
                 else:
-                    if label in [ node, globs['st'].label[node] ]:
-                    # if label in [n, globs['st'][n][3]]:
-                        label_found = True;
-                        globs['groups'][group] += globs['st'].getClade(node);
-                        # cur_clade = TREE.getClade(n, globs['st']);
-                        # globs['groups'][group] += cur_clade;
-                        break;
+                    if globs['tree-data-type'] == 'class':
+                        if label in [ node, globs['st'].label[node] ]:
+                            label_found = True;
+                            globs['groups'][group] += globs['st'].getClade(node);
+                            break;
+                    elif globs['tree-data-type'] == 'func':
+                        if label in [n, globs['st'][n][3]]:
+                            label_found = True;
+                            cur_clade = TREEF.getClade(n, globs['st']);
+                            globs['groups'][group] += cur_clade;
+                            break;
                 # Check if the current label is an internal label (either from the tree input or from treeparse/--labeltree) and
                 # if so get all the tips descending from it to add to the global group and break
 
@@ -118,12 +166,15 @@ def readSpeciesGroups(globs):
     ##########
 
     if not globs['groups']['conserved']:
-        globs['groups']['conserved'] = [ node for node in globs['st'].tips if node not in globs['groups']['targets'] and node not in globs['groups']['outgroup'] ];
-        # globs['groups']['conserved'] = [ node for node in globs['tips'] if node not in globs['groups']['targets'] and node not in globs['groups']['outgroup'] ];
+        if globs['tree-data-type'] == 'class':
+            globs['groups']['conserved'] = [ node for node in globs['st'].tips if node not in globs['groups']['targets'] and node not in globs['groups']['outgroup'] ];
+        elif globs['tree-data-type'] == 'func':
+            globs['groups']['conserved'] = [ node for node in globs['tips'] if node not in globs['groups']['targets'] and node not in globs['groups']['outgroup'] ];
     # If the conserved group isn't specified, add all remaining tip species not in the other groups to it here
 
-    for tip in globs['st'].tips:
+    # for tip in globs['st'].tips:
     # for tip in globs['tips']:
+    for tip in tips:
         num_in_groups = 0;
         for group in globs['groups']:
             for label in globs['groups'][group]:
@@ -177,9 +228,15 @@ def writeCF(globs):
 
         ####################
 
+        if globs['tree-data-type'] == 'class':
+            internals = globs['st'].internals;
+        elif globs['tree-data-type'] == 'func':
+            internals = globs['internals'];
+
         outfile.write("\t".join(cf_headers) + "\n");
-        for node in globs['st'].internals:
+        # for node in globs['st'].internals:
         # for node in globs['internals']:
+        for node in internals:
             outline = [];
 
             if node in globs['scf']:
@@ -203,8 +260,10 @@ def writeCF(globs):
                 outline += ["NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA"];
                 scf_labels[node] = "NA";
 
-            outline = [node] + [ str(v) for v in outline ] + [globs['st'].label[node], globs['st'].bl[node]];
-            # outline = [node] + [ str(v) for v in outline ] + [ globs['st'][node][0], globs['st'][node][3] ];
+            if globs['tree-data-type'] == 'class':
+                outline = [node] + [ str(v) for v in outline ] + [globs['st'].label[node], globs['st'].bl[node]];
+            if globs['tree-data-type'] == 'func':
+                outline = [node] + [ str(v) for v in outline ] + [ globs['st'][node][0], globs['st'][node][3] ];
             outfile.write("\t".join(outline) + "\n");
             #print("\t".join(outline));
 
@@ -222,15 +281,18 @@ def writeCF(globs):
     # Add the output directory to the scftreefile name
 
     new_labels = { node : scf_labels[node] for node in globs['scf'] };
-    globs['scf-labeled-tree'] = globs['st'].addLabel(new_labels, delim="_");
+    
+    if globs['tree-data-type'] == 'class':
+        globs['scf-labeled-tree'] = globs['st'].addLabel(new_labels, delim="_");
 
-    # globs['scf-labeled-tree'] = globs['labeled-tree'];
-    # # Get the labeled input tree from treeParse
-    # globs['scf-labeled-tree'] = TREE.addBranchLength(globs['scf-labeled-tree'], globs['st']);
-    # # Add the branch lengths back onto the tree
-    # for node in globs['scf']:
-    #    globs['scf-labeled-tree'] = globs['scf-labeled-tree'].replace(node, node + "_" + str(round(globs['scf'][node]['avg-quartet-scf'], 2)));
-    # # For every node in the tree, add the averaged scf value over all loci to the label
+    elif globs['tree-data-type'] == 'func':
+        globs['scf-labeled-tree'] = globs['labeled-tree'];
+        # Get the labeled input tree from treeParse
+        globs['scf-labeled-tree'] = TREEF.addBranchLength(globs['scf-labeled-tree'], globs['st']);
+        # Add the branch lengths back onto the tree
+        for node in globs['scf']:
+            globs['scf-labeled-tree'] = globs['scf-labeled-tree'].replace(node, node + "_" + str(round(globs['scf'][node]['scf'], 2)));
+    # For every node in the tree, add the averaged scf value over all loci to the label
 
     with open(globs['scftreefile'], "w") as cf_tree_file:
         cf_tree_file.write(globs['scf-labeled-tree']);

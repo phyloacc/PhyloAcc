@@ -6,6 +6,7 @@
 import os
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
+import phyloacc_lib.tree_old as TREEF
 import phyloacc_lib.templates as TEMPLATES
 
 #############################################################################
@@ -205,6 +206,7 @@ def genJobFiles(globs):
                                                                             coal_tree_line=coal_tree_line,
                                                                             outdir=os.path.abspath(cur_out_dir),
                                                                             batch=batch_num_str,
+                                                                            thin=str(globs['thin']),
                                                                             burnin=str(globs['burnin']),
                                                                             mcmc=str(globs['mcmc']),
                                                                             chain=str(globs['chain']),

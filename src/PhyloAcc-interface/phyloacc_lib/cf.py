@@ -9,12 +9,12 @@ import time
 import copy
 import math
 import phyloacc_lib.core as CORE
-#import phyloacc_lib.tree_old as TREE
+import phyloacc_lib.tree_old as TREEF
 
 #############################################################################
 
 def locusSCF(locus_item):
-    locus, aln, quartets, st_nodes, aln_skip_chars = locus_item
+    locus, aln, quartets, st_nodes, aln_skip_chars, site_type = locus_item
     # Unpack the data for the current locus
 
     aln_len = len(aln[list(aln.keys())[0]]);
@@ -60,71 +60,101 @@ def locusSCF(locus_item):
             # Skip any alignments that don't have all 4 species from the current quartet
             # Not sure if this is the best way to deal with missing data...
 
-            ####################
-            sub_aln = [ aln[spec] for spec in quartet_spec_list ];
-            # Get the sub-alignment for the current quartet
+            ########################################
+            if site_type == "zip":
+                sub_aln = [ aln[spec] for spec in quartet_spec_list ];
+                # Get the sub-alignment for the current quartet
 
-            sites = zip(*sub_aln);
+                sites = zip(*sub_aln);
 
-            for site in sites:
-                if any(char in site for char in aln_skip_chars):
-                    continue;
-                # We only care about sites with full information for the quartet, so skip others here
+                for site in sites:
+                    if any(char in site for char in aln_skip_chars):
+                        continue;
+                    # We only care about sites with full information for the quartet, so skip others here
+
+                    uniq_site = set(site);
+                    # The alleles at the current site
+
+                    if len(uniq_site) > 1:
+                        quartet_scores[node][quartet]['variable-sites'] += 1;
+                    # If there is more than one allele, the site is variable                
+
+                        if all(site.count(allele) == 2 for allele in uniq_site):
+                        #if len(uniq_site) == 2:
+                            quartet_scores[node][quartet]['decisive-sites'] += 1;
+                        # If all alleles have a count of 2 at this site, it is decisive
+
+                            if site[0] == site[1] and site[2] == site[3]:
+                                quartet_scores[node][quartet]['concordant-sites'] += 1;
+                            # If the alleles from split1 match and the alleles from split2 match, the site is concordant
+                            elif site[0] == site[2] and site[1] == site[3]:
+                                quartet_scores[node][quartet]['disco1-sites'] += 1;
+                            elif site[0] == site[3] and site[1] == site[2]:
+                                quartet_scores[node][quartet]['disco2-sites'] += 1;
+                            # Otherwise they are discordant
+
+                del sites;
+                # Remove the sites from memory since it is a copy of the alignment
             ## Alternate way to loop over sites... faster and looks much nicer by but has memory leak??
-            ####################
+            ########################################
 
-            ####################
-            # sub_aln = {};
-            # for spec in quartet_spec_list:
-            #     sub_aln[spec] = aln[spec];
-            # # Get the sub-alignment for the current quartet
+            ########################################
+            elif site_type == "loop":
+            
+                sub_aln = {};
+                for spec in quartet_spec_list:
+                    sub_aln[spec] = aln[spec];
+                # Get the sub-alignment for the current quartet
 
-            # for j in range(aln_len):
-            # # Count every site in the sub-alignment
+                for j in range(aln_len):
+                # Count every site in the sub-alignment
 
-            #     site, split1_site, split2_site = "", "", "";
-            #     # The full site, the site for split1 and the site for split2
+                    site, split1_site, split2_site = "", "", "";
+                    # The full site, the site for split1 and the site for split2
 
-            #     for seq in sub_aln:
-            #         site += sub_aln[seq][j];
-            #         if seq in split1:
-            #             split1_site += sub_aln[seq][j];
-            #         if seq in split2:
-            #             split2_site += sub_aln[seq][j];
-            #     # Get the allele for every sequence in the sub-alignment and add it to the appropriate sites                    
+                    for seq in sub_aln:
+                        site += sub_aln[seq][j];
+                        if seq in split1:
+                            split1_site += sub_aln[seq][j];
+                        if seq in split2:
+                            split2_site += sub_aln[seq][j];
+                    # Get the allele for every sequence in the sub-alignment and add it to the appropriate sites                    
 
-            #     if any(state in site for state in aln_skip_chars):
-            #         continue;
-                # We only care about sites with full information for the quartet, so skip others here
-            ####################
+                    if any(state in site for state in aln_skip_chars):
+                        continue;
+                    # We only care about sites with full information for the quartet, so skip others here
+                ####################
 
-                uniq_site = set(site);
-                # The alleles at the current site
+                    uniq_site = set(site);
+                    # The alleles at the current site
 
-                if len(uniq_site) > 1:
-                    quartet_scores[node][quartet]['variable-sites'] += 1;6
-                # If there is more than one allele, the site is variable                
+                    if len(uniq_site) > 1:
+                        quartet_scores[node][quartet]['variable-sites'] += 1;
+                    # If there is more than one allele, the site is variable                
 
-                    if all(site.count(allele) == 2 for allele in uniq_site):
-                    #if len(uniq_site) == 2:
-                        quartet_scores[node][quartet]['decisive-sites'] += 1;
-                    # If all alleles have a count of 2 at this site, it is decisive
+                        if all(site.count(allele) == 2 for allele in uniq_site):
+                        #if len(uniq_site) == 2:
+                            quartet_scores[node][quartet]['decisive-sites'] += 1;
+                        # If all alleles have a count of 2 at this site, it is decisive
 
-                        # site = split1_site + split2_site;
+                            site = split1_site + split2_site;
 
-                        if site[0] == site[1] and site[2] == site[3]:
-                            quartet_scores[node][quartet]['concordant-sites'] += 1;
+                            if site[0] == site[1] and site[2] == site[3]:
+                                quartet_scores[node][quartet]['concordant-sites'] += 1;
+                            # If the alleles from split1 match and the alleles from split2 match, the site is concordant
+                            elif site[0] == site[2] and site[1] == site[3]:
+                                quartet_scores[node][quartet]['disco1-sites'] += 1;
+                            elif site[0] == site[3] and site[1] == site[2]:
+                                quartet_scores[node][quartet]['disco2-sites'] += 1;
+                            # Otherwise they are discordant
+
+
+                        # if split1_site[0] == split1_site[1] and split2_site[0] == split2_site[1] and split1_site[0] != split2_site[0]:
+                        # #if split1_site.count(split1_site[0]) == len(split1_site) and split2_site.count(split2_site[0]) == len(split2_site):
+                        #     quartet_scores[node][quartet]['concordant-sites'] += 1;
                         # If the alleles from split1 match and the alleles from split2 match, the site is concordant
-                        elif site[0] == site[2] and site[1] == site[3]:
-                            quartet_scores[node][quartet]['disco1-sites'] += 1;
-                        elif site[0] == site[3] and site[1] == site[2]:
-                            quartet_scores[node][quartet]['disco2-sites'] += 1;
-                        # Otherwise they are discordant
             ## End site loop
-            ####################
-
-            del sites;
-            # Remove the sites from memory since it is a copy of the alignment
+            ########################################
 
             if quartet_scores[node][quartet]['decisive-sites'] != 0:
                 quartet_scores[node][quartet]['scf'] = quartet_scores[node][quartet]['concordant-sites'] / quartet_scores[node][quartet]['decisive-sites'];
@@ -160,11 +190,13 @@ def scf(globs):
 
     step = "Sampling quartets";
     step_start_time = CORE.report_step(globs, step, False, "In progress...");
-    sampled_quartets = globs['st'].sampleQuartets();
+    if globs['tree-data-type'] == 'class':
+        sampled_quartets = globs['st'].sampleQuartets();
 
-    # root_desc = TREE.getDesc(globs['root'], globs['st']);
-    # # Get the descendants of the root node to exclude them from sCF calculations
-    # sampled_quartets = TREE.sampleQuartets(globs, root_desc);
+    elif globs['tree-data-type'] == 'func':
+        root_desc = TREEF.getDesc(globs['root'], globs['st']);
+        # Get the descendants of the root node to exclude them from sCF calculations
+        sampled_quartets = TREEF.sampleQuartets(globs, root_desc);
     step_start_time = CORE.report_step(globs, step, step_start_time, "Success");
     # Sample quartets for all nodes
 
@@ -185,9 +217,12 @@ def scf(globs):
     # The dictionary of site counts per quartet
 
     for node in sampled_quartets:
-        #if node in st.tips or node == st.root:
-        if node in globs['tips'] or node == globs['root']:
-            continue;
+        if globs['tree-data-type'] == 'class':
+            if node in globs['st'].tips or node == globs['st'].root:
+                continue;
+        if globs['tree-data-type'] == 'func':
+            if node in globs['tips'] or node == globs['root']:
+                continue;
         # Cannot calculate sCF for tips, the root, or node descendant from the root
 
         globs['scf'][node] = { 'variable-sites' : 0, 'decisive-sites' : 0, 
@@ -222,8 +257,14 @@ def scf(globs):
         #    result = locusSCF((locus, globs['alns'][locus], sampled_quartets, st, globs['aln-skip-chars']));
         # Serial version for debugging
 
-        for result in pool.imap_unordered(locusSCF, ((locus, globs['alns'][locus], sampled_quartets, globs['st'].internals, globs['aln-skip-chars']) for locus in globs['alns'])):
+        if globs['tree-data-type'] == 'class':
+            internals = globs['st'].internals;
+        elif globs['tree-data-type'] == 'func':
+            internals = globs['internals'];
+
+        # for result in pool.imap_unordered(locusSCF, ((locus, globs['alns'][locus], sampled_quartets, globs['st'].internals, globs['aln-skip-chars']) for locus in globs['alns'])):
         # for result in pool.imap_unordered(locusSCF, ((locus, globs['alns'][locus], sampled_quartets, globs['internals'], globs['aln-skip-chars']) for locus in globs['alns'])):
+        for result in pool.imap_unordered(locusSCF, ((locus, globs['alns'][locus], sampled_quartets, internals, globs['aln-skip-chars'], globs['scf-site-type']) for locus in globs['alns'])):
             # Loop over every locus in parallel to calculate sCF per node
 
             node_scf, locus, quartet_scores = result;
