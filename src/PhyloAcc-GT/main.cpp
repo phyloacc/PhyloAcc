@@ -106,7 +106,9 @@ void LoadParams(int argc, char* argv[])
     if (argc > 1)
         params_path = string(argv[1]);
     else
-        params_path = "/Users/zhiruihu/Phylogenetics/test_mammalData/param_chr2_Long2.txt"; //params2
+        // params_path = "/Users/zhiruihu/Phylogenetics/test_mammalData/param_chr2_Long2.txt"; //params2
+        cerr << " No parameter file specified. Exiting." << endl;
+        exit(1);        
 
     cout << "Loading program configurations from " << params_path << "......" <<endl;
 

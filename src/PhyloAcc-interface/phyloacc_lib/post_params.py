@@ -7,6 +7,7 @@
 import sys
 import os
 import timeit
+from collections import defaultdict
 import phyloacc_lib.core as CORE
 
 #############################################################################
@@ -44,9 +45,28 @@ def init():
 
         'bf1-cutoff' : 5,
         'bf2-cutoff' : 5,
+        'bf3-cutoff' : 5,
+
+        'bf1' : [],
+        'bf2' : [],
+        'bf3' : [],
+
+        'all-loci' : [],
+
+        'bf1-loci' : [],
+        'bf2-loci' : [],
+        'bf3-loci' : [],
+        # Bayes Factor summaries
+
+        'm2-per-locus' : defaultdict(int),
+        'm2-per-lineage' : defaultdict(int),
 
         'locus-stats' : {},
-        'accelerated-loci' : [],
+        'm0-loci' : [],
+        'm1-loci' : [],
+        'm2-loci' : [],
+
+        'summary' : {},
 
         'complete-batches' : [],
         'complete-batches-st' : [],
@@ -61,6 +81,7 @@ def init():
         'batch-runtimes' : [],
 
         'outdir' : '',
+        'results-dir' : '',
         'run-name' : 'phyloacc-post',
         'logfilename' : 'phyloacc-post.errlog',
         'tmpdir' : 'System default.',
@@ -71,6 +92,10 @@ def init():
         # Option to output plots/html
 
         'tree-string' : False,
+        'st' : False,
+        'st-rev-labels' : {},
+
+        'tree-data-type' : "class",
         'tree-dict' : False,
         'labeled-tree' : False,
         'root-node' : False,
@@ -79,9 +104,14 @@ def init():
 
         'plot-dir' : '',
         'input-tree-plot-file' : 'input-species-tree.png',
+        'bf-dist-file' : 'bf-dists.png',
         'bf1-dist-file' : 'bf1-hist.png',
         'bf2-dist-file' : 'bf2-hist.png',
+        'bf3-dist-file' : 'bf3-hist.png',
         'bf1-bf2-plot-file' : 'bf1-v-bf2.png',
+        'm2-locus-dist-file' : 'accelerated-lineages-per-locus-m2.png',
+        'm2-lineage-dist-file' : 'accelerated-loci-per-lineage-m2.png',
+
         'inf-sites-frac-plot-file' : 'informative-sites-frac-hist.png',
         'var-inf-sites-plot-file' : 'variable-informative-sites.png',
         'avg-scf-hist-file' : 'avg-scf-per-locus.png',

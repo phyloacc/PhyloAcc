@@ -34,14 +34,8 @@ def htmlSummary():
                         <div class="col-22-24" id="nav-links">
                             <a class="nav-link" href="#run-info">1. Run info</a>
                             <a class="nav-link" href="#bf">2. Bayes factors</a>
-                            {comment_start}
-                            <a class="nav-link" href="#locus-lens">3. Distribution of locus lengths</a>
-                            <a class="nav-link" href="#informative-sites">4. Distribution of informative sites per locus</a>
-                            <a class="nav-link" href="#variable-informative-sites">5. Correlation between variable and informative sites</a>
-                            <a class="nav-link" href="#scf">6. Site concordance factors (sCF) per locus</a>
-                            <a class="nav-link" href="#scf-tree">7. sCF across all loci</a>
-                            <a class="nav-link" href="#bl-scf">8. Branch length vs. sCF for the species tree</a> 
-                            {comment_end}
+                            <a class="nav-link" href="#m2-loci">3. Accelerated lineages per locus (M2)</a>
+                            <a class="nav-link" href="#m2-lineages">4. Lineages accelerated in most loci (M2)</a>
                         </div>
                     </div>
                 </div>
@@ -124,7 +118,46 @@ def htmlSummary():
 
                     {batch_comment_end}
 
+                    <div class="sub-header">Bayes factor cut-offs</div>
+                    <div class="table-container">
+                        <table class="table-content" id="bf-table">
+                            <thead>
+                                <th>Bayes Factor</th>
+                                <th>Models compared</th>
+                                <th>Cut-off</th>
+                                <th># loci above cut-off</th>
+                            </thead>
+                            <tr>
+                                <td>BF1</td>
+                                <td>M1 (target acceleration) vs. M0 (no acceleration)</td>
+                                <td>{bf1_cutoff}</td>
+                                <td>{bf1_loci}</td>
+                            </tr>
+
+                            <tr>
+                                <td>BF2</td>
+                                <td>M1 (target acceleration) vs. M2 (free acceleration)</td>
+                                <td>{bf2_cutoff}</td>
+                                <td>{bf2_loci}</td>
+                            </tr>
+
+                            <tr>
+                                <td>BF3</td>
+                                <td>M2 (free acceleration) vs. M0 (no acceleration)</td>
+                                <td>{bf3_cutoff}</td>
+                                <td>{bf3_loci}</td>
+                            </tr>                            
+
+                        </table>
+                    </div>
+
+
                     <div class="sub-header">Result summary</div>
+
+                    <p>
+                        Acclerated loci (targets) are those above the cut-off of both BF1 and BF2.
+                    </p>
+
                     <div class="table-container">
                         <table class="table-content">
                             <tr>
@@ -133,9 +166,14 @@ def htmlSummary():
                             </tr>
 
                             <tr>
-                                <td>Accelerated loci</td>
-                                <td>{accelerated_loci}</td>
+                                <td>Accelerated loci (targets)</td>
+                                <td>{target_loci}</td>
                             </tr>
+
+                            <tr>
+                                <td>Accelerated loci (full)</td>
+                                <td>{full_loci}</td>
+                            </tr>                            
                         </table>
                     </div>
 
@@ -201,47 +239,36 @@ def htmlSummary():
                 <div class="col-24-24 content-col" id="bf">
                     <div class="section-header">2. Bayes factors</div>
 
-                    {comment_start}
                     <div class="table-container">
                         <table class="table-content">
                             <tr>
-                                <td>Average alignment length</td>
-                                <td>{avg_aln_len}</td>
+                                <td>Median BF1</td>
+                                <td>{med_bf1}</td>
                             </tr>
 
                             <tr>
-                                <td>Median alignment length</td>
-                                <td>{median_aln_len}</td>
+                                <td>Median BF2</td>
+                                <td>{med_bf2}</td>
                             </tr>                        
 
                             <tr>
-                                <td>Average sequence length (no gaps) per alignment</td>
-                                <td>{avg_seq_len_nogap}</td>
+                                <td>Median BF3</td>
+                                <td>{med_bf3}</td>
                             </tr>   
-
-                           <tr>
-                                <td>Median sequence length (no gaps) per alignment</td>
-                                <td>{med_seq_len_nogap}</td>
-                            </tr>   
-
                         </table>
                     </div>
-                    {comment_end}
 
                     <div class="row img-row" id="bf-container-row">
-                        <div class="col-2-24 margin"></div>
-                        <div class="col-9-24 img-container" id="bf1-container">
-                            <img id="bf1-img" src="{bf1_hist}">
+                        <div class="col-7-24 margin"></div>
+                        <div class="col-10-24 img-container" id="bf1-container">
+                            <img id="bf-img" src="{bf_boxplot}">
                         </div>
-                        <div class="col-2-24 margin"></div>
-                        <div class="col-9-24 img-container" id="bf2-container">
-                            <img id="bf2-img" src="{bf2_hist}">
-                        </div>
-                        <div class="col-2-24 margin"></div>
+                        <div class="col-7-24 margin"></div>
                     </div>
 
                     <div class="small-sep-div"></div>
 
+                    {comment_start}
                     <div class="row img-row" id="bf-container-row">
                         <div class="col-7-24 margin"></div>
                         <div class="col-10-24 img-container" id="bf1-bf2-container">
@@ -249,10 +276,84 @@ def htmlSummary():
                         </div>
                         <div class="col-7-24 margin"></div>
                     </div>
+                    {comment_end}
 
 
                 </div>
             </div>
+
+            <div class="sep-div"></div>
+
+            <div class="row content-row" id="m2-row">
+                <div class="col-24-24 content-col" id="m2-loci">
+                    <div class="section-header">3. Accelerated lineages per locus under full model (M2)</div>
+
+                    <div class="table-container">
+                        <table class="table-content">
+                            <tr>
+                                <td>Avg. accelerated branches per locus</td>
+                                <td>{avg_m2_locus}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Median accelerated branches per locus</td>
+                                <td>{med_m2_locus}</td>
+                            </tr>                         
+                        </table>
+                    </div>
+
+                    <div class="small-sep-div"></div>
+
+                    <div class="row img-row" id="m2-container-row">
+                        <div class="col-7-24 margin"></div>
+                        <div class="col-10-24 img-container" id="m2-container">
+                            <img id="m2-img" src="{m2_dist}">
+                        </div>
+                        <div class="col-7-24 margin"></div>
+                    </div>
+
+                    <div class="small-sep-div"></div>
+                </div>
+            </div>
+
+            <div class="sep-div"></div>
+
+            <div class="row content-row" id="m2-row">
+                <div class="col-24-24 content-col" id="m2-lineages">
+                    <div class="section-header">4. Accelerated lineages in most loci under full model (M2)</div>
+
+                    <div class="table-container">
+                        <table class="table-content">
+                            <tr>
+                                <td>Avg. times a branch is accelerated</td>
+                                <td>{avg_m2_lineages}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Median times a branch is accelerated</td>
+                                <td>{med_m2_lineages}</td>
+                            </tr>                         
+                        </table>
+                    </div>
+
+                    <div class="small-sep-div"></div>
+
+                    <p>
+                        The 10 lineages accelerated in the most loci.
+                    </p>
+
+                    <div class="row img-row" id="m2-container-row">
+                        <div class="col-7-24 margin"></div>
+                        <div class="col-10-24 img-container" id="m2-container">
+                            <img id="m2-img" src="{m2_counts}">
+                        </div>
+                        <div class="col-7-24 margin"></div>
+                    </div>
+
+                    <div class="small-sep-div"></div>
+                </div>
+            </div>
+
 
             <div class="sep-div"></div>
 
@@ -527,17 +628,26 @@ def htmlSummary():
         border-radius: 10px;
         width: 25%;
     }}
+    #bf-table {{
+        width: 60%;
+    }}
     .table-content  th {{
-        background-color:#000000;
+        background-color:#333333;
         /* background-color: #A9C686; */
         /* background-color: #6B8B39; */
         padding:5px;
-        width:12.5%;
-        color: #ececec;
+        /* width:12.5%; */
+        color: #ffffff;
         /* border:1px solid red; */
     }}
     .table-content  tr:nth-child(even) {{
         background-color:#E0DEDE;
+    }}
+    #bf-table th:nth-child(1) {{
+        border-top-left-radius: 10px;
+    }}
+    #bf-table th:nth-child(4) {{
+        border-top-right-radius: 10px;
     }}
 
     /*------------------------------------------------------*/
