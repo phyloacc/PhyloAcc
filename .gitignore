@@ -2,6 +2,7 @@ src/PhyloAcc-interface/phyloacc_lib/__pycache__/
 *.pyc
 .snakemake
 *.code-workspace
+src/PhyloAcc-interface/notes.txt
 src/PhyloAcc-interface/test/
 src/PhyloAcc-interface/id-test/
 src/PhyloAcc-interface/phyloacc_lib/templates_old.py
