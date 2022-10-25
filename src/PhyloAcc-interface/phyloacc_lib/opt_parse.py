@@ -133,9 +133,10 @@ def optParse(globs):
 
     ####################
 
-    if not args.mod_file:
-        PC.errorOut("OP3", "A mod file must be provided with -m", globs);
-    globs['mod-file'] = args.mod_file;
+    if not args.depcheck:
+        if not args.mod_file:
+            PC.errorOut("OP3", "A mod file must be provided with -m", globs);
+        globs['mod-file'] = args.mod_file;
     # Check the mod file
 
     # Species tree/rate file
