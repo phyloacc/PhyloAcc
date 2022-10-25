@@ -385,7 +385,7 @@ if __name__ == '__main__':
             idout.write("# TREE: " + globs['st'].tree_str + "\n");            
         idout.write("#\n");  
         id_headers = ["phyloacc.id", "original.id", "best.fit.model", "marginal.likelihood.m0", "marginal.likelihood.m1", "marginal.likelihood.m2", 
-                        "logbf1", "logbf2", "logbf3", "num.accel.m0", "num.accel.m1", "num.accel.m2", "accel.lineages.m1", "accel.lineages.m2"];
+                        "logbf1", "logbf2", "logbf3", "num.accel.m1", "num.accel.m2", "accel.lineages.m1", "accel.lineages.m2"];
         idout.write("\t".join(id_headers) + "\n");
         # Write some headers and explanatory info at the top of the file
 

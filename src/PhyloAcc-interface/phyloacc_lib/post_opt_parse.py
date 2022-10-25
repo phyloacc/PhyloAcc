@@ -110,17 +110,6 @@ def optParse(globs):
     ## Interface input directory check
     ####################
 
-    interface_logfiles = [ f for f in os.listdir(globs['interface-run-dir']) if f.endswith(".log") and f != os.path.basename(globs['logfilename']) ];
-    if len(interface_logfiles) > 1:
-        CORE.errorOut("OP1", "Found multiple logfiles in the input directory. Make sure there is only one coinciding with the run you want to analyze.", globs);
-    if len(interface_logfiles) < 1:
-        CORE.errorOut("OP2", "Cannot find interface logfile in the input directory.", globs);
-    else:
-        globs['interface-logfile'] = os.path.abspath(os.path.join(globs['interface-run-dir'], interface_logfiles[0]));
-
-    ## Interface log file check
-    ####################
-
     globs['phyloacc-out-dir'] = os.path.join(globs['interface-run-dir'], "phyloacc-job-files", "phyloacc-output");
     
     # The directory with all the PhyloAcc output files
@@ -186,15 +175,24 @@ def optParse(globs):
     #globs['run-name'] = os.path.basename(os.path.normpath(globs['interface-run-dir']));
     globs['logfilename'] = os.path.join(globs['outdir'], "phyloacc-post.log");
     
-    # Log file
-    ####################
-
     if not args.append_log_flag:
         logfile = open(globs['logfilename'], "w");
         logfile.write("");
         logfile.close();
     # Prep the logfile to be overwritten
 
+    # Log file
+    ####################
+
+    interface_logfiles = [ f for f in os.listdir(globs['interface-run-dir']) if f.endswith(".log") and f != os.path.basename(globs['logfilename']) ];
+    if len(interface_logfiles) > 1:
+        CORE.errorOut("OP1", "Found multiple logfiles in the input directory. Make sure there is only one coinciding with the run you want to analyze.", globs);
+    if len(interface_logfiles) < 1:
+        CORE.errorOut("OP2", "Cannot find interface logfile in the input directory.", globs);
+    else:
+        globs['interface-logfile'] = os.path.abspath(os.path.join(globs['interface-run-dir'], interface_logfiles[0]));
+
+    ## Interface log file check
     ####################
 
     if args.quiet_flag:
