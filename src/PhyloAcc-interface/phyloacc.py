@@ -90,6 +90,9 @@ if __name__ == '__main__':
     elif globs['tree-data-type'] == 'func':
         globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
 
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", 45) + globs['tree-string']);
+    # Report the tree that was read -- this line is necessary for phyloacc_post.py to read the tree used in the run
+
     if globs['debug-tree']:
         TREE.debugTree(globs);
         sys.exit(0);

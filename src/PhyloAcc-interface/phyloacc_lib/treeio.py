@@ -82,7 +82,6 @@ def readST(globs, tree_type="species", rf_to_st=False):
             else:
                 internals.append(node);
 
-
         step_start_time = CORE.report_step(globs, step, step_start_time, "Success: tree read");
         CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Tree has "+ str(len(tips)) + " tips and " + str(len(internals)) + " internal nodes");
         # Status update

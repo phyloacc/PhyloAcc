@@ -210,6 +210,7 @@ if __name__ == '__main__':
 
                     if first_file:
                         locus_id = batch + "-" + line[1];
+
                         id_keys[batch][line[0]] = locus_id;
                         globs['all-loci'].append(locus_id);
                         # Get the current locus ID based on the batch number and locus number within batch
@@ -233,9 +234,12 @@ if __name__ == '__main__':
                         globs['locus-stats'][cur_data][locus_id]["logBF3"] = str(round(logbf3, 6));
                         # Add BF3 to the locus stats
 
-                        globs['locus-stats'][cur_data][locus_id]["m0-lineages"] = [];
-                        globs['locus-stats'][cur_data][locus_id]["m1-lineages"] = [];
-                        globs['locus-stats'][cur_data][locus_id]["m2-lineages"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m0-lineages-cons"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m0-lineages-acc"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m1-lineages-cons"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m1-lineages-acc"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m2-lineages-cons"] = [];
+                        globs['locus-stats'][cur_data][locus_id]["m2-lineages-acc"] = [];
                         # Add a column that will store a list of the accelerated lineages from the z-matrix
 
                         bf1, bf2, bf3 = False, False, False;
@@ -283,13 +287,17 @@ if __name__ == '__main__':
 
                             for z in range(len(z_scores)):
                             # Loop over every z score
+                                cur_label = cur_headers[z+1];
+                                # lookup the lineage label from the headers
+
+                                if z_scores[z] == "1":
+                                    globs['locus-stats']["elem_lik"][locus_id][cur_model.lower() + "-lineages-cons"].append(cur_label);
+                                ## End conserved block
                                 if z_scores[z] == "2":
                                 # If the current z score is accelerated (2)
 
-                                    num_accel += 1;
-                                    cur_label = cur_headers[z+1];
-                                    # Increment the number accelerated for this locus and lookup the
-                                    # lineage label from the headers
+                                    num_accel += 1;                                    
+                                    # Increment the number accelerated for this locus and 
 
                                     # if globs['st'].has_label:
                                     #     cur_label = globs['st-rev-labels'][cur_label];
@@ -299,14 +307,19 @@ if __name__ == '__main__':
                                         globs['m2-per-lineage'][cur_label] += 1;
                                     # Increment the count of acclerated elements for this branch/label
 
-                                    globs['locus-stats']["elem_lik"][locus_id][cur_model.lower() + "-lineages"].append(cur_label);        
+                                    globs['locus-stats']["elem_lik"][locus_id][cur_model.lower() + "-lineages-acc"].append(cur_label);        
                                 ## End accelerated block
                             ## End z score loop
                             
                             if cur_model == "M2":
                                 globs['m2-per-locus'][num_accel] += 1;
                             # Increment the bin for the number of branches accelerated per locus 
-                        ## End Z matrix file block                       
+                        ## End Z matrix file block
+
+                        # if "_rate_postZ_" in cur_batch_file:
+                        #      print(cur_batch_file);
+                        #      sys.exit();
+                                            
 
                         outfile.write("\t".join(outline) + "\n");
                         # Write the line to the output file
@@ -328,6 +341,10 @@ if __name__ == '__main__':
 
     step_start_time = CORE.report_step(globs, step, step_start_time, "Success: files combined");
     # Status update
+
+    # print();
+    # print(globs['locus-stats']['rate_postZ_M0']['50-4'].keys());
+    # sys.exit();
 
     # print();
     # print(len(globs['all-loci']), len(globs['m0-loci']), len(globs['m1-loci']), len(globs['m2-loci']));
@@ -369,10 +386,17 @@ if __name__ == '__main__':
         idout.write("# marginal.likelihood.m2:    The marginal likelihood from M2\n");
         idout.write("# logbf1:                    The Bayes factor between M1 and M0 (logbf1 = marginal.likelihood.m1 - marginal.likelihood.m0, specified cutoff was " + str(globs['bf1-cutoff']) +")\n");
         idout.write("# logbf2:                    The Bayes factor between M1 and M2 (logbf2 = marginal.likelihood.m1 - marginal.likelihood.m2, specified cutoff was " + str(globs['bf2-cutoff']) +")\n");
-        idout.write("# logbf3:                    The Bayes factor between M2 and M1 (logbf3 = marginal.likelihood.m2 - marginal.likelihood.m0, specified cutoff was " + str(globs['bf3-cutoff']) +")\n");     
+        idout.write("# logbf3:                    The Bayes factor between M2 and M1 (logbf3 = marginal.likelihood.m2 - marginal.likelihood.m0, specified cutoff was " + str(globs['bf3-cutoff']) +")\n");
+        idout.write("# conserved.rate.m0:         The posterior median of the conserved substitution rate under M0\n");
+        idout.write("# accel.rate.m0:             The posterior median of the accelerated substitution rate under M0\n");          
+        idout.write("# conserved.rate.m1:         The posterior median of the conserved substitution rate under M1\n");
+        idout.write("# accel.rate.m1:             The posterior median of the accelerated substitution rate under M1\n");  
+        idout.write("# conserved.rate.m2:         The posterior median of the conserved substitution rate under M2\n");
+        idout.write("# accel.rate.m2:             The posterior median of the accelerated substitution rate under M2\n");    
         idout.write("# num.accel.m1:              The number of lineages inferred to be accelerated under M1\n");        
         idout.write("# num.accel.m2:              The number of lineages inferred to be accelerated under M2\n");        
         idout.write("# accel.lineages.m1:         A comma separated list of the accelerated lineages under M1\n");
+        idout.write("# conserved.lineages.m2:     A comma separated list of the conserved lineages under M2\n");
         idout.write("# accel.lineages.m2:         A comma separated list of the accelerated lineages under M2\n");
         idout.write("#\n");        
         idout.write("# NOTE: M0 = null model   (no acceleration, classifed when BFs are below cutoffs for M1 and M2)\n");
@@ -385,7 +409,9 @@ if __name__ == '__main__':
             idout.write("# TREE: " + globs['st'].tree_str + "\n");            
         idout.write("#\n");  
         id_headers = ["phyloacc.id", "original.id", "best.fit.model", "marginal.likelihood.m0", "marginal.likelihood.m1", "marginal.likelihood.m2", 
-                        "logbf1", "logbf2", "logbf3", "num.accel.m1", "num.accel.m2", "accel.lineages.m1", "accel.lineages.m2"];
+                        "logbf1", "logbf2", "logbf3", 
+                        "conserved.rate.m0", "accel.rate.m0", "conserved.rate.m1", "accel.rate.m1", "conserved.rate.m2", "accel.rate.m2", 
+                        "num.accel.m1", "num.accel.m2", "conserved.lineages.m1", "accel.lineages.m1", "conserved.lineages.m2", "accel.lineages.m2"];
         idout.write("\t".join(id_headers) + "\n");
         # Write some headers and explanatory info at the top of the file
 
@@ -429,11 +455,28 @@ if __name__ == '__main__':
                     outline.append(globs['locus-stats']['elem_lik'][locus_id][col]);
                 # Compile the output list based on the desired columns
 
-                for model in ["m1", "m2"]:
-                    outline.append(str(len(globs['locus-stats']['elem_lik'][locus_id][model + "-lineages"])));
+                for model in ["M0", "M1", "M2"]:
+                    post_z_key = "rate_postZ_" + model;
+                    for rate in ["c_rate", "n_rate"]:
+                        if rate in globs['locus-stats'][post_z_key][locus_id]:
+                            outline.append(str(globs['locus-stats'][post_z_key][locus_id][rate]));
+                        else:
+                            outline.append("NA");
 
-                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m1-lineages"]));
-                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m2-lineages"]));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M0'][locus_id]['c_rate']));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M0'][locus_id]['n_rate']));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M1'][locus_id]['c_rate']));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M1'][locus_id]['n_rate']));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M2'][locus_id]['c_rate']));
+                # outline.append(str(globs['locus-stats']['rate_postZ_M2'][locus_id]['n_rate']));
+
+                for model in ["m1", "m2"]:
+                    outline.append(str(len(globs['locus-stats']['elem_lik'][locus_id][model + "-lineages-acc"])));
+
+                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m1-lineages-cons"]));
+                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m1-lineages-acc"]));
+                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m2-lineages-cons"]));
+                outline.append(",".join(globs['locus-stats']['elem_lik'][locus_id]["m2-lineages-acc"]));
 
                 idout.write("\t".join(outline) + "\n");
                 # Write the output to the id key file:
