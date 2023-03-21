@@ -178,7 +178,7 @@ public:
         log_cache_TM_cons = vector<mat >(N, zeros<mat> (bpp.num_base,bpp.num_base));
         log_cache_TM_null = vector<mat >(N, zeros<mat> (bpp.num_base,bpp.num_base));
         
-        log_TM_Int = vector<mat >(N, zeros<mat>(3,2));
+        log_TM_Int = vector<mat >(N, zeros<mat>(3,3));
         
 //        for(size_t i =0 ;i <3; i++)  // hyperparameter for loss and gain rates
 //        {

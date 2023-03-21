@@ -121,8 +121,6 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
     
     int effective_sum = 0;
     
-    //// get P(Z |C) for each configuration
-    ////vector<double> priorZ = prior_Z_subtree(configZ, numConfigZ);
     // get log(P(X, Z)),logdet(Sigma) for each configuration
     for(unsigned int i = 0; i<numConf;i++)
     {
@@ -130,17 +128,19 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         if(w < 0.02) continue; // always keep MaxZ (if only one config, same as Chib)
         
         // compute P(Z|C)
-        mat nZ = zeros(3,2);
+        mat nZ = zeros(3,3);
         for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
         {
             int p = parent2[*it];
-            if(configZ[i][p] < 2)
-            {
+            //if(configZ[i][p] < 2)
+            //{
                 nZ(configZ[i][*it],configZ[i][p]) += 1;
-            }
+            //if(configZ[i][p] == 2 && configZ[i][*it] == 1) cout << p << " -> " << *it << endl; 
+            //}
         }
-        
-        double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
+        cout << nZ << endl;
+        assert(nZ(2,0) == 0);
+        double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b); //nZ(2,0) should be zero
         
         for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
         {
@@ -148,15 +148,16 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
             {
                 int p = parent2[*it];
                 assert(p!=N);
-                if(configZ[i][p] < 2)
-                {
+                assert(configZ[i][p] < 2);
+                //if(configZ[i][p] < 2)
+                //{
                     nZ(configZ[i][*it],configZ[i][p]) -= 1;
-                }
+                //}
             }
         }
         
         priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
-        if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+        if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
         
         //root
         priorZ += prior_z.at(configZ[i][root]);
@@ -240,15 +241,16 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
         for(unsigned int i = 0; i < numConf;i++)
         {
             // compute P(Z|C)
-            mat nZ = zeros(3,2);
+            mat nZ = zeros(3,3);
             for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
             {
                 int p = parent2[*it];
-                if(configZ[i][p] < 2)
-                {
+                //if(configZ[i][p] < 2)
+                //{
                     nZ(configZ[i][*it],configZ[i][p]) += 1;
-                }
+                //}
             }
+            assert(nZ(2,0) == 0);
             double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
             
             for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
@@ -257,15 +259,16 @@ void BPP_C::Eval2(BPP&bpp, int resZ)  // VB lower bound
                 {
                     int p = parent2[*it];
                     assert(p!=N);
-                    if(configZ[i][p] < 2)
-                    {
+                    assert(configZ[i][p] < 2);
+                    //if(configZ[i][p] < 2)
+                    //{
                         nZ(configZ[i][*it],configZ[i][p]) -= 1;
-                    }
+                    //}
                 }
             }
             
             priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
-            if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+            if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
             
             //root
             priorZ += prior_z.at(configZ[i][root]);

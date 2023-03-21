@@ -56,10 +56,10 @@ int num_chain; // outer loop of updates Q matrix and hyperparameter of substitut
 
 
 double prep_lrate = 0.5;
-double prep_lrate2 = 0.0; //0.1
+double prep_lrate2 = 0.1; //
 double prep_grate = 0.8; // initalization
 
-double prior_lrate2_a = 0.0,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
+double prior_lrate2_a = 1,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
 double prior_lrate_a = 1 ,prior_lrate_b = 1 ; // beta prior for lrate, 1,9
 double prior_grate_a = 1,prior_grate_b = 1; // beta prior for grate, 3,1
 
@@ -106,7 +106,7 @@ void LoadParams(int argc, char* argv[])
     if (argc > 1)
         params_path = string(argv[1]);
     else
-        // params_path = "/Users/zhiruihu/Phylogenetics/test_mammalData/param_chr2_Long2.txt"; //params2
+        params_path = "/Users/zhu/PhyloAcc/Yan-etal-2022/param_chr2_Long2.txt"; //params2
         cerr << " No parameter file specified. Exiting." << endl;
         exit(1);        
 
@@ -185,6 +185,10 @@ void LoadParams(int argc, char* argv[])
             line_stream >> prior_lrate_a;
         else if (tmp=="HYPER_LRATE_B")
             line_stream >> prior_lrate_b;
+        else if (tmp=="HYPER_LRATE2_A")
+            line_stream >> prior_lrate2_a;
+        else if (tmp=="HYPER_LRATE2_B")
+            line_stream >> prior_lrate2_b;
         else if (tmp=="HYPER_GRATE_A")
             line_stream >> prior_grate_a;
         else if (tmp=="HYPER_GRATE_B")
@@ -245,6 +249,8 @@ void LoadParams(int argc, char* argv[])
             cout << "Unknown parameter: " << tmp <<endl;
 
     }
+    
+    if(prior_lrate2_a==0) prep_lrate2 = 0;
 
     // trimming file names
     phytree_path = strutils::trim(phytree_path, " \"\t\n");
