@@ -1017,6 +1017,18 @@ void BPP_C::MonitorChain(int  m,int iter, int max_iter, BPP &bpp, double ind_pro
         gtree->printTree(gtree->root, bpp, buffer);
         Max_GT = buffer.str();
         
+//        mat nZ = zeros(3,3);
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+//        {
+//            int p = bpp.parent[*it];
+//            //if(Z[p] < 2)
+//            //{
+//                nZ(Z[*it],Z[p]) += 1;
+//            //}
+//        }
+        //cout << "iter " << m <<": " << endl;
+        //cout << nZ << endl;
+        
     }
 
     if( m>=new_burn && (m%5000==0) && verbose){  // && verbose

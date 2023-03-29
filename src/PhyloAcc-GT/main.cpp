@@ -106,9 +106,9 @@ void LoadParams(int argc, char* argv[])
     if (argc > 1)
         params_path = string(argv[1]);
     else
-        params_path = "/Users/zhu/PhyloAcc/Yan-etal-2022/param_chr2_Long2.txt"; //params2
-        cerr << " No parameter file specified. Exiting." << endl;
-        exit(1);        
+        params_path = "/Users/zhu/PhyloAcc/Yan-etal-2022/param_CaseB.txt"; //params2
+        //cerr << " No parameter file specified. Exiting." << endl;
+        //exit(1);
 
     cout << "Loading program configurations from " << params_path << "......" <<endl;
 
@@ -310,52 +310,52 @@ int main(int argc, char* argv[])
     // init and display the running parameters
     DispParams(profile, seed);
 
+    // load the phylogenetic tree
+    PhyloTree phytree = LoadPhyloTree(phytree_path); //Han: .subs_rate contains Q
+    
     PhyloTree_theta tree2;
     if(tree_coal_unit !=""){
         tree2 = LoadPhyloTree_theta(tree_coal_unit);
+        //get thetas
+        double theta_cum=0;
+        int count_cum=0;
+        int N = phytree.nodes_names.size();
+        vector<int> pos_cum=vector<int> (N,0);
+        for(int i=0; i<(N-1); i++){
+            if(phytree.nodes_names[i]!=tree2.nodes_names[i]){
+                cout<<"i="<<i<<". tree1_name="<<phytree.nodes_names[i]<<", tree2_name="<<tree2.nodes_names[i]<<endl;
+                cerr<<"two trees do not have the same topology"<<endl;
+                exit(1);
+            }else{
+                if(i<phytree.S){
+                    phytree.thetas[i]=0;
+                }else{
+                    //cout<<"\ni="<<i<<": ";
+                    if((tree2.distances[i]!=1.0) && (tree2.distances[i]!= 7.0) && (tree2.distances[i]!= 0)){
+                        phytree.thetas[i]=2*phytree.distances[i]/tree2.distances[i];
+                        if(phytree.thetas[i]>= theta_cutoff){
+                            pos_cum[i]=1;
+                        }else{
+                            theta_cum+=phytree.thetas[i];
+                            count_cum+=1;
+                        }
+                    }else{
+                        pos_cum[i]=1;
+                    }
+                }
+            }
+        }
+        double theta_aver=theta_cum/count_cum;
+        pos_cum[N-1]=1;
+        for(int i=phytree.S; i<N; i++){
+            if(pos_cum[i]==1) phytree.thetas[i]=theta_aver;
+            //cout<<"node "<<phytree.nodes_names[i]<<" theta="<<phytree.thetas[i]<<endl;
+        }
     }else{
         cout<<"please input a phylogengy with branch length in coalescent unit."<<endl;
         return 1;
     } 
 
-    // load the phylogenetic tree
-    PhyloTree phytree = LoadPhyloTree(phytree_path); //Han: .subs_rate contains Q
-
-    //get thetas
-    double theta_cum=0;
-    int count_cum=0;
-    int N = phytree.nodes_names.size();
-    vector<int> pos_cum=vector<int> (N,0);
-    for(int i=0; i<(N-1); i++){
-        if(phytree.nodes_names[i]!=tree2.nodes_names[i]){
-            cout<<"i="<<i<<". tree1_name="<<phytree.nodes_names[i]<<", tree2_name="<<tree2.nodes_names[i]<<endl;
-            cerr<<"two trees do not have the same topology"<<endl;
-            exit(1);
-        }else{
-            if(i<phytree.S){
-                phytree.thetas[i]=0;
-            }else{
-                //cout<<"\ni="<<i<<": ";
-                if((tree2.distances[i]!=1.0) && (tree2.distances[i]!= 7.0) && (tree2.distances[i]!= 0)){
-                    phytree.thetas[i]=2*phytree.distances[i]/tree2.distances[i];
-                    if(phytree.thetas[i]>= theta_cutoff){
-                        pos_cum[i]=1;
-                    }else{
-                        theta_cum+=phytree.thetas[i];
-                        count_cum+=1;
-                    }
-                }else{
-                    pos_cum[i]=1;
-                }
-            }
-        }
-    }
-    double theta_aver=theta_cum/count_cum;
-    pos_cum[N-1]=1;
-    for(int i=phytree.S; i<N; i++){
-        if(pos_cum[i]==1) phytree.thetas[i]=theta_aver;
-        //cout<<"node "<<phytree.nodes_names[i]<<" theta="<<phytree.thetas[i]<<endl;
-    }
 
     // create and init the BPP object
     //BPP bpp(0, profile, phytree, output_path, targetspecies, outgroup, conserve_prop, conservegroup, ratio0, ratio1, ropt, cub, nlb, nprior_a, nprior_b, cprior_a, cprior_b, seed, seed2, prep_grate, prep_lrate, prep_lrate2, prior_grate_a, prior_grate_b,prior_lrate_a, prior_lrate_b,prior_lrate2_a, prior_lrate2_b,  indel, indel2, missing_thres, sample_indel,prior_dir_par, br_sample_cutoff);
