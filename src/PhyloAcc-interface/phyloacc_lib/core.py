@@ -96,8 +96,8 @@ def execCheck(globs, a):
         if not cur_passed:
             deps_passed = False
             dcheck_str[2] = "FAILED with exit code " + str(cmd_result.returncode);
-            #if not a.depcheck:    
-            #    errorOut("CORE2", opt + " not found at specified path: " + globs[opt], globs);
+            if not a.depcheck:    
+                errorOut("CORE2", opt + " not found at specified path: " + globs[opt], globs);
             # On a normal run, exit immediately.  
         # Check whether the pass has failed for the current option and take action here
 
