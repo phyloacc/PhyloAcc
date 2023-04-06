@@ -137,6 +137,8 @@ def init():
         #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
         'phyloacc-gt' : 'PhyloAcc-GT',
         #'phyloacc-gt' : "/n/home07/gthomas/anaconda3/envs/phyloacc-conda/bin/PhyloAcc-GT",
+        'coal-cmd' : 'java -jar astral.jar',
+        'iqtree-path' : 'iqtree',
         # Dependency paths
 
         'batch' : True,

@@ -1,3 +1,7 @@
+04.06.2023
+- Fixed ids dir when `--theta` is set
+- Added `-iqtree-path` and `-coal-cmd` options to specify programs to estimate branch lengths in coalescent units when `--theta` is set
+
 Version 1.1.0, 02.11.2022
 - Combining PhyloAcc and Python interface repos to facilitate codebase mergining in the future and to develop the conda package
 - Moved all data files to Hu-etal-2019 to split into a separate repo later

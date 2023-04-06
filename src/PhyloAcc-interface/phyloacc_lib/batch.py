@@ -30,11 +30,11 @@ def genJobFiles(globs):
 
         len_sorted_alns = [ aln for aln, value in sorted(globs['aln-stats'].items(), key=lambda item: item[1]['length'], reverse=True) ];
         # Sort the alignments by length
-
+        
         for aln in len_sorted_alns:
         # Go over every locus
 
-            if globs['aln-stats'][aln]['length'] > 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= 0.2:
+            if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= 0.2:
             # Check if the current locus is long enough and has enough informative sites to make a tree
 
                 if globs['aln-stats'][aln]['low-qual']:
@@ -258,6 +258,8 @@ def writeSnakemake(globs):
             smkfile.write(TEMPLATES.snakemake().format(cmd=globs['call'],
                                                         dt=PC.getDateTime(),
                                                         run_char=run_char,
+                                                        astral_path=globs['coal-cmd'],
+                                                        iqtree_path=globs['iqtree-path'],
                                                         st_path=globs['phyloacc'],
                                                         gt_path=globs['phyloacc-gt'],
                                                         coal_tree_path=globs['coal-tree-file']

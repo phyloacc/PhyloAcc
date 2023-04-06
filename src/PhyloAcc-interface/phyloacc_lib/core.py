@@ -49,35 +49,62 @@ def execCheck(globs, a):
     deps_passed = True;
     # Variable to check if all dependencies are found.
 
-    if a.phyloacc_path:
-        globs['phyloacc'] = a.phyloacc_path;
+    if a.phyloacc_st_path:
+        globs['phyloacc'] = a.phyloacc_st_path;
+    if a.phyloacc_gt_path:
+        globs['phyloacc-gt'] = a.phyloacc_gt_path;
+    if a.iqtree_path:
+        globs['iqtree-path'] = a.iqtree_path;             
+    if a.coal_cmd:
+        globs['coal-cmd'] = a.coal_cmd;                   
     # Update the global paths if the user provided them through args.
 
-    dpad = 20;
+    dpad = 24;
+    hyphens = 55;
     if a.depcheck:
         print("# --depcheck set: CHECKING DEPENDENCY PATHS AND EXITING.\n");
         print(spacedOut("   PROGRAM", dpad) + spacedOut("PATH", dpad) + "STATUS");
-        print("   -------------------------------------------");
+        print("   " + "-" * hyphens);
     # For the dependency check option (--depcheck), this initializes a neat output table.
 
-    for opt in ['phyloacc', 'phyloacc-gt']:#, 'phyloacc-gbgc']:
-        dcheck_str = [spacedOut("   " + opt, dpad), spacedOut(globs[opt], dpad), "NA"];
+    for opt in ['phyloacc', 'phyloacc-gt', 'iqtree-path', 'coal-cmd']:#, 'phyloacc-gbgc']:
+        cur_passed = True;
+
+        dcheck_str = [spacedOut("   " + opt, dpad), spacedOut(globs[opt] + " ", dpad), "NA"];
         # Initialize the check string for --depcheck.
 
         cmd_result = subprocess.run(globs[opt], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE);
         # Run the provided command and retrieve the exit code.
 
-        if cmd_result.returncode > 1:
+        if opt in ['phyloacc', 'phyloacc-gt'] and cmd_result.returncode > 1:
         # If the exit code for the command run is greater than 1, the command isn't found.
+            cur_passed = False;
+        # PhyloAcc-ST and PhyloAcc-GT have an exit status of 1 when called without any arguments (as opposed to 127
+        # if called and not present)
+
+        elif opt not in ['phyloacc', 'phyloacc-gt'] and cmd_result.returncode > 0:
+            if opt in ['coal-cmd'] and cmd_result.returncode > 0:
+                if not cmd_result.stderr.decode().startswith("\n================== ASTRAL ====================="):
+                    cur_passed = False;                          
+            # Because ASTRAL has an exit code of 1 when no arguments are given, we also need to check the text of
+            # the help menu that is displayed to know if the program is there or not         
+
+            else:
+                cur_passed = False;
+            # For any other dependency an exit code > 0 means the pass fails             
+
+        if not cur_passed:
+            deps_passed = False
             dcheck_str[2] = "FAILED with exit code " + str(cmd_result.returncode);
-            deps_passed = False;
-            # Update the check string and keep going.
-            if not a.depcheck:    
-                errorOut("CORE2", opt + " not found at specified path: " + globs[opt], globs);
-            # On a normal run, exit immediately.
+            #if not a.depcheck:    
+            #    errorOut("CORE2", opt + " not found at specified path: " + globs[opt], globs);
+            # On a normal run, exit immediately.  
+        # Check whether the pass has failed for the current option and take action here
+
         else:
             dcheck_str[2] = "PASSED";
             # Update the check string.
+        # In all other cases with an exit code of 0, the depcheck passes
             
         if a.depcheck:
             print("".join(dcheck_str));

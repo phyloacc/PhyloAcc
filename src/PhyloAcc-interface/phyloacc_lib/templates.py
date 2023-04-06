@@ -87,7 +87,7 @@ rule run_iqtree:
         cpus=1    
     shell:
         \"\"\"
-        iqtree -s {{input}} --prefix {{params.locus}} -T {{resources.cpus}} -redo &> {{log}}
+        {iqtree_path} -s {{input}} --prefix {{params.locus}} -T {{resources.cpus}} -redo &> {{log}}
         \"\"\"    
 
 rule combine_gene_trees:
@@ -111,7 +111,7 @@ rule run_astral:
         os.path.join(ASTRALDIR, "astral-species-tree.log")
     shell:
         \"\"\"
-        java -jar /n/home07/gthomas/env/pkgs/ASTRAL/Astral/astral.5.7.8.jar -q {{input.species_tree}} -i {{input.gene_trees}} -o {{output}} &> {{log}}
+        {astral_path} -q {{input.species_tree}} -i {{input.gene_trees}} -o {{output}} &> {{log}}
         \"\"\"
 
 # The above rules estimate a tree with branch lengths in coalescent units if the --theta option

@@ -50,7 +50,10 @@ def optParse(globs):
     parser.add_argument("-phyloacc", dest="phyloacc_opts", help="A catch-all option for other PhyloAcc parameters. Enter as a semi-colon delimited list of options: 'OPT1 value;OPT2 value'", default=False);
     # PhyloAcc options
 
-    parser.add_argument("-path", dest="phyloacc_path", help="The path to the PhyloAcc binary. Default: PhyloAcc", default=False);
+    parser.add_argument("-st-path", dest="phyloacc_st_path", help="The path to the PhyloAcc-ST binary. Default: PhyloAcc-ST", default=False);
+    parser.add_argument("-gt-path", dest="phyloacc_gt_path", help="The path to the PhyloAcc-GT binary. Default: PhyloAcc-GT", default=False);
+    parser.add_argument("-iqtree-path", dest="iqtree_path", help="The path to the IQ-Tree executable for making gene trees with --theta. Default: iqtree", default=False);
+    parser.add_argument("-coal-path", dest="coal_cmd", help="The path to the program to estimate branch lengths in coalescent units with --theta (Supported programs: ASTRAL). Default: java -jar astral.jar", default=False);
     # Dependency paths
     ## Note: For now we will likely need three dependency paths for the models, but eventually these should all be consolidated
     
@@ -189,9 +192,6 @@ def optParse(globs):
         job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output' };
         # Expected job directories to create
 
-        if globs['id-flag']:
-            job_sub_dirs['job-ids'] = 'ids';
-
         if globs['run-mode'] != 'st':
             if args.theta and args.coal_tree:
                 PC.errorOut("OP7", "Only one of -l or --theta should be specified.", globs);
@@ -199,7 +199,7 @@ def optParse(globs):
 
             if args.theta:
                 globs['theta'] = True;
-                globs['coal-tree-file'] = "phyloacc-job-files/astral/astral-species-tree.treefile"
+                #globs['coal-tree-file'] = "phyloacc-job-files/astral/astral-species-tree.treefile";
                 job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output', 'iqtree' : 'iqtree', 'astral' : 'astral' };
             # If --theta is specified, set global param to True and add directories for iqtree and astral
             elif args.coal_tree:
@@ -207,6 +207,9 @@ def optParse(globs):
                     PC.errorOut("OP8", "Cannot find coalescent tree file (-l): " + args.coal_tree, globs);
                 globs['coal-tree-file'] = args.coal_tree;
             # Get the file with the coalescent tree
+
+        if globs['id-flag']:
+            job_sub_dirs['job-ids'] = 'ids';
 
         ## Coalescent tree/theta options
         ####################
@@ -357,8 +360,10 @@ def optParse(globs):
                         os.makedirs(globs[subdir]);
             # Job output subdirs
 
-        if globs['coal-tree-file']:
+        if args.coal_tree:
             globs['coal-tree-file'] = os.path.abspath(globs['coal-tree-file']);
+        elif args.theta:
+            globs['coal-tree-file'] = os.path.join(globs['astral'], "astral-species-tree.treefile");
 
         globs['run-name'] = os.path.basename(os.path.normpath(globs['outdir']));
         globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");
@@ -514,8 +519,18 @@ def startProg(globs):
     PC.printWrite(globs['logfilename'], globs['log-v'], "# " + "-" * 125);
     PC.printWrite(globs['logfilename'], globs['log-v'], "# DEPENDENCY PATHS:");    
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Program", pad) + "Specified Path");
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc-ST", pad) + globs['phyloacc']);
+    
+    if globs['run-mode'] != "st":
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc-GT", pad) + globs['phyloacc-gt']);
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc", pad) + globs['phyloacc']);
+        if globs['theta']:
+            PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# IQTree", pad) + globs['iqtree-path']);
+            # The path to IQ-tree
+
+            PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Coalescent method", pad) + globs['coal-cmd']);                                        
+        # The path to the coalescent species tree method (ASTRAL)
+        
     #PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# PhyloAcc-gBGC", pad) + globs['phyloacc-gbgc']);
     # Dependency paths
     #######################
@@ -669,6 +684,7 @@ def startProg(globs):
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --theta", pad) +
                     PC.spacedOut("True", opt_pad) + 
                     "A species tree with branch lengths in coalescent units will be estimated.");
+        # The path to the coalescent tree to be estimated
     else:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --theta", pad) +
                     PC.spacedOut("False", opt_pad) + 
