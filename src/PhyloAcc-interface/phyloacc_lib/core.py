@@ -59,6 +59,11 @@ def execCheck(globs, a):
         globs['coal-cmd'] = a.coal_cmd;                   
     # Update the global paths if the user provided them through args.
 
+    dep_list = ['phyloacc', 'phyloacc-gt'];
+    if a.theta:
+        dep_list += ['iqtree-path', 'coal-cmd'];
+    # Which dependencies to check
+
     dpad = 24;
     hyphens = 55;
     if a.depcheck:
@@ -67,7 +72,7 @@ def execCheck(globs, a):
         print("   " + "-" * hyphens);
     # For the dependency check option (--depcheck), this initializes a neat output table.
 
-    for opt in ['phyloacc', 'phyloacc-gt', 'iqtree-path', 'coal-cmd']:#, 'phyloacc-gbgc']:
+    for opt in dep_list:
         cur_passed = True;
 
         dcheck_str = [spacedOut("   " + opt, dpad), spacedOut(globs[opt] + " ", dpad), "NA"];

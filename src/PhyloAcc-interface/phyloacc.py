@@ -101,10 +101,20 @@ if __name__ == '__main__':
     if globs['label-tree']:
         if globs['tree-data-type'] == 'class':
             globs['st'].showAttrib("type", "label", "desc");
-            print("\n" + globs['st'].tree_str +"\n");
-        print(globs['labeled-tree']);
-        print();
+
+            print("\nInput tree with integer labels:");
+            print(globs['st'].tree_str +"\n");
+
+            #if not globs['st'].has_label:
+            print("\nInput tree with descendant labels:");
+            print(globs['st'].labelDesc());
+
+        #print(globs['labeled-tree']);
+        #print();
         sys.exit(0);
+    elif not globs['st'].has_label:
+        PC.errorOut("MAIN2", "Tree does not have internal nodes labeled, which is required for PhyloAcc. Use --labeltree and replace the tree in your .mod file with the labeled tree.", globs);
+
     #else:
     #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);
     # Print the tree and exit if --labeltree is set

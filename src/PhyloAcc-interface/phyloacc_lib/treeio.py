@@ -20,48 +20,55 @@ def readST(globs, tree_type="species", rf_to_st=False):
     step_start_time = CORE.report_step(globs, step, False, "In progress...");
     # Status update
 
-    try:
-        if tree_type == "species":
-            for line in open(globs['mod-file']):
-                if line.startswith("TREE: "):
-                    tree_str = line.strip().replace("TREE: ", "");
-            # Read the tree string from the MOD file
+    # try:
+    if tree_type == "species":
+        for line in open(globs['mod-file']):
+            if line.startswith("TREE: "):
+                tree_str = line.strip().replace("TREE: ", "");
+        # Read the tree string from the MOD file
 
-        elif tree_type == "from-log":
-            for line in open(globs['interface-logfile']):
-                if line.startswith("# Tree read from mod file:"):
-                    tree_str = line.strip().replace("# Tree read from mod file:", "");
-                    while tree_str[0] == " ":
-                        tree_str = tree_str[1:];
-                # Read the tree string from the interface log file
+    elif tree_type == "from-log":
+        for line in open(globs['interface-logfile']):
+            if line.startswith("# Tree read from mod file:"):
+                tree_str = line.strip().replace("# Tree read from mod file:", "");
+                while tree_str[0] == " ":
+                    tree_str = tree_str[1:];
+            # Read the tree string from the interface log file
 
-                if line.startswith("# Loci per batch (-batch)"):
-                    batch_size = line.strip().replace("# Loci per batch (-batch)", "");
-                    batch_size = list(filter(None, batch_size.split(" ")))[0];
+            if line.startswith("# Loci per batch (-batch)"):
+                batch_size = line.strip().replace("# Loci per batch (-batch)", "");
+                batch_size = list(filter(None, batch_size.split(" ")))[0];
 
-                if line.startswith("# Processes per job (-p)"):
-                    procs_per_batch = line.strip().replace("# Processes per job (-p)", "");
-                    procs_per_batch = list(filter(None, procs_per_batch.split(" ")))[0];
+            if line.startswith("# Processes per job (-p)"):
+                procs_per_batch = line.strip().replace("# Processes per job (-p)", "");
+                procs_per_batch = list(filter(None, procs_per_batch.split(" ")))[0];
 
-        elif tree_type == "coalescent":
-            tree_str = open(globs['coal-tree-file'], "r").read();
+    elif tree_type == "coalescent":
+        tree_str = open(globs['coal-tree-file'], "r").read();
 
-        else:
-            CORE.errorOut("IO1", "INTERNAL: invalid tree type to read", globs);
+    else:
+        CORE.errorOut("IO1", "INTERNAL: invalid tree type to read", globs);
 
-        if globs['tree-data-type'] == 'class':
-            tree = TREE.Tree(tree_str);
-        elif globs['tree-data-type'] == 'func':
-            tree_dict, tree, root = TREEF.treeParse(tree_str);
-        # Parse the tree string to the tree class
-    except:
-        CORE.errorOut("IO2", "Error reading tree from file!", globs);
+    if globs['tree-data-type'] == 'class':
+        tree = TREE.Tree(tree_str);
+
+    elif globs['tree-data-type'] == 'func':
+        tree_dict, tree, root = TREEF.treeParse(tree_str);
+    # Parse the tree string to the tree class
+    # except:
+    #     print("\n\n");
+    #     CORE.errorOut("IO2", "Error reading tree from file!", globs);
     # Read the tree
 
     if globs['tree-data-type'] == 'class':
-        tree.subtree = tree.genSubtrees();
-        tree.tree_str = tree.subtree[tree.root];
-        del tree.subtree;
+        # tree.subtree = tree.genSubtrees();
+        # print("--------------------------------------")
+        # print(tree.tree_str)        
+        # tree.tree_str = tree.subtree[tree.root];
+        # del tree.subtree;
+
+        # print("SHGFDSLJGHFDGJFDGLDFKHGLKDFHGLDKFHGLDFKJ")
+        # print(tree.tree_str)
 
         root_str = "unrooted";
         add_root_node = 0;
