@@ -164,6 +164,8 @@ void LoadParams(int argc, char* argv[])
             line_stream >> num_thin;
         else if (tmp=="INIT_LRATE")
             line_stream >> prep_lrate;
+	else if (tmp=="INIT_LRATE2")
+            line_stream >> prep_lrate2;
         else if (tmp=="INIT_GRATE")
             line_stream >> prep_grate;
         else if (tmp=="HYPER_LRATE_A")
