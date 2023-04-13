@@ -92,6 +92,8 @@ def optParse(globs):
     
     parser.add_argument("--qstats", dest="qstats", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--norun", dest="norun", help=argparse.SUPPRESS, action="store_true", default=False);
+    parser.add_argument("--nophyloacc", dest="no_phyloacc", help=argparse.SUPPRESS, action="store_true", default=False);
+    # Generate the snakemake file but comment out the phyloacc rules, for dev
     parser.add_argument("--debug", dest="debug_opt", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--debugtree", dest="debug_tree", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--nolog", dest="nolog_opt", help=argparse.SUPPRESS, action="store_true", default=False);
@@ -120,6 +122,11 @@ def optParse(globs):
         globs['norun'] = True;
         globs['log-v'] = -1;
     # Check if norun is set
+
+    if args.no_phyloacc:
+        globs['no-phyloacc'] = True;
+    # Check if --nophyloacc is set to prevent the PhyloAcc rules from being executed in 
+    # the snakemake workflow (useful for debugging/testing --theta)
 
     globs['overwrite'] = args.ow_flag;
     # Check if overwrite is set

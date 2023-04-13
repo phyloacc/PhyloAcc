@@ -34,7 +34,7 @@ def genJobFiles(globs):
         for aln in len_sorted_alns:
         # Go over every locus
 
-            if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= 0.2:
+            if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= globs['informative-frac-theta']:
             # Check if the current locus is long enough and has enough informative sites to make a tree
 
                 if globs['aln-stats'][aln]['low-qual']:
@@ -246,10 +246,13 @@ def writeSnakemake(globs):
     
     globs['smk'] = os.path.join(globs['job-smk'], "run_phyloacc.smk");
 
+    phyloacc_char = "";
+    if globs['no-phyloacc']:
+        phyloacc_char = "#";
+
+    run_char = "#";
     if globs['theta']:
         run_char = "";
-    else:
-        run_char = "#";
     # If --theta isn't set, we don't want to run some of the rules in the snakemake file, so we comment out their
     # expected outputs in rule all here
 
@@ -258,6 +261,7 @@ def writeSnakemake(globs):
             smkfile.write(TEMPLATES.snakemake().format(cmd=globs['call'],
                                                         dt=PC.getDateTime(),
                                                         run_char=run_char,
+                                                        phyloacc_char=phyloacc_char,
                                                         astral_path=globs['coal-cmd'],
                                                         iqtree_path=globs['iqtree-path'],
                                                         st_path=globs['phyloacc'],

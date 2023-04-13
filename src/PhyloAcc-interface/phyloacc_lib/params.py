@@ -62,6 +62,7 @@ def init():
         'logdir' : '',
         'tmpdir' : 'System default.',
         'overwrite' : False,
+        'informative-frac-theta' : 0.2,
         # I/O options
         
         'run-mode' : 'st',
@@ -234,6 +235,7 @@ def init():
         'psutil' : False,
         'qstats' : False,
         'norun' : False,
+        'no-phyloacc' : False,
         'debug-tree' : False,
         'debug' : False,
         'nolog' : False,

@@ -65,8 +65,8 @@ rule all:
         {run_char}expand(os.path.join(IQTREEDIR, "gene-trees", "{{locus}}", "{{locus}}.treefile"), locus=iqtree_loci),
         {run_char}os.path.join(IQTREEDIR, "gene-trees", "all-gene-trees.treefile"),
         {run_char}"{coal_tree_path}",
-        expand(os.path.join(OUTDIR, "{{st_batch}}-phyloacc-st-out", "{{st_batch}}_elem_lik.txt"), st_batch=ST_BATCHES),
-        expand(os.path.join(OUTDIR, "{{gt_batch}}-phyloacc-gt-out", "{{gt_batch}}_elem_lik.txt"), gt_batch=GT_BATCHES)
+        {phyloacc_char}expand(os.path.join(OUTDIR, "{{st_batch}}-phyloacc-st-out", "{{st_batch}}_elem_lik.txt"), st_batch=ST_BATCHES),
+        {phyloacc_char}expand(os.path.join(OUTDIR, "{{gt_batch}}-phyloacc-gt-out", "{{gt_batch}}_elem_lik.txt"), gt_batch=GT_BATCHES)
 # This rule checks for expected outputs from the rules
 # With --theta, a coalescent tree will be estimated with IQTree and ASTRAL, but without --theta these outputs
 # are commented and those rules will not be run.
@@ -187,7 +187,7 @@ default-resources:
   - mem='{mem}g'
   - time='{time}'
   - cpus={procs_per_job}
-latency-wait: 30
+latency-wait: 45
 verbose: true
 """
 
