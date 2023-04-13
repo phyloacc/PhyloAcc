@@ -394,6 +394,34 @@ void BPP::sample_hyperparam(int iter, vector<int> & ids, ofstream & output) // r
         prior_l_a = prior_l_a_prop;
         prior_l_b = prior_l_b_prop;
     }
+    
+    // sample lrate2
+    u = gsl_rng_uniform(RNG)*(1.3 - 0.7) + 0.7; // generate uniform from (1/prop_n, prop_n);
+    double prior_l2_a_prop = prior_l2_a *  u;
+    
+    u = gsl_rng_uniform(RNG)*(1.3 - 0.7) + 0.7; // generate uniform from (1/prop_n, prop_n);
+    double prior_l2_b_prop = prior_l2_b *  u;
+    log_p = 0; log_pc = 0;
+    for(std::size_t i = 0; i < ids.size(); i++ )  // 0702
+    {
+        int c = ids[i];
+        log_p += log(cur_lrate2[c]);
+        log_pc += log(1 - cur_lrate2[c]);
+    }
+    
+    
+    M_ratio = (prior_l2_a_prop - prior_l2_a) * (log_p - 1) + (prior_l2_b_prop - prior_l2_b) * (log_pc - 1);
+    M_ratio += ids.size() * (gsl_sf_lnbeta(prior_l2_a, prior_l2_b) - gsl_sf_lnbeta(prior_l2_a_prop, prior_l2_b_prop));
+    
+    H_ratio = log(prior_l2_a) - log(prior_l2_a_prop) + log(prior_l2_b) - log(prior_l2_b_prop);
+    
+    cout << "lrate2_MH_ratio: " << M_ratio + H_ratio << ", " << prior_l2_a << ", " << prior_l2_a_prop <<", " << prior_l2_b << ", " << prior_l2_b_prop  << endl;
+    
+    if(log(gsl_rng_uniform(RNG)) < M_ratio + H_ratio)
+    {
+        prior_l2_a = prior_l2_a_prop;
+        prior_l2_b = prior_l2_b_prop;
+    }
 
     // sample grate
     u = gsl_rng_uniform(RNG)*(1.3 - 0.7) + 0.7; // generate uniform from (1/prop_n, prop_n);
@@ -423,7 +451,7 @@ void BPP::sample_hyperparam(int iter, vector<int> & ids, ofstream & output) // r
         prior_g_b = prior_g_b_prop;
     }
 
-    output << iter << "\t"<< nprior_a<< "\t"<< nprior_b <<"\t"<< cprior_a << "\t"<< cprior_b << "\t"<< prior_l_a << "\t"<< prior_l_b << "\t"<< prior_g_a << "\t"<< prior_g_b <<endl;
+    output << iter << "\t"<< nprior_a<< "\t"<< nprior_b <<"\t"<< cprior_a << "\t"<< cprior_b << "\t"<< prior_l_a << "\t"<< prior_l_b << "\t"<< prior_g_a << "\t"<< prior_g_b << "\t"<< prior_l2_a << "\t"<< prior_l2_b << endl;
 }
 
 

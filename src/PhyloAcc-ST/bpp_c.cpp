@@ -311,16 +311,22 @@ void BPP_C::initMCMC(int iter, BPP&bpp, int resZ)  // assign small prob from Z =
             log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
             log_TM_Int[s](1,0) = log(trace_g_rate[0]);
             log_TM_Int[s](2,0) = log(0);
+            
+            // won't use log_TM_Int(,2)
         
         }else{
             log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
-            log_TM_Int[s](1,0) = log(trace_g_rate[0]) + log(1 - trace_l2_rate[0]);
-            log_TM_Int[s](2,0) = log(trace_g_rate[0]) + log(trace_l2_rate[0]);
+            log_TM_Int[s](1,0) = log(trace_g_rate[0]);
+            log_TM_Int[s](2,0) = log(0) ;
             
             double y = 1 - trace_l_rate[0];
             log_TM_Int[s](0,1) = log(0); // set once, never changed
             log_TM_Int[s](1,1) = log(y);
             log_TM_Int[s](2,1) = log(1-y);
+            
+            log_TM_Int[s](0,2) = log(0);
+            log_TM_Int[s](1,2) = log(trace_l2_rate[0]);
+            log_TM_Int[s](2,2) = log(1 - trace_l2_rate[0]);
         }
         
     }
@@ -467,48 +473,9 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
     
     
     if(UpHyper) {
-//        bpp.log_liks_curZ[CC] = trace_loglik[m];  
-			bpp.cur_Z[resZ][CC] = Z; // orginially m-1 ???
-//        // compute Z transition matrix for proposal
-//        double loss, gain;
-//        log_f_Z(Z, log_TM_Int, gain, loss);  // only do this for full model, no constraint
-//        bpp.MH_ratio_gain[CC] = -gain;
-//        //bpp.MH_ratio_loss[CC] = -loss;
-//
-//
-//        for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
-//        {
-//            int s = *it;
-//            //double z = 1 - grate_prop;
-//            log_TM_Int[s](0,0) = log(1 - lrate_prop - grate_prop);
-//            log_TM_Int[s](1,0) = log(grate_prop);
-//            log_TM_Int[s](2,0) = log(lrate_prop);
-//            //double y = exp(-lrate_prop *distances2[s]);
-//            double y = 1 - lrate_prop;
-//            log_TM_Int[s](1,1) = log(y);
-//            log_TM_Int[s](2,1) = log(1-y);
-//            //log_TM_Int[s] = log(TM_Int[s]);
-//        }
-//
-//
-//
-//        for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
-//        {
-//            log_TM_Int[*it](1,1) = 0;
-//            log_TM_Int[*it](2,1) = log(0);
-//
-//            log_TM_Int[*it](0,0) = log(1 - grate_prop);
-//            log_TM_Int[*it](1,0) = log(grate_prop);
-//            log_TM_Int[*it](2,0) = log(0);
-//
-//            //log_TM_Int[*it] = log(TM_Int[*it]);
-//        }
-//
-//
-//        log_f_Z(Z, log_TM_Int, gain, loss);
-//        bpp.MH_ratio_gain[CC] += gain;
-//        //bpp.MH_ratio_loss[CC] += loss;
-//
+
+        bpp.cur_Z[resZ][CC] = Z; // orginially m-1 ???
+
         bpp.cur_crate[CC] = trace_c_rate[m]; // orginially m-1 ???
         bpp.cur_nrate[CC] = trace_n_rate[m];  // orginially m-1 ??? //doesn't matter, initalize Z with no 2, random sample r_n from prior
         
@@ -555,20 +522,20 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
 void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
 {
     
-    mat nZ = zeros(3,2); // record number of Z transitions
+    mat nZ = zeros(3,3); // record number of Z transitions
     for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
     {
         int p = parent2[*it];
-        if(Z[p] < 2)
-        {
+        //if(Z[p] < 2)
+        //{
             nZ(Z[*it],Z[p]) += 1;
-        }
+        //}
         
         
     }
     
     //cout << "Count matrix: " << nZ << endl;
-    gr = gsl_ran_beta(RNG, prior_g_a + nZ(1,0) + nZ(2,0) , prior_g_b + nZ(0,0));
+    gr = gsl_ran_beta(RNG, prior_g_a + nZ(1,0) + nZ(2,0) , prior_g_b + nZ(0,0)); // nZ(2, 0) should be zero
     
     //for(vector<int>:: iterator it = upper_c.begin(); it < upper_c.end() -1;it++)
     for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
@@ -577,10 +544,11 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
         {
             int p = parent2[*it];
             assert(p!=N);
-            if(Z[p] < 2)
-            {
+            assert(Z[p] < 2);
+            //if(Z[p] < 2) // Z[p] shouldn't be 2
+            //{
                 nZ(Z[*it],Z[p]) -= 1;
-            }
+            //}
         }
     }
     
@@ -589,7 +557,7 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
     {
         lr2 = 0;
     }else{
-        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,0), prior_l2_b + nZ(2,0));
+        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2));
     }
     
     //cout << "Count matrix: " << nZ << endl;
@@ -617,12 +585,15 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
             
         }else{
             log_TM_Int[s](0,0) = log(1 - gr);
-            log_TM_Int[s](1,0) = log(gr) + log(1 - lr2);
-            log_TM_Int[s](2,0) = log(gr) + log(lr2);
+            log_TM_Int[s](1,0) = log(gr);
+            log_TM_Int[s](2,0) = log(0);
             
             double y = 1 - lr;
             log_TM_Int[s](1,1) = log(y);
             log_TM_Int[s](2,1) = log(1-y);
+            
+            log_TM_Int[s](1,2) = log(lr2);
+            log_TM_Int[s](2,2) = log(1-lr2);
         }
         
     }
@@ -1236,8 +1207,8 @@ vector<int> BPP_C::Update_Z_subtree(int num_base, bool prior)  //whether cal pro
         int s = *it;
         int p = parent2[s];
         
-        log_prob_back[p] += BPP::log_multi2(log_TM_Int[s], log_prob_back[s]);  //matrix * vector
-        //cout << log_prob_back[p] <<endl;
+        log_prob_back[p] += BPP::log_multi2(log_TM_Int[s], log_prob_back[s]);  //matrix * vector, for fixZ ==1, Zp = 2 is already set to -Inf, -Inf + xx
+        //cout << p << ": " << log_prob_back[p] <<endl;
     }
     
 
@@ -1285,8 +1256,8 @@ vector<int> BPP_C::Update_Z_subtree(int num_base, bool prior)  //whether cal pro
         //if(fixZ[s] == 2 && (missing[s] && s<S)) continue;
         
         old = Z[s];
-        if(Z[p]!=2)
-        {
+        //if(Z[p]!=2)
+        //{
             log_trans_p =log_TM_Int[s].unsafe_col(Z[p]) + log_prob_back[s];
             trans_p = BPP::log_sample(log_trans_p);
             
@@ -1306,11 +1277,11 @@ vector<int> BPP_C::Update_Z_subtree(int num_base, bool prior)  //whether cal pro
                 cout<< "Sample Z error" <<endl;
             }
             
-        }
-        else{
-            Z[s] =2;
-            
-        }
+//        }
+//        else{
+//            Z[s] =2;
+//
+//        }
         
         if(old != Z[s]) changedZ.push_back(s);
         

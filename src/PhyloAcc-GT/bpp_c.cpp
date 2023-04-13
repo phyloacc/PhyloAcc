@@ -294,16 +294,22 @@ void BPP_C::initMCMC(int iter, int max_iter, BPP&bpp, int resZ, bool prune, bool
             log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
             log_TM_Int[s](1,0) = log(trace_g_rate[0]); //grate=alpha in PHI. prob of bkgrd -> conserv
             log_TM_Int[s](2,0) = log(0);
-
+            
+            // won't use log_TM_Int(,2)
+        
         }else{
             log_TM_Int[s](0,0) = log(1 - trace_g_rate[0]);
-            log_TM_Int[s](1,0) = log(trace_g_rate[0]) + log(1 - trace_l2_rate[0]); //l2=0. 
-            log_TM_Int[s](2,0) = log(trace_g_rate[0]) + log(trace_l2_rate[0]);
-
-            double y = 1 - trace_l_rate[0]; //lrate: prob of acceleration: 1->2
+            log_TM_Int[s](1,0) = log(trace_g_rate[0]);
+            log_TM_Int[s](2,0) = log(0) ;
+            
+            double y = 1 - trace_l_rate[0];
             log_TM_Int[s](0,1) = log(0); // set once, never changed
             log_TM_Int[s](1,1) = log(y);
             log_TM_Int[s](2,1) = log(1-y);
+            
+            log_TM_Int[s](0,2) = log(0);
+            log_TM_Int[s](1,2) = log(trace_l2_rate[0]);
+            log_TM_Int[s](2,2) = log(1 - trace_l2_rate[0]);
         }
     }
     //printSptree(bpp);
@@ -769,14 +775,14 @@ void BPP_C::Gibbs(int iter, int max_iter, BPP &bpp, ofstream & outZ, string outp
 double BPP_C::priorP_Z(BPP & bpp)
 {
     // compute P(Z|C)
-    mat nZ = zeros(3,2);
+    mat nZ = zeros(3,3);
     for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
     {
         int p = bpp.parent[*it];
-        if(Z[p] < 2)
-        {
+        //if(Z[p] < 2)
+        //{
             nZ(Z[*it],Z[p]) += 1;
-        }
+        //}
     }
     double priorZ = gsl_sf_lnbeta(prior_g_a + nZ(1,0) + nZ(2,0), prior_g_b + nZ(0,0)) - gsl_sf_lnbeta(prior_g_a, prior_g_b);
 
@@ -786,15 +792,15 @@ double BPP_C::priorP_Z(BPP & bpp)
         {
             int p = bpp.parent[*it];
             assert(p!=N);
-            if(Z[p] < 2)
-            {
+            //if(Z[p] < 2)
+            //{
                 nZ(Z[*it],Z[p]) -= 1;
-            }
+            //}
         }
     }
 
     priorZ += gsl_sf_lnbeta(prior_l_a + nZ(2,1), prior_l_b + nZ(1,1)) - gsl_sf_lnbeta(prior_l_a, prior_l_b);
-    if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(2,0), prior_l2_b + nZ(1,0)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
+    if(prior_l2_a > 0) priorZ += gsl_sf_lnbeta(prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2)) - gsl_sf_lnbeta(prior_l2_a, prior_l2_b);
 
     //root
     priorZ += prior_z.at(Z[N-1]);
@@ -806,14 +812,14 @@ double BPP_C::priorP_Z(BPP & bpp)
 void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2, BPP & bpp)
 {
 
-    mat nZ = zeros(3,2); // record number of Z transitions
+    mat nZ = zeros(3,3); // record number of Z transitions
     for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
     {
         int p = bpp.parent[*it];
-        if(Z[p] < 2)
-        {
+        //if(Z[p] < 2)
+        //{
             nZ(Z[*it],Z[p]) += 1;
-        }
+        //}
 
 
     }
@@ -828,10 +834,10 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2, BPP & 
         {
             int p = bpp.parent[*it];
             assert(p!=N);
-            if(Z[p] < 2)
-            {
+            //if(Z[p] < 2)
+            //{
                 nZ(Z[*it],Z[p]) -= 1;
-            }
+            //}
         }
     }
 
@@ -840,7 +846,7 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2, BPP & 
     {
         lr2 = 0;
     }else{
-        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,0), prior_l2_b + nZ(2,0));
+        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2));
     }
 
     for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
@@ -858,12 +864,14 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2, BPP & 
 
         }else{
             log_TM_Int[s](0,0) = log(1 - gr);
-            log_TM_Int[s](1,0) = log(gr) + log(1 - lr2);
-            log_TM_Int[s](2,0) = log(gr) + log(lr2);
+            log_TM_Int[s](1,0) = log(gr);
 
             double y = 1 - lr;
             log_TM_Int[s](1,1) = log(y);
             log_TM_Int[s](2,1) = log(1-y);
+            
+            log_TM_Int[s](2,2) = log(1 - lr2);
+            log_TM_Int[s](1,2) = log(lr2);
         }
 
     }
@@ -1008,6 +1016,18 @@ void BPP_C::MonitorChain(int  m,int iter, int max_iter, BPP &bpp, double ind_pro
         std::stringstream buffer;
         gtree->printTree(gtree->root, bpp, buffer);
         Max_GT = buffer.str();
+        
+//        mat nZ = zeros(3,3);
+//        for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
+//        {
+//            int p = bpp.parent[*it];
+//            //if(Z[p] < 2)
+//            //{
+//                nZ(Z[*it],Z[p]) += 1;
+//            //}
+//        }
+        //cout << "iter " << m <<": " << endl;
+        //cout << nZ << endl;
         
     }
 
@@ -1460,8 +1480,8 @@ vector<int> BPP_C::Update_Z(int len, BPP & bpp)  //whether cal prob_back again
         int p = bpp.parent[s];
 
         old = Z[s];
-        if(Z[p]!=2)
-        {
+        //if(Z[p]!=2)
+        //{
             log_trans_p =log_TM_Int[s].unsafe_col(Z[p]) + log_prob_back[s];
             trans_p = BPP::log_sample(log_trans_p);
 
@@ -1476,10 +1496,10 @@ vector<int> BPP_C::Update_Z(int len, BPP & bpp)  //whether cal prob_back again
             if(nn>2) {
                 cout<< "Sample Z error" <<endl;
             }
-        }
-        else{
-            Z[s] =2;
-        }
+//        }
+//        else{
+//            Z[s] =2;
+//        }
         if(old != Z[s]) changedZ.push_back(s);
     }
     return(changedZ);

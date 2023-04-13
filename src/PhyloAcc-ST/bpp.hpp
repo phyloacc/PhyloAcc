@@ -193,9 +193,9 @@ public:
     indel = _indel; //0.025; 0.25 for mammal
     indel2 = _indel2; //0.013 for ratite; 0.08 for mammal
     
-    ind_lrate = _prep_lrate;
-    ind_lrate2 = _prep_lrate2;
-    ind_grate = _prep_grate;
+    ind_lrate = _prep_lrate; // 1->2
+    ind_lrate2 = _prep_lrate2; //2->1
+    ind_grate = _prep_grate; //0->1
 //    prior_glr[0] = _prior_l * _prior_gla;
 //    prior_glr[1] = _prior_g * _prior_gla;
 //    prior_glr[2] = (1 - _prior_l -_prior_g)  * _prior_gla;
@@ -282,8 +282,8 @@ public:
     cout << "InitPhyloTree finished" <<endl;
     
     // transition probability of hidden state Z
-    TM_Int = vector<mat >(N, zeros<mat>(3,2));
-    log_TM_Int = vector<mat >(N, zeros<mat>(3,2));
+    TM_Int = vector<mat >(N, zeros<mat>(3,3));
+    log_TM_Int = vector<mat >(N, zeros<mat>(3,3));
     
     
     

@@ -13,7 +13,7 @@
 #include <string>
 #include <algorithm>
 #include <iomanip>
-#include <omp.h>
+//#include <omp.h>
 #include <string> 
 #include <armadillo>
 #include "profile.h"
@@ -53,10 +53,10 @@ int num_chain; // outer loop of updates Q matrix and hyperparameter of substitut
 
 
 double prep_lrate = 0.3;
-double prep_lrate2 = 0.0;//0.1
+double prep_lrate2 = 0.1;
 double prep_grate = 0.5; // initalization
 
-double prior_lrate2_a = 0,prior_lrate2_b = 1 ; // beta prior for lrate2, 0.5
+double prior_lrate2_a = 1,prior_lrate2_b = 9 ; // beta prior for lrate2, 0.5
 double prior_lrate_a = 1 ,prior_lrate_b = 9 ; // beta prior for lrate, 2
 double prior_grate_a = 3,prior_grate_b = 1 ; // beta prior for grate
 
@@ -93,7 +93,7 @@ void LoadParams(int argc, char* argv[])
     if (argc > 1)
         params_path = string(argv[1]);
     else
-        params_path = "/Users/hzr/Phd_2/Bird/PhyloAcc_init3-3/params2s.txt"; //params2
+        params_path = "/Users/zhu/PhyloAcc/code/PhyloAcc-test-data/phyloacc-test-config.txt";  //params2
     
     cout << "Loading program configurations from " << params_path << "......" <<endl;
     
@@ -164,6 +164,8 @@ void LoadParams(int argc, char* argv[])
             line_stream >> num_thin;
         else if (tmp=="INIT_LRATE")
             line_stream >> prep_lrate;
+	else if (tmp=="INIT_LRATE2")
+            line_stream >> prep_lrate2;
         else if (tmp=="INIT_GRATE")
             line_stream >> prep_grate;
         else if (tmp=="HYPER_LRATE_A")
@@ -174,6 +176,10 @@ void LoadParams(int argc, char* argv[])
             line_stream >> prior_grate_a;
         else if (tmp=="HYPER_GRATE_B")
             line_stream >> prior_grate_b;
+        else if (tmp=="HYPER_LRATE2_A")
+            line_stream >> prior_lrate2_a; // if it's zero, assume dollo
+        else if (tmp=="HYPER_LRATE2_B")
+            line_stream >> prior_lrate2_b;
         else if (tmp=="CHAIN")
             line_stream >> num_chain;
         
@@ -229,6 +235,7 @@ void LoadParams(int argc, char* argv[])
     //output_path2  = strutils::trim(output_path2,  " \"\t\n");
     segment_path = strutils::trim(segment_path, " \"\t\n");
     
+    if(prior_lrate2_a==0) prep_lrate2 = 0;
     
 }
 
@@ -412,7 +419,7 @@ int main(int argc, char* argv[])
             if(!sample_hyper)
             {
                 bppc.initMCMC(iter,bpp,0);  //not constrain log_prob_back
-                bppc.Gibbs(iter,bpp,out_Z0,output_path,output_path2,0,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element
+                bppc.Gibbs(iter,bpp,out_Z0,output_path,output_path2,0,true,sample_hyper, lrate_prop, grate_prop);  // Gibbs run to get Z for each element, lrate_prop & grate_prop not used 
                 //if(!bppc.failure)
                 //{
                 bppc.Eval2(bpp,0);

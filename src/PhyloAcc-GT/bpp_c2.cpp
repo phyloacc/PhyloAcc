@@ -52,7 +52,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ)
             out_lik << iter << "\t" << trace_loglik[i] << "\t" << trace_indicator[i] << "\t" << trace_n_rate[i] << "\t" << trace_c_rate[i] << "\t" << trace_pi[i][0] << "\t" <<trace_GTtopChg[i] << "\t";
             for (int s = 0; s < N; s++)
                 out_lik << trace_Z[i][s] << "\t";
-            out_lik <<trace_g_rate[i]<<"\t"<<trace_l_rate[i] << endl;
+            out_lik <<trace_g_rate[i]<<"\t"<<trace_l_rate[i] <<"\t" << trace_l2_rate[i] << endl;
         }
 
         out_lik.close();
