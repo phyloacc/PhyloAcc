@@ -237,7 +237,7 @@ public:
         verbose = _verbose;
         verboseGT = _verboseGT;
 
-        log_TM_Int = vector<mat >(N, zeros<mat>(3,2));
+        log_TM_Int = vector<mat >(N, zeros<mat>(3,3));
 
         prior_l_a = bpp.prior_l_a;
         prior_l_b = bpp.prior_l_b;
@@ -552,7 +552,7 @@ public:
         trace_c_rate = vector<double >(num_burn+num_mcmc, 0);
         trace_l_rate = vector<double >(num_burn+num_mcmc, bpp.cur_lrate[CC]);
         trace_g_rate = vector<double >(num_burn+num_mcmc, bpp.cur_grate[CC]);
-        trace_l2_rate = vector<double >(num_burn+num_mcmc, 0);
+        trace_l2_rate = vector<double >(num_burn+num_mcmc, bpp.cur_lrate2[CC]);
         trace_logNormratio = vector<double>(num_burn+num_mcmc, 0);
 
 

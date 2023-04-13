@@ -306,8 +306,8 @@ public:
     cout << "InitPhyloTree finished" <<endl;
 
     // transition probability of hidden state Z
-    TM_Int = vector<mat >(N, zeros<mat>(3,2));
-    log_TM_Int = vector<mat >(N, zeros<mat>(3,2));
+    TM_Int = vector<mat >(N, zeros<mat>(3,3));
+    log_TM_Int = vector<mat >(N, zeros<mat>(3,3));
 
     tmp = strutils::split(strutils::trim(_outgroup),';');
     for(vector<string>::iterator it = tmp.begin(); it<tmp.end();it++)
