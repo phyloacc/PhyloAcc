@@ -57,8 +57,8 @@ def optParse(globs):
     # Dependency paths
     ## Note: For now we will likely need three dependency paths for the models, but eventually these should all be consolidated
     
-    parser.add_argument("-scf", dest="low_scf", help="The value of sCF to consider as 'low' for any given branch in a locus. Default: 0.5", default=False);
-    parser.add_argument("-s", dest="scf_prop", help="The proportion of branches to consider a locus for the gene tree model. Default: 0.3333, meaning if one-third of all branches for a given locus have low sCF, this locus will be run with the gene tree model.", default=False);
+    parser.add_argument("-scf", dest="low_scf", help="The value of sCF to consider as 'low' for any given branch in a locus. Default: 0.5", type=float, default=0.5);
+    parser.add_argument("-s", dest="scf_prop", help="The proportion of branches to consider a locus for the gene tree model. Default: 0.3333, meaning if one-third of all branches for a given locus have low sCF, this locus will be run with the gene tree model.", type=float, default=False);
     parser.add_argument("-l", dest="coal_tree", help="A file containing a rooted, Newick formatted tree with the same topology as the species tree in the mod file (-m), but with branch lengths in coalescent units. When the gene tree model is used, one of -l or --theta must be set.", default=False);
     parser.add_argument("-r", dest="run_mode", help="Determines which version of PhyloAcc will be used. gt: use the gene tree model for all loci, st: use the species tree model for all loci, adaptive: use the gene tree model on loci with many branches with low sCF and species tree model on all other loci. Default: st", default=False);
     parser.add_argument("-n", dest="num_procs", help="The number of processes that this script should use. Default: 1.", type=int, default=1);
@@ -75,6 +75,7 @@ def optParse(globs):
     parser.add_argument("-time", dest="cluster_time", help="The time in hours to give each job. Default: 1.", default=False);
     # Cluster options
     
+    parser.add_argument("--dollo", dest="dollo_flag", help="Set this to use the Dollo assumption in the original model (lineages descendant from an accelerated branch cannot change state).", action="store_true", default=False);
     parser.add_argument("--theta", dest="theta", help="Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for estimation of the theta prior. Note that a species tree with branch lengths in units of substitutions per site is still required with -m. Also note that this may add substantial runtime to the pipeline.", action="store_true", default=False);
     parser.add_argument("--labeltree", dest="labeltree", help="Simply reads the tree from the input mod file (-m), labels the internal nodes, and exits.", action="store_true", default=False);
     parser.add_argument("--overwrite", dest="ow_flag", help="Set this to overwrite existing files.", action="store_true", default=False);
@@ -90,19 +91,23 @@ def optParse(globs):
     parser.add_argument("--quiet", dest="quiet_flag", help="Set this flag to prevent PhyloAcc from reporting detailed information about each step.", action="store_true", default=False);
     # Run options
     
+    parser.add_argument("-inf-frac-theta", dest="inf_frac_theta", help=argparse.SUPPRESS, type=float, default=0.2);
+    # Controls the threshold for informative sites for loci to be used in the --theta estimation -- only those with a higher fraction will be used
     parser.add_argument("--qstats", dest="qstats", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--norun", dest="norun", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--nophyloacc", dest="no_phyloacc", help=argparse.SUPPRESS, action="store_true", default=False);
     # Generate the snakemake file but comment out the phyloacc rules, for dev
-    parser.add_argument("--debug", dest="debug_opt", help=argparse.SUPPRESS, action="store_true", default=False);
+    parser.add_argument("--dev", dest="dev_opt", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--debugtree", dest="debug_tree", help=argparse.SUPPRESS, action="store_true", default=False);
-    parser.add_argument("--nolog", dest="nolog_opt", help=argparse.SUPPRESS, action="store_true", default=False);
-    # Performance tests
+    # Dev options (hidden)
     
     args = parser.parse_args();
     # The input options and help messages
 
     ####################
+
+    warnings = [];
+    # List of warnings to print after logfile is created
 
     globs['call'] = " ".join(sys.argv);
     # Save the program call for later
@@ -182,6 +187,12 @@ def optParse(globs):
         # Input files
         ####################
 
+        if args.dollo_flag:
+            globs['dollo'] = True;
+
+        ## Dollo option
+        ####################
+
         if args.run_mode:
             if args.run_mode not in ["st", "gt", "adaptive"]:
                 PC.errorOut("OP5", "Run mode (-r) must be one of: 'st', 'gt', or 'adaptive'.", globs);
@@ -190,7 +201,7 @@ def optParse(globs):
             globs['run-mode'] = args.run_mode;
 
         if globs['run-mode'] == "st" and (args.theta or args.coal_tree):
-            print("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
+            warnings.append("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
         # Check the run mode option
 
         ## Run mode
@@ -239,17 +250,15 @@ def optParse(globs):
         ## Read species group options
         ####################
 
-        if args.low_scf:
-            if not PC.isPosFloat(args.low_scf, maxval=1.0):
-                PC.errorOut("OP13", "-low-scf must be a positive float, between 0 and 1.", globs);
-            else:
-                globs['min-scf'] = float(args.low_scf);
+        if not PC.isPosFloat(args.low_scf, maxval=1.0):
+            PC.errorOut("OP13", "-low-scf must be a positive float, between 0 and 1.", globs);
+        if args.low_scf != 0.5:
+            globs['min-scf'] = float(args.low_scf);
 
-        if args.scf_prop:
-            if not PC.isPosFloat(args.scf_prop, maxval=1.0):
-                PC.errorOut("OP13", "-s must be a positive float, between 0 and 1.", globs);
-            else:
-                globs['low-scf-branch-prop'] = float(args.scf_prop);
+        if not PC.isPosFloat(args.scf_prop, maxval=1.0):
+            PC.errorOut("OP13", "-s must be a positive float, between 0 and 1.", globs);
+        if args.scf_prop or str(int(args.scf_prop)) == "0":
+            globs['low-scf-branch-prop'] = float(args.scf_prop);
 
         ## sCF options
         ####################
@@ -282,6 +291,11 @@ def optParse(globs):
 
                 opt = opt.upper();
                 # PhyloAcc options are all upper case
+
+                if globs['dollo'] and opt in ["INIT_LRATE2", "HYPER_LRATE2_A", "HYPER_LRATE2_B"]:
+                    warnings.append("# WARNING: With --dollo set, LRATE2 parameters are not used. Ignoring your input for: " + opt);
+                    continue;
+                # A warning in case the LRATE2 parameters are set when --dollo is assumed
 
                 if opt not in globs['phyloacc-defaults']:
                     PC.errorOut("OP14", "One of the provided PhyloAcc options (-phyloacc) is invalid: " + opt, globs);
@@ -463,11 +477,26 @@ def optParse(globs):
         globs['pids'] = [psutil.Process(os.getpid())];
     # Get the starting process ids to calculate memory usage throughout.
 
+    if not PC.isPosFloat(args.inf_frac_theta, maxval=1.0):
+        PC.errorOut("OP22", "-inf-frac-theta must be a positive float, between 0 and 1.", globs);       
+    if args.inf_frac_theta != 0.2:
+        globs['inf-frac-theta'] = args.inf_frac_theta;
+    # The threshold for informative sites for a locus to be used in --theta estimation
+    # Useful for simulations which may have few informative sites
+
+    print(globs['inf-frac-theta']);
     ## Internal stuff
     ####################
 
     startProg(globs);
     # After all the essential options have been set, call the welcome function.
+
+    if warnings:
+        for warning in warnings:
+            PC.printWrite(globs['logfilename'], globs['log-v'], warning);
+            globs['warnings'] += 1; 
+        PC.printWrite(globs['logfilename'], globs['log-v'], "#");
+    # Print any warnings here if there were any before the logfile was created   
 
     return globs;
 
@@ -659,20 +688,6 @@ def startProg(globs):
 
     ####################
 
-    # if globs['plot']:
-    #     plot_status = "True";
-    #     plot_status_str = "An HTML file summarizing the input data will be written to " + globs['html-file'];
-    # else:
-    #     plot_status = "False";
-    #     plot_status_str = "No HTML summary file will be generated.";
-
-    # PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --plot", pad) + 
-    #             PC.spacedOut(plot_status, opt_pad) + 
-    #             plot_status_str);
-    # --plot option
-
-    ####################
-
     if globs['batch']:
         batch_status = "False";
         batch_status_str = "PhyloAcc batch files will be generated and written to the job directory specified above.";
@@ -684,6 +699,18 @@ def startProg(globs):
                 PC.spacedOut(batch_status, opt_pad) + 
                 batch_status_str);
     # --plotonly option
+
+    ####################
+
+    if globs['dollo']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --dollo", pad) +
+                    PC.spacedOut("True", opt_pad) + 
+                    "The Dollo assumption will be used in this run.");
+    else:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --dollo", pad) +
+                    PC.spacedOut("False", opt_pad) + 
+                    "he Dollo assumption will NOT be used in this run.");            
+    # Report the dollo option.    
 
     ####################
 
@@ -733,6 +760,16 @@ def startProg(globs):
     #                 PC.spacedOut("True", opt_pad) + 
     #                 "Printing out a bit of debug info.");
     # Reporting the debug option.
+
+    if globs['inf-frac-theta'] != 0.2:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -inf-frac-theta", pad) + 
+            PC.spacedOut(str(globs['inf-frac-theta']), opt_pad) + 
+            "ONLY LOCI WITH A FRACTION OF INFORMATIVE SITES ABOVE THIS VALUE WILL BE USED TO ESTIMATE --theta.");
+
+    if globs['no-phyloacc']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --nophyloacc", pad) + 
+            PC.spacedOut("True", opt_pad) + 
+            "PHYLOACC RULES WILL NOT BE EXECUTED IN SNAKEMAKE WORKFLOW.");
 
     if globs['qstats']:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --qstats", pad) + 

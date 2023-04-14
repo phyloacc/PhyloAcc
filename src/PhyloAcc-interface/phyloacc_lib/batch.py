@@ -34,7 +34,7 @@ def genJobFiles(globs):
         for aln in len_sorted_alns:
         # Go over every locus
 
-            if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= globs['informative-frac-theta']:
+            if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= globs['inf-frac-theta']:
             # Check if the current locus is long enough and has enough informative sites to make a tree
 
                 if globs['aln-stats'][aln]['low-qual']:
@@ -188,14 +188,23 @@ def genJobFiles(globs):
                             idfile.write(str(batch_aln_id) + "\n");
                             batch_aln_id += 1;
                 # Write an ID file
+                # ID files required for now due to Segmentation fault in PhyloAcc without them
 
                 phyloacc_opt_str = "";
                 if globs['phyloacc-opts']:
                     phyloacc_opt_str = "\n".join(globs['phyloacc-opts']);
+                # The string of extra PhyloAcc options to add
 
                 id_line_str = "";
                 if globs['id-flag']:
                     id_line_str = "\nID_FILE " + cur_id_file;
+                # ID files required for now due to Segmentation fault in PhyloAcc without them
+
+                dollo_str = "";
+                if globs['dollo']:
+                    dollo_str = "HYPER_LRATE2_A 0"
+                # If the dollo assumption is enabled with --dollo, set the appropriate param here 
+                # to be included in all config files
 
                 cur_cfg_file = os.path.join(globs['job-cfgs'], batch_num_str + "-" + model_type + ".cfg");
                 with open(cur_cfg_file, "w") as cfgfile:
@@ -214,7 +223,8 @@ def genJobFiles(globs):
                                                                             outgroup=";".join(globs['groups']['outgroup']),
                                                                             conserved=";".join(globs['groups']['conserved']),
                                                                             procs_per_job=str(globs['procs-per-job']),
-                                                                            phyloacc_opts=phyloacc_opt_str
+                                                                            phyloacc_opts=phyloacc_opt_str,
+                                                                            dollo_str=dollo_str
                                                                             ))
                 # Write the phyloacc config file for the current concatenated alignment
             ## End batch block
@@ -250,9 +260,9 @@ def writeSnakemake(globs):
     if globs['no-phyloacc']:
         phyloacc_char = "#";
 
-    run_char = "#";
+    theta_char = "#";
     if globs['theta']:
-        run_char = "";
+        theta_char = "";
     # If --theta isn't set, we don't want to run some of the rules in the snakemake file, so we comment out their
     # expected outputs in rule all here
 
@@ -260,7 +270,7 @@ def writeSnakemake(globs):
         with open(globs['smk'], "w") as smkfile:
             smkfile.write(TEMPLATES.snakemake().format(cmd=globs['call'],
                                                         dt=PC.getDateTime(),
-                                                        run_char=run_char,
+                                                        theta_char=theta_char,
                                                         phyloacc_char=phyloacc_char,
                                                         astral_path=globs['coal-cmd'],
                                                         iqtree_path=globs['iqtree-path'],

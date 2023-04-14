@@ -40,7 +40,7 @@ if __name__ == '__main__':
     if "--options" in sys.argv:
         opt_pad = 20;
         print();
-        print("These are a list of other options for PhyloAcc that can be specified with -phyloacc:");
+        print("This is a list of other options for PhyloAcc that can be specified with -phyloacc:");
         print(PC.spacedOut("OPTION", opt_pad) + "DEFAULT");
         print("-" * 30);
         for opt in globs['phyloacc-defaults']:
@@ -68,8 +68,9 @@ if __name__ == '__main__':
     globs = OP.optParse(globs);
     # Getting the input parameters from optParse.
 
-    print(globs['tree-data-type']);
-    print(globs['scf-site-type']);
+    #print(globs['tree-data-type']);
+    #print(globs['scf-site-type']);
+    # Tree debugging stuff
 
     if globs['info']:
         print("# --info SET. EXITING AFTER PRINTING PROGRAM INFO...\n#")

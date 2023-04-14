@@ -1,6 +1,11 @@
 04.13.2023
 - Added `--nophyloacc` option that prevents execution of the PhyloAcc rules in the snakemake workflow, useful for debugging or just running `--theta`
 - Internally, switched the number of informative sites required for a locus to be used in `--theta` estimation to be a param, maybe user option later
+- Added `--dollo` option which sets the PhyloAcc `HYPER_LRATE2_A` parameter to 0 to use the Dollo assumption from the original model
+- Implemented (better) handling of Warnings
+- Added hidden `--dev` option to automatically set paths when testing things locally
+- Added hidden `-inf-frac-theta` option to control the fraction of informative sites needed for a locus to be used in `--theta` estimation (for development)
+- Fixed bug in which options that require floats as input (e.g. `-scf`) wouldn't be set if the input value was 0.0
 
 04.06.2023
 - Fixed ids dir when `--theta` is set

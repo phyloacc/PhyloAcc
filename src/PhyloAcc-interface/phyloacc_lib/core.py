@@ -59,6 +59,13 @@ def execCheck(globs, a):
         globs['coal-cmd'] = a.coal_cmd;                   
     # Update the global paths if the user provided them through args.
 
+    if a.dev_opt:
+        globs['phyloacc'] = "/n/home07/gthomas/projects/phyloacc/PhyloAcc/bin/PhyloAcc-ST";
+        globs['phyloacc-gt'] = "/n/home07/gthomas/projects/phyloacc/PhyloAcc/bin/PhyloAcc-GT";
+        globs['iqtree-path'] = "iqtree";
+        globs['coal-cmd'] = "java -jar /n/home07/gthomas/env/pkgs/ASTRAL/Astral/astral.5.7.8.jar";
+    # If --dev is set, set the local paths here
+
     dep_list = ['phyloacc', 'phyloacc-gt'];
     if a.theta:
         dep_list += ['iqtree-path', 'coal-cmd'];
@@ -102,7 +109,7 @@ def execCheck(globs, a):
             deps_passed = False
             dcheck_str[2] = "FAILED with exit code " + str(cmd_result.returncode);
             if not a.depcheck:    
-                errorOut("CORE2", opt + " not found at specified path: " + globs[opt], globs);
+                errorOut("CORE2", opt + " not found or encountered an error: " + globs[opt], globs);
             # On a normal run, exit immediately.  
         # Check whether the pass has failed for the current option and take action here
 
@@ -495,6 +502,9 @@ def endProg(globs, interface=True):
         printWrite(globs['logfilename'], globs['log-v'], "# ERROR: PHYLOACC FINISHED WITH ERRORS.");
         printWrite(globs['logfilename'], globs['log-v'], "# ERROR: PLEASE CHECK THE LOG FILE FOR MORE INFO: " + globs['logfilename'] + "\n#");
     elif interface:
+        if globs['warnings'] != 0:
+            printWrite(globs['logfilename'], globs['log-v'], "\n# phyloacc.py finished with " + str(globs['warnings']) + " WARNINGS -- check log file for more info");
+
         if globs['batch']:
             printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc job files successfully generated");
             printWrite(globs['logfilename'], 1, "# Run the following command to run the PhyloAcc batches:\n\n");
