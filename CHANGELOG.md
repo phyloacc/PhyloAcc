@@ -1,4 +1,4 @@
-04.13.2023
+Version 2.2.0, 04.13.2023
 - Added `--nophyloacc` option that prevents execution of the PhyloAcc rules in the snakemake workflow, useful for debugging or just running `--theta`
 - Internally, switched the number of informative sites required for a locus to be used in `--theta` estimation to be a param, maybe user option later
 - Added `--dollo` option which sets the PhyloAcc `HYPER_LRATE2_A` parameter to 0 to use the Dollo assumption from the original model
