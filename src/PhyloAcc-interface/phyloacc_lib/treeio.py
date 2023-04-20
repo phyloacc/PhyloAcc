@@ -51,18 +51,16 @@ def readST(globs, tree_type="species", rf_to_st=False):
 
         if globs['tree-data-type'] == 'class':
             tree = TREE.Tree(tree_str);
+
         elif globs['tree-data-type'] == 'func':
             tree_dict, tree, root = TREEF.treeParse(tree_str);
-        # Parse the tree string to the tree class
+    # Parse the tree string to the tree class
     except:
+        print("\n\n");
         CORE.errorOut("IO2", "Error reading tree from file!", globs);
     # Read the tree
 
     if globs['tree-data-type'] == 'class':
-        tree.subtree = tree.genSubtrees();
-        tree.tree_str = tree.subtree[tree.root];
-        del tree.subtree;
-
         root_str = "unrooted";
         add_root_node = 0;
         if tree.rooted:

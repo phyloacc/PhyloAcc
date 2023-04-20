@@ -103,6 +103,7 @@ class Tree:
         subtrees = {};
 
         pairs = re.findall("\([\d\w/.,:_<>-]+\)", tree);
+
         node_count = 1;
         while pairs:
         # Loop over all pairs of opening an closing parens at each
@@ -247,8 +248,10 @@ class Tree:
             self.has_bl = True;
             self.bl = { n : self.bl[n] if self.bl[n] != "NA" else "0.0" for n in self.bl };
 
-        if all(self.label[n] == "" for n in self.label):
+        if all(self.label[n] in ["", "NA", ":0"] for n in self.label):
             self.has_label = False;
+            self.label = { n : "NA" for n in self.label };
+            # NOTE: does PhyloAcc need the :0 branch length at the root?
         else:
             self.has_label = True;
             self.label = { n : self.label[n] if self.label[n] != "" else "NA" for n in self.label };
@@ -698,8 +701,8 @@ class Tree:
                 new_label += self.label[node];
             # If the node is in the given dictionary, add the new label
 
-            if self.has_bl and node != self.root:
-                new_label += ":" + str(self.bl[node]);
+            # if self.has_bl and node != self.root:
+            #     new_label += ":" + str(self.bl[node]);
             # If the tree has branch lengths, add the bl
 
             if new_label or node == self.root:
@@ -708,6 +711,37 @@ class Tree:
             # tree with it
 
         return new_tree_str;
+
+    ##########
+
+    def labelDesc(self):
+    # Adds labels in the format [descendant 1]-[descendant 2] to all internal nodes
+    # of a tree
+    # Descendants 1 and 2 are chosen by alphabetically sorting all tips that are 
+    # children of the current node and selecting the first two tips
+
+        label_dict = {};
+        # A dictionary: [numeric label] : [desecendant label]
+
+        tree_str = self.tree_str;
+        for node in self.internals:
+            selected_descs = sorted(self.getClade(node))[0:2];
+            new_label = "-".join(selected_descs);
+            label_dict[node] = new_label;
+        # For every node, select 2 descendants as the new label
+
+        tree_str = self.addLabel(label_dict);
+        # Add the new labels to the tree string
+
+        tree_str = re.sub('<[\d]+>', "", tree_str) + ";";
+        # Remove the integer node labels and add a semi-colon
+
+        if self.has_label:
+            for node in self.internals:
+                tree_str = tree_str.replace(self.label[node] + label_dict[node], label_dict[node]);
+        # Hacky way to remove the old labels after adding the new ones... seems problematic...
+
+        return tree_str;
 
     ##########
 

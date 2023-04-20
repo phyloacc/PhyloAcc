@@ -62,8 +62,12 @@ def init():
         'logdir' : '',
         'tmpdir' : 'System default.',
         'overwrite' : False,
+        'inf-frac-theta' : 0.2,
         # I/O options
         
+        'dollo' : False,
+        # The Dollo assumption option
+
         'run-mode' : 'st',
         # Run mode option
 
@@ -137,6 +141,8 @@ def init():
         #'phyloacc-gt' : 'testSRC_debug4_2tree/PhyloAcc-GT_piQ',
         'phyloacc-gt' : 'PhyloAcc-GT',
         #'phyloacc-gt' : "/n/home07/gthomas/anaconda3/envs/phyloacc-conda/bin/PhyloAcc-GT",
+        'coal-cmd' : 'java -jar astral.jar',
+        'iqtree-path' : 'iqtree',
         # Dependency paths
 
         'batch' : True,
@@ -173,6 +179,7 @@ def init():
         # Job files
 
         'id-flag' : True,
+        # ID files required for now due to Segmentation fault in PhyloAcc without them
 
         'iqtree' : '',
         'astral' : '',
@@ -202,7 +209,7 @@ def init():
         'html-file' : '',
         # Plot and HTML summary files
 
-        'status-script' : 'slurm_status.py',
+        #'status-script' : 'slurm_status.py',
         'smk-cmd' : '',
         # The final snakemake command to report
 
@@ -218,6 +225,7 @@ def init():
         'scf-tree-written' : False,
         'html-summary-written' : False,
 
+        'warnings' : 0,
         'tree-data-type' : "class",
         'scf-site-type' : "loop",
         'count-disco-sites' : True,
@@ -232,6 +240,7 @@ def init():
         'psutil' : False,
         'qstats' : False,
         'norun' : False,
+        'no-phyloacc' : False,
         'debug-tree' : False,
         'debug' : False,
         'nolog' : False,
@@ -254,18 +263,21 @@ def init():
         'CUB'                 : { 'type' : "POS_FLOAT", 'default' : "1" },
         'NLB'                 : { 'type' : "POS_FLOAT", 'default' : "0.6" },
         'THIN'                : { 'type' : "POS_INT",   'default' : "1" },
-        'INIT_LRATE'          : { 'type' : "PROB",      'default' : "0.8" },
-        'INIT_GRATE'          : { 'type' : "PROB",      'default' : "0.5" },
-        'HYPER_LRATE_A'       : { 'type' : "PROB",      'default' : "1" },
-        'HYPER_LRATE_B'       : { 'type' : "PROB",      'default' : "1" },
-        'HYPER_GRATE_A'       : { 'type' : "PROB",      'default' : "1" },
-        'HYPER_GRATE_B'       : { 'type' : "PROB",      'default' : "1" },
+        'INIT_LRATE'          : { 'type' : "POS_FLOAT", 'default' : "0.8" },
+        'INIT_LRATE2'         : { 'type' : "POS_FLOAT", 'default' : "0.1" },
+        'INIT_GRATE'          : { 'type' : "POS_FLOAT", 'default' : "0.5" },
+        'HYPER_LRATE_A'       : { 'type' : "POS_FLOAT", 'default' : "1" },
+        'HYPER_LRATE_B'       : { 'type' : "POS_FLOAT", 'default' : "1" },
+        'HYPER_LRATE2_A'      : { 'type' : "POS_FLOAT", 'default' : "1" },
+        'HYPER_LRATE2_B'      : { 'type' : "POS_FLOAT", 'default' : "1" },
+        'HYPER_GRATE_A'       : { 'type' : "POS_FLOAT", 'default' : "1" },
+        'HYPER_GRATE_B'       : { 'type' : "POS_FLOAT", 'default' : "1" },
         'WL'                  : { 'type' : "BOOL",      'default' : "FALSE" },
         'BL_WL'               : { 'type' : "POS_INT",   'default' : "15" },
         'CONSERVE_PROP'       : { 'type' : "PERC",      'default' : "0.8" },
         'CONSERVE_RATE'       : { 'type' : "PROP",      'default' : "NA" },
         'GAP_PROP'            : { 'type' : "PERC",      'default' : "0.8" },
-        'CONSTOMIS'           : { 'type' : "PROB",      'default' : "0.5" },
+        'CONSTOMIS'           : { 'type' : "POS_FLOAT", 'default' : "0.5" },
         'BR_SAMPLE_THRESHOLD' : { 'type' : "POS_FLOAT", 'default' : "10" },
         'GAPCHAR'             : { 'type' : "CHAR",      'default' : "-" },
         'PRUNE_TREE'          : { 'type' : "BOOL",      'default' : "FALSE" },

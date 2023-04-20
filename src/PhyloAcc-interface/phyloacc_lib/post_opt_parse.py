@@ -51,7 +51,7 @@ def optParse(globs):
 
     parser = argparse.ArgumentParser(description="phyloacc_post.py combines and summarizes the output from batched PhyloAcc runs.");
 
-    parser.add_argument("-i", dest="input_dir", help="The directory created from a phyloacc_interface run.", default=False);
+    parser.add_argument("-i", dest="input_dir", help="The directory created from a phyloacc.py run.", default=False);
     #parser.add_argument("-m", dest="mod_file", help="A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from PHAST. REQUIRED.", default=False);
     # Input
 

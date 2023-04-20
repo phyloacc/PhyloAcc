@@ -3,13 +3,11 @@ src/PhyloAcc-interface/phyloacc_lib/__pycache__/
 .snakemake
 *.code-workspace
 src/PhyloAcc-interface/notes.txt
-src/PhyloAcc-interface/test/
-src/PhyloAcc-interface/id-test/
 src/PhyloAcc-interface/phyloacc_lib/templates_old.py
-src/PhyloAcc-interface/test.tre
 src/PhyloAcc-interface/*.errlog
 src/PhyloAcc-interface/tests/
 support/
+bin/
 
 # Compiled source #
 ###################

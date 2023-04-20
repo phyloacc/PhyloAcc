@@ -394,7 +394,8 @@ if __name__ == '__main__':
         idout.write("# conserved.rate.m2:         The posterior median of the conserved substitution rate under M2\n");
         idout.write("# accel.rate.m2:             The posterior median of the accelerated substitution rate under M2\n");    
         idout.write("# num.accel.m1:              The number of lineages inferred to be accelerated under M1\n");        
-        idout.write("# num.accel.m2:              The number of lineages inferred to be accelerated under M2\n");        
+        idout.write("# num.accel.m2:              The number of lineages inferred to be accelerated under M2\n");
+        idout.write("# conserved.lineages.m1:     A comma separated list of the conserved lineages under M1\n");    
         idout.write("# accel.lineages.m1:         A comma separated list of the accelerated lineages under M1\n");
         idout.write("# conserved.lineages.m2:     A comma separated list of the conserved lineages under M2\n");
         idout.write("# accel.lineages.m2:         A comma separated list of the accelerated lineages under M2\n");

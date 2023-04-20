@@ -131,6 +131,9 @@ def genPlots(globs):
     # A single list of alignment IDs for consistency between dictionary lookups
 
     aln_len_hist_file = os.path.join(globs['plot-dir'], globs['aln-len-plot-file']);
+    for aln in globs['aln-stats']:
+        if globs['aln-stats'][aln]['length'] == 0:
+            print(aln);
     aln_lens = [ globs['aln-stats'][aln]['length'] for aln in aln_list ];
     
     plt.figure(figsize=(8,6));

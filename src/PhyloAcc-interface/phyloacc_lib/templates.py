@@ -18,6 +18,7 @@ OUTGROUP {outgroup}
 CONSERVE {conserved}
 NUM_THREAD {procs_per_job}
 {phyloacc_opts}
+{dollo_str}
 """
 
     return phyloacc_template;
@@ -27,7 +28,7 @@ NUM_THREAD {procs_per_job}
 def snakemake():
 
     smk_template = """#############################################################################
-# Pipeline for running phyloacc per locus
+# Pipeline for running phyloacc batches
 # Generated from: {cmd}
 # On: {dt}
 #############################################################################
@@ -51,7 +52,7 @@ GT_BATCHES = config["gt_batch_list"];
 #############################################################################
 
 iqtree_loci = [];
-{run_char}iqtree_loci = [ f.replace(".fa", "") for f in os.listdir(os.path.join(IQTREEDIR, "alns")) if f.endswith(".fa") ];
+{theta_char}iqtree_loci = [ f.replace(".fa", "") for f in os.listdir(os.path.join(IQTREEDIR, "alns")) if f.endswith(".fa") ];
 # Reads the alignments to make trees from if --theta is specified
 
 #############################################################################
@@ -62,11 +63,11 @@ localrules: all
 
 rule all:
     input:
-        {run_char}expand(os.path.join(IQTREEDIR, "gene-trees", "{{locus}}", "{{locus}}.treefile"), locus=iqtree_loci),
-        {run_char}os.path.join(IQTREEDIR, "gene-trees", "all-gene-trees.treefile"),
-        {run_char}"{coal_tree_path}",
-        expand(os.path.join(OUTDIR, "{{st_batch}}-phyloacc-st-out", "{{st_batch}}_elem_lik.txt"), st_batch=ST_BATCHES),
-        expand(os.path.join(OUTDIR, "{{gt_batch}}-phyloacc-gt-out", "{{gt_batch}}_elem_lik.txt"), gt_batch=GT_BATCHES)
+        {theta_char}expand(os.path.join(IQTREEDIR, "gene-trees", "{{locus}}", "{{locus}}.treefile"), locus=iqtree_loci),
+        {theta_char}os.path.join(IQTREEDIR, "gene-trees", "all-gene-trees.treefile"),
+        {theta_char}"{coal_tree_path}",
+        {phyloacc_char}expand(os.path.join(OUTDIR, "{{st_batch}}-phyloacc-st-out", "{{st_batch}}_elem_lik.txt"), st_batch=ST_BATCHES),
+        {phyloacc_char}expand(os.path.join(OUTDIR, "{{gt_batch}}-phyloacc-gt-out", "{{gt_batch}}_elem_lik.txt"), gt_batch=GT_BATCHES)
 # This rule checks for expected outputs from the rules
 # With --theta, a coalescent tree will be estimated with IQTree and ASTRAL, but without --theta these outputs
 # are commented and those rules will not be run.
@@ -87,7 +88,7 @@ rule run_iqtree:
         cpus=1    
     shell:
         \"\"\"
-        iqtree -s {{input}} --prefix {{params.locus}} -T {{resources.cpus}} -redo &> {{log}}
+        {iqtree_path} -s {{input}} --prefix {{params.locus}} -T {{resources.cpus}} -redo &> {{log}}
         \"\"\"    
 
 rule combine_gene_trees:
@@ -111,7 +112,7 @@ rule run_astral:
         os.path.join(ASTRALDIR, "astral-species-tree.log")
     shell:
         \"\"\"
-        java -jar /n/home07/gthomas/env/pkgs/ASTRAL/Astral/astral.5.7.8.jar -q {{input.species_tree}} -i {{input.gene_trees}} -o {{output}} &> {{log}}
+        {astral_path} -q {{input.species_tree}} -i {{input.gene_trees}} -o {{output}} &> {{log}}
         \"\"\"
 
 # The above rules estimate a tree with branch lengths in coalescent units if the --theta option
@@ -187,7 +188,7 @@ default-resources:
   - mem='{mem}g'
   - time='{time}'
   - cpus={procs_per_job}
-latency-wait: 30
+latency-wait: 45
 verbose: true
 """
 

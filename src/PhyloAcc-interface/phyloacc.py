@@ -40,7 +40,7 @@ if __name__ == '__main__':
     if "--options" in sys.argv:
         opt_pad = 20;
         print();
-        print("These are a list of other options for PhyloAcc that can be specified with -phyloacc:");
+        print("This is a list of other options for PhyloAcc that can be specified with -phyloacc:");
         print(PC.spacedOut("OPTION", opt_pad) + "DEFAULT");
         print("-" * 30);
         for opt in globs['phyloacc-defaults']:
@@ -68,8 +68,9 @@ if __name__ == '__main__':
     globs = OP.optParse(globs);
     # Getting the input parameters from optParse.
 
-    print(globs['tree-data-type']);
-    print(globs['scf-site-type']);
+    #print(globs['tree-data-type']);
+    #print(globs['scf-site-type']);
+    # Tree debugging stuff
 
     if globs['info']:
         print("# --info SET. EXITING AFTER PRINTING PROGRAM INFO...\n#")
@@ -101,10 +102,20 @@ if __name__ == '__main__':
     if globs['label-tree']:
         if globs['tree-data-type'] == 'class':
             globs['st'].showAttrib("type", "label", "desc");
-            print("\n" + globs['st'].tree_str +"\n");
-        print(globs['labeled-tree']);
-        print();
+
+            print("\nInput tree with integer labels:");
+            print(globs['st'].tree_str +"\n");
+
+            #if not globs['st'].has_label:
+            print("\nInput tree with descendant labels:");
+            print(globs['st'].labelDesc());
+
+        #print(globs['labeled-tree']);
+        #print();
         sys.exit(0);
+    elif not globs['st'].has_label:
+        PC.errorOut("MAIN2", "Tree does not have internal nodes labeled, which is required for PhyloAcc. Use --labeltree and replace the tree in your .mod file with the labeled tree.", globs);
+
     #else:
     #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);
     # Print the tree and exit if --labeltree is set
