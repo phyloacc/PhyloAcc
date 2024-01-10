@@ -964,7 +964,7 @@ def debugTree(globs):
 
     # # print(st.labeled_topo_str);
     # # st.showSplit();
-    #st.showAttrib("label", "anc", "desc");
+    st.showAttrib("label", "anc", "desc");
     #print(st.rooted);
     #print(st.root);
 

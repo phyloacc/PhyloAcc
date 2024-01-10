@@ -50,7 +50,9 @@ def readFasta(filename, globs):
 
         #print(header, len(seq));
 
-        if globs['tree-data-type'] == 'class':
+        if globs['debug-aln']:
+            seqdict[curkey] = seq;
+        elif globs['tree-data-type'] == 'class':
             if curkey in globs['st'].tips:
                 seqdict[curkey] = seq;
         elif globs['tree-data-type'] == 'func':
@@ -334,26 +336,34 @@ def alnStats(globs):
     step_start_time = PC.report_step(globs, step, False, "In progress...");
     # Status update
 
-    with globs['aln-pool'] as pool:
-        for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['aln-skip-chars']) for locus in globs['alns'])):
-        # Loop over every locus in parallel to calculate stats
-        # Have to do it this way so it doesn't terminate the pool for sCF calculations
-
-            aln, stats = result;
+    if globs['debug-aln']:
+        for locus in globs['alns']:
+            # print();
+            # print(locus);
+            # print(globs['alns'][locus]);
+            aln, stats = locusAlnStats((locus, globs['alns'][locus], globs['aln-skip-chars']));
             globs['aln-stats'][aln] = stats;
-            # Unpack the current result
+    else:
+        with globs['aln-pool'] as pool:
+            for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['aln-skip-chars']) for locus in globs['alns'])):
+            # Loop over every locus in parallel to calculate stats
+            # Have to do it this way so it doesn't terminate the pool for sCF calculations
 
-            if globs['run-mode'] == 'st':
-                globs['aln-stats'][aln]['batch-type'] = "st";
-            # With run mode st, all loci are run through the species tree model
+                aln, stats = result;
+                globs['aln-stats'][aln] = stats;
+                # Unpack the current result
 
-            elif globs['run-mode'] == 'gt':
-                globs['aln-stats'][aln]['batch-type'] = "gt";
-            # With run mode gt, all loci are run through the gene tree model
-            
-            if globs['aln-stats'][aln]['informative-sites'] == 0:
-                globs['no-inf-sites-loci'].append(aln);
-            # If the locus has no informative sites, add to the list here
+                if globs['run-mode'] == 'st':
+                    globs['aln-stats'][aln]['batch-type'] = "st";
+                # With run mode st, all loci are run through the species tree model
+
+                elif globs['run-mode'] == 'gt':
+                    globs['aln-stats'][aln]['batch-type'] = "gt";
+                # With run mode gt, all loci are run through the gene tree model
+                
+                if globs['aln-stats'][aln]['informative-sites'] == 0:
+                    globs['no-inf-sites-loci'].append(aln);
+                # If the locus has no informative sites, add to the list here
 
     sorted_aln_lens = sorted([ globs['aln-stats'][aln]['length'] for aln in globs['aln-stats'] ]);
     globs['avg-aln-len'] = PC.mean(sorted_aln_lens);

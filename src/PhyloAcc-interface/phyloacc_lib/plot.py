@@ -74,7 +74,8 @@ def genPlots(globs):
     if globs['tree-data-type'] == 'class':
         tree_str = globs['st'].tree_str;
         for node in globs['st'].internals:
-            tree_str = tree_str.replace(globs['st'].label[node], "");
+            tree_str = tree_str.replace(globs['st'].label[node] + ":", ":");
+            print(globs['st'].label[node]);
     elif globs['tree-data-type'] == 'func':
         tree_str = TREEF.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
     # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
@@ -82,7 +83,7 @@ def genPlots(globs):
     handle = StringIO(tree_str);
     tree = Phylo.read(handle, "newick");
     # Parse the tree string with Bio
-    
+ 
     target_lg, conserve_lg, outgroup_lg = False, False, False;
     #for clade in tree.get_terminals():
     for clade in tree.find_clades():
@@ -106,7 +107,8 @@ def genPlots(globs):
     if num_spec < 20:
         fig = plt.figure(figsize=(num_spec/4, 25.4/5.08));
     else:
-        fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+        #fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+        fig = plt.figure(figsize=(20, 30));
     # Specify the plot size depending on the number of species
 
     axes = fig.add_subplot(1, 1, 1);

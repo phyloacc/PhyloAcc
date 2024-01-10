@@ -242,6 +242,7 @@ def init():
         'norun' : False,
         'no-phyloacc' : False,
         'debug-tree' : False,
+        'debug-aln' : False,
         'debug' : False,
         'nolog' : False,
         # Internal stuff
