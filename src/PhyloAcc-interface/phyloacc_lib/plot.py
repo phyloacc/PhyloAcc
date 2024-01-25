@@ -5,6 +5,7 @@
 
 import os
 import re
+import math
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
 import phyloacc_lib.tree_old as TREEF
@@ -341,6 +342,24 @@ def genPlots(globs):
 
 #############################################################################
 
+def getBFs(globs):
+# A function to get the BFs into lists for plotting
+# Also removes and warns about BFs that are infinite
+    bf_types = [ "logBF1", "logBF2", "logBF3" ];
+    bf_lists = { bf_type : [] for bf_type in bf_types };
+
+    for locus in globs['all-loci']:
+        for bf_type in bf_types:
+            bf = float(globs['locus-stats']['elem_lik'][locus][bf_type]);
+            if math.isinf(bf):
+                print("WARNING: " + bf_type + " for locus " + locus + " is infinite. This locus may have failed to converge for this model. Excluding from plots...");
+            else:
+                bf_lists[bf_type].append(bf);
+
+    return tuple(bf_lists[bf_type] for bf_type in bf_types)
+
+#############################################################################
+
 def genPlotsPost(globs):
 
     step = "Generating summary plots";
@@ -371,10 +390,8 @@ def genPlotsPost(globs):
     
     ####################
 
-    bf1s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF1']) for locus in globs['all-loci'] ];
-    bf2s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF2']) for locus in globs['all-loci'] ];
-    bf3s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF3']) for locus in globs['all-loci'] ];
-    # Just get lists of the BFs
+    bf1s, bf2s, bf3s = getBFs(globs);
+    # Just get lists of the BFs and filter out the infs for elements that failed to converge
 
     ####################
 
