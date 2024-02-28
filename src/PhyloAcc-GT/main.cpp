@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
             //cout<<"node "<<phytree.nodes_names[i]<<" theta="<<phytree.thetas[i]<<endl;
         }
     }else{
-        cout<<"please input a phylogengy with branch length in coalescent unit."<<endl;
+        cout << "Error. Please also input a phylogeny with branch lengths in coalescent units." << endl;
         return 1;
     } 
 
