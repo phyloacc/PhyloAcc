@@ -97,6 +97,7 @@ if __name__ == '__main__':
 
         if globs['debug-tree']:
             TREE.debugTree(globs);
+            #   print(globs['st'].has_label);
             sys.exit(0);
         # Print the debug stats and exit if --debugtree is set
 
@@ -115,7 +116,7 @@ if __name__ == '__main__':
             #print();
             sys.exit(0);
         elif not globs['st'].has_label:
-            PC.errorOut("MAIN2", "Tree does not have internal nodes labeled, which is required for PhyloAcc. Use --labeltree and replace the tree in your .mod file with the labeled tree.", globs);
+            PC.errorOut("MAIN2", "One or more internal nodes in your tree are unlabeled, which is required for PhyloAcc. Please label all internal nodes (maybe with the --labeltree option) and replace the tree in your .mod file with the labeled tree.", globs);
 
         #else:
         #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);

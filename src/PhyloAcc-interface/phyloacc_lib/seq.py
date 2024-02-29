@@ -53,11 +53,11 @@ def readFasta(filename, globs):
         if globs['debug-aln']:
             seqdict[curkey] = seq;
         elif globs['tree-data-type'] == 'class':
-            if curkey in globs['st'].tips:
-                seqdict[curkey] = seq;
+            #if curkey in globs['st'].tips:
+            seqdict[curkey] = seq;
         elif globs['tree-data-type'] == 'func':
-            if curkey in globs['tips']:
-                seqdict[curkey] = seq;
+            #if curkey in globs['tips']:
+            seqdict[curkey] = seq;
         # Save the sequence in seqdict if it belongs to a tip branch in the input tree  
 
     return seqdict;
@@ -148,6 +148,30 @@ def partitionSeqs(concat_seqs, bed_coords):
         # Save the current alignment to the alns dict
 
     return alns;
+
+#############################################################################
+
+def checkAlnLabels(globs):
+    tree_tips = globs['st'].tips;
+    # Get the tips of the input tree
+
+    for aln in globs['alns']:
+        if len(globs['alns'][aln]) != len(tree_tips):
+            if globs['aln-file']:
+                PC.errorOut("SEQ1", "The number of sequences in the alignment do not match the number of tips in the input tree.", globs);
+            else:
+                PC.errorOut("SEQ1", "The number of sequences in the alignment " + aln + " does not match the number of tips in the input tree.", globs);
+            sys.exit(1);
+        # If the number of sequences in the locus does not match the number of tips in the input tree, exit
+
+        for header in globs['alns'][aln]:
+            if header not in tree_tips:
+                if globs['aln-file']:
+                    PC.errorOut("SEQ2", "Sequence " + header + " is in the alignment but not in the tree.", globs);
+                else:
+                    PC.errorOut("SEQ2", "Sequence " + header + " is in alignment " + aln + " but not in the tree.", globs);
+                sys.exit(1);
+        # If a sequence in any locus is not in the input tree, exit
 
 #############################################################################
 
@@ -259,6 +283,8 @@ def readSeq(globs):
 
     # Read sequences if input is a directory of alignment files
     #######################
+
+    checkAlnLabels(globs);
 
     return globs;
 

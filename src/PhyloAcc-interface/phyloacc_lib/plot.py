@@ -76,7 +76,6 @@ def genPlots(globs):
         tree_str = globs['st'].tree_str;
         for node in globs['st'].internals:
             tree_str = tree_str.replace(globs['st'].label[node] + ":", ":");
-            print(globs['st'].label[node]);
     elif globs['tree-data-type'] == 'func':
         tree_str = TREEF.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
     # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below

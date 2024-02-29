@@ -247,8 +247,9 @@ class Tree:
         else:
             self.has_bl = True;
             self.bl = { n : self.bl[n] if self.bl[n] != "NA" else "0.0" for n in self.bl };
+        ## Checks for branch lengths
 
-        if all(self.label[n] in ["", "NA", ":0"] for n in self.label):
+        if any(self.label[n] in ["", "NA", ":0", "root"] for n in self.label if n in self.internals):
             self.has_label = False;
             self.label = { n : "NA" for n in self.label };
             # NOTE: does PhyloAcc need the :0 branch length at the root?
