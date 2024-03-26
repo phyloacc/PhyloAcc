@@ -104,6 +104,7 @@ def init():
         'med-nogap-seq-len' : "NA",
         'no-inf-sites-loci' : [],
         'gappy-loci' : [],
+        'filter-alns' : False,
         # Alignment summary stats
 
         'input-groups' : { 'targets' : [], 'outgroup' : [], 'conserved' : [] },

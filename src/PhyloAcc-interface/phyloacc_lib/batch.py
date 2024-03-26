@@ -92,8 +92,18 @@ def genJobFiles(globs):
     # Subset alignments based on model type. This is either specified by the user with '-r st' or '-r gt', or is decided
     # by sCF with '-r adaptive'.
 
+    init_st_loci = len(st_alns);
+    init_gt_loci = len(gt_alns);
+    init_total_loci = init_st_loci + init_gt_loci;
+
+    if globs['filter-alns']:
+        st_alns = { aln : globs['alns'][aln] for aln in st_alns if not globs['aln-stats'][aln]['low-qual'] };
+        gt_alns = { aln : globs['alns'][aln] for aln in gt_alns if not globs['aln-stats'][aln]['low-qual'] };
+    # If the alignment filter flag is set, remove low quality alignments
+
     globs['st-loci'] = len(st_alns);
     globs['gt-loci'] = len(gt_alns);
+    total_loci = globs['st-loci'] + globs['gt-loci'];
     # Adjust the counts after removing alignments with no informative sites
 
     model_num = 0;
@@ -232,9 +242,11 @@ def genJobFiles(globs):
     ## End model partition loop
 
     if globs['batch']:
-        step_start_time = PC.report_step(globs, step, step_start_time, "Success: " + str(batch_num) + " jobs written");
+        step_start_time_tmp = PC.report_step(globs, step, step_start_time, "Success: " + str(batch_num) + " jobs written" );
     else:
-        step_start_time = PC.report_step(globs, step, step_start_time, "Success: " + str(batch_num) + " batches counted");
+        step_start_time_tmp = PC.report_step(globs, step, step_start_time, "Success: " + str(batch_num) + " batches counted");
+    #step_start_time = PC.report_step(globs, step, step_start_time, "# INFO: " + str(total_loci) + " out of " + str(init_total_loci) + " loci kept");
+    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# INFO: " + str(total_loci) + " out of " + str(init_total_loci) + " loci kept", 45) + "");
     # Status update
 
     globs['num-batches'] = batch_num;

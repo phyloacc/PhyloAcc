@@ -229,7 +229,7 @@ def readSeq(globs):
         # step_start_time = PC.report_step(globs, step, False, "In progress...");
         # written = 0;
         # for aln in globs['alns']:
-        #     outdir = "/n/holylfs05/LABS/informatics/Everyone/phyloacc-data/GTpost/Tree4/Theta2/Len4/Simu/alns/";
+        #     outdir = "/n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/";
         #     if not os.path.isdir(outdir):
         #         os.system("mkdir " + outdir);
         #     outfile = os.path.join(outdir, aln + ".fa");
@@ -349,7 +349,7 @@ def locusAlnStats(locus_item):
     # Count the number of unique sequences
     # Could also count number of times each sequence occurs: https://stackoverflow.com/questions/30692655/counting-number-of-strings-in-a-list-with-python#30692666
 
-    if cur_stats['num-sites-half-gap'] > half_site_len or cur_stats['num-seqs-half-gap'] > half_site_len:
+    if cur_stats['num-sites-half-gap'] >= half_aln_len or cur_stats['num-seqs-half-gap'] >= half_site_len:
         cur_stats['low-qual'] = True;
     # Setting a flag for low quality sequence to be considered when estimating theta
 

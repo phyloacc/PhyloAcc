@@ -2,16 +2,16 @@
 # Sequence input
 ####################
 
-## EITHER the following 3 options ##
+## EITHER the following options ##
 
-aln_file: simu_500_200_diffr_2-1.noanc.fa
+aln_file:
 # Alignment file (-a)
 # An alignment file with all loci concatenated. 
 # bed_file must also be specified. 
 # Expected as FASTA format. 
 # REQUIRED conditionally: Only specify one of aln_file + bed_file OR aln_dir.
 
-bed_file: simu_500_200_diffr_2-1.bed
+bed_file:
 # bed file (-b)
 # A bed file with coordinates for the loci in the concatenated alignment file (aln_file). 
 # aln_file must also be specified.
@@ -25,7 +25,7 @@ id_file:
 
 ## OR ##
 
-aln_dir:
+aln_dir: alns
 # Alignment directory (-d)
 # A directory containing individual alignment files for each locus. 
 # Expected as FASTA format. 
@@ -35,7 +35,7 @@ aln_dir:
 # Tree input
 ####################
 
-mod_file: ratite-no-labels.mod
+mod_file: ratite.mod
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
 # EXAMPLE FILE:
@@ -137,6 +137,21 @@ summarize_flag:
 # True: only generate the input summary.
 # False: continue to generate/overwrite batch job files (normal run).
 # DEFAULT: False
+
+####################
+# Alignment filtering
+####################
+
+filter_alns:
+# Filter low quality alignments (--filter)
+# By default, any locus with at least 1 informative site is reatained for PhyloAcc.
+# Set this to filter out loci that have at least 50% of sites that are 50% or more gap charcaters
+# OR that have 50% of sequences that are made up of 50% or more gap charcaters.
+# OPTIONS:
+# True: filter out low quality alignments.
+# False: do not filter out low quality alignments.
+# DEFAULT: False
+# More alignment filtering options may be available in the future.
 
 ####################
 # SCF options
@@ -354,3 +369,5 @@ quiet_flag:
 # True: run in quiet mode.
 # False: run in verbose mode.
 # DEFAULT: False
+
+####################

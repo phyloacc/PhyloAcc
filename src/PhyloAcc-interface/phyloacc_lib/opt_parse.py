@@ -15,8 +15,8 @@ import phyloacc_lib.tree as TREE
 #############################################################################
 
 def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check=True):
-
-    #globs['run-mode'] = getOpt(args.run_mode, "run_mode", ["st", "gt", "adaptive"], globs['run-mode'], config, arg_flags, globs);
+# This function gets the value of an option from the command line, config file, or default.
+# It also checks the value for validity if check=True.
 
     if args_var:
         param_value = args_var;
@@ -24,14 +24,7 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
         param_value = config[arg_str];
     else:
         param_value = arg_default;
-
-    #param_value = args_var if args_var else config.get(arg_str, arg_default);
-    
-    # print(arg_str);
-    # print(arg_default);
-    # print(args_var);
-    # print(config.get(arg_str, arg_default));
-    # print(param_value);
+    # Get the value from the command line, config file, or default
 
     if check:
         if arg_type == str and not param_value:
@@ -48,18 +41,6 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
 
         if arg_type == "PROP" and not PC.isPosFloat(param_value, maxval=1.0):
             PC.errorOut("OP4", "The value for " + arg_str + " must be a positive float between 0 and 1.", globs);
-
-        # if arg_type == "PERC" and not PC.isPosFloat(param_value, maxval=100.0):
-        #     PC.errorOut("OP4", "The value for " + arg_str + " must be a positive float between 0 and 100.", globs);
-
-        # if arg_type == "POS_INT" and not PC.isPosInt(param_value):
-        #     PC.errorOut("OP4", "The value for " + arg_str + " must be a positive integer.", globs);
-
-        # if arg_type == "POS_FLOAT" and not PC.isPosFloat(param_value):
-        #     PC.errorOut("OP4", "The value for " + arg_str + " must be a positive float.", globs);
-
-        # if arg_type == "BOOL" and param_value not in [True, False, 0, 1]:
-        #     PC.errorOut("OP4", "The value for " + arg_str + " must be a boolean (True/False).", globs);
 
         if arg_type == "FILE" and param_value and not os.path.isfile(param_value):
             if not optional:
@@ -80,6 +61,8 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
 #############################################################################
 
 def addArgument(parser, flag, dest, arg_type, help_str):
+# This function adds an argument to the parser with the specified flag, destination, type, and help message.
+
     if arg_type == bool:
         parser.add_argument(flag, dest=dest, help=help_str, action="store_true");
     else:
@@ -141,6 +124,12 @@ def optParse(globs):
         "Desired output directory. This will be created for you if it doesn't exist. Default: phyloacc-[date]-[time]"));
     #parser.add_argument("-o", dest="out_dest", help="Desired output directory. This will be created for you if it doesn't exist. Default: phyloacc-[date]-[time]", default=False);
     ## Output
+
+    ##########
+
+    arg_flags.update(addArgument(parser, "--filter", "filter_alns", bool,
+        "Set this flag to filter out loci with no informative sites before running PhyloAcc."));
+    ## Alignments
 
     ##########
     
@@ -436,10 +425,11 @@ def optParse(globs):
         # Save the input type as a global param
 
         globs = PC.fileCheck(globs);
-        # Make sure all the input file actually exist, and get their
+        # Make sure all the input files actually exist, and get their
         # full paths
 
-        #sys.exit();
+        globs['filter-alns'] = getOpt(args.filter_alns, "filter_alns", bool, globs['filter-alns'], config, arg_flags, globs);
+        # Alignment filtering option
 
         # Input files
         ####################
@@ -571,8 +561,12 @@ def optParse(globs):
 
             ####################
 
-            globs['batch'] = getOpt(args.summarize_flag, "summarize_flag", bool, globs['batch'], config, arg_flags, globs);
-            # Set the plot_flag to True if the plot_only_flag is True
+            summarize_opt = getOpt(args.summarize_flag, "summarize_flag", bool, False, config, arg_flags, globs);
+            if summarize_opt:
+                globs['batch'] = False;
+            else:
+                globs['batch'] = True;
+            #globs['batch'] = getOpt(args.summarize_flag, "summarize_flag", bool, globs['batch'], config, arg_flags, globs);
 
             ## Batch option -- after checking input files check to see if the user wants to write the batch files or just get the summary
             ####################   
@@ -947,6 +941,16 @@ def startProg(globs):
     # Report the -l option
 
     ####################
+
+    if globs['filter-alns']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --filter", pad) +
+                    PC.spacedOut("True", opt_pad) + 
+                    "Low quality alignments will be filtered out before PhyloAcc is run.");
+    else:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --filter", pad) +
+                    PC.spacedOut("False", opt_pad) + 
+                    "All alignments with informative sites will be run with PhyloAcc.");       
+    # Reporting the filter option.
 
     if globs['overwrite']:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --overwrite", pad) +
