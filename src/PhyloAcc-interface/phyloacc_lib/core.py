@@ -44,22 +44,12 @@ def fileCheck(globs):
 
 #############################################################################
 
-def execCheck(globs, a):
+def execCheck(globs, dep_check, dev_opt):
 # Checks dependency executables.
     deps_passed = True;
     # Variable to check if all dependencies are found.
 
-    if a.phyloacc_st_path:
-        globs['phyloacc'] = a.phyloacc_st_path;
-    if a.phyloacc_gt_path:
-        globs['phyloacc-gt'] = a.phyloacc_gt_path;
-    if a.iqtree_path:
-        globs['iqtree-path'] = a.iqtree_path;             
-    if a.coal_cmd:
-        globs['coal-cmd'] = a.coal_cmd;                   
-    # Update the global paths if the user provided them through args.
-
-    if a.dev_opt:
+    if dev_opt:
         globs['phyloacc'] = "/n/home07/gthomas/projects/phyloacc/PhyloAcc/bin/PhyloAcc-ST";
         globs['phyloacc-gt'] = "/n/home07/gthomas/projects/phyloacc/PhyloAcc/bin/PhyloAcc-GT";
         globs['iqtree-path'] = "iqtree";
@@ -67,13 +57,13 @@ def execCheck(globs, a):
     # If --dev is set, set the local paths here
 
     dep_list = ['phyloacc', 'phyloacc-gt'];
-    if a.theta:
+    if globs['theta']:
         dep_list += ['iqtree-path', 'coal-cmd'];
     # Which dependencies to check
 
     dpad = 24;
     hyphens = 55;
-    if a.depcheck:
+    if dep_check:
         print("# --depcheck set: CHECKING DEPENDENCY PATHS AND EXITING.\n");
         print(spacedOut("   PROGRAM", dpad) + spacedOut("PATH", dpad) + "STATUS");
         print("   " + "-" * hyphens);
@@ -108,7 +98,7 @@ def execCheck(globs, a):
         if not cur_passed:
             deps_passed = False
             dcheck_str[2] = "FAILED with exit code " + str(cmd_result.returncode);
-            if not a.depcheck:    
+            if not dep_check:    
                 errorOut("CORE2", opt + " not found or encountered an error: " + globs[opt], globs);
             # On a normal run, exit immediately.  
         # Check whether the pass has failed for the current option and take action here
@@ -118,7 +108,7 @@ def execCheck(globs, a):
             # Update the check string.
         # In all other cases with an exit code of 0, the depcheck passes
             
-        if a.depcheck:
+        if dep_check:
             print("".join(dcheck_str));
         # Print the check string if --depcheck is set.
 

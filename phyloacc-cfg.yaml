@@ -1,0 +1,356 @@
+####################
+# Sequence input
+####################
+
+## EITHER the following 3 options ##
+
+aln_file: simu_500_200_diffr_2-1.noanc.fa
+# Alignment file (-a)
+# An alignment file with all loci concatenated. 
+# bed_file must also be specified. 
+# Expected as FASTA format. 
+# REQUIRED conditionally: Only specify one of aln_file + bed_file OR aln_dir.
+
+bed_file: simu_500_200_diffr_2-1.bed
+# bed file (-b)
+# A bed file with coordinates for the loci in the concatenated alignment file (aln_file). 
+# aln_file must also be specified.
+# REQUIRED conditionally: Only specify one of aln_file + bed_file OR aln_dir.
+
+id_file:
+# ID file (-i)
+# A text file with locus names, one per line, corresponding to regions in bed_file. 
+# aln_file and bed_file must also be specified.
+# DEFAULT: None
+
+## OR ##
+
+aln_dir:
+# Alignment directory (-d)
+# A directory containing individual alignment files for each locus. 
+# Expected as FASTA format. 
+# REQUIRED conditionally: Only specify one of aln_file + bed_file OR aln_dir.
+
+####################
+# Tree input
+####################
+
+mod_file: ratite.mod
+# Model file (-m)
+# A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
+# EXAMPLE FILE:
+# REQUIRED.
+
+targets: strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
+# Target species (-t)
+# Tip labels in the input tree to be used as target species. 
+# Enter multiple labels separated by semi-colons (;). 
+# REQUIRED.
+
+conserved:
+# Conserved species (-c)
+# Tip labels in the input tree to be used as conserved species. 
+# Enter multiple labels separated by semi-colons (;). 
+# DEFAULT: Any species not specified as targets or outgroup will be set as conserved.
+
+outgroup: allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
+# Outgroup species (-g)
+# Tip labels in the input tree to be used as outgroup species. 
+# Enter multiple labels separated by semi-colons (;).
+# DEFAULT: None. If blank, no species will be set as outgroup.
+
+coal_tree:
+# Coalescent tree (-l)
+# A file containing a rooted, Newick formatted tree with the same topology as the species 
+# tree in the mod file (-m), but with branch lengths in coalescent units. 
+# Either coal_tree or theta is REQUIRED for the gene tree and adaptive models, not needed for species tree model.
+
+theta_flag:
+# Estimate population size parameter theta (--theta)
+# Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for 
+# estimation of the theta prior. Note that a species tree with branch lengths in units of 
+# substitutions per site is still required in the mod_file. Also note that this may add substantial 
+# runtime to the pipeline.
+# Either coal_tree or theta is REQUIRED for the gene tree and adaptive models, not needed for species tree model.
+
+####################
+# PhyloAcc Method
+####################
+
+run_mode:
+# Run mode (-r)
+# Determines which version of PhyloAcc will be used.
+# OPTIONS: 
+# gt: use the gene tree model for all loci.
+# st: use the species tree model for all loci.
+# adaptive: use the gene tree model on loci with many branches with low sCF and species tree model on all other loci. 
+# DEFAULT: st
+
+dollo_flag:
+# Dollo assumption (--dolly)
+# Set this to use the Dollo assumption in the original model (lineages descendant from an 
+#   accelerated branch cannot change state).
+# OPTIONS:
+# True: use the Dollo assumption.
+# False: do not use the Dollo assumption.
+# DEFAULT: False
+
+####################
+# Other input options
+####################
+
+num_procs: 10
+# Number of processes (-n)
+# The number of processes that this script should use. 
+# DEFAULT: 1.
+
+####################
+# Output
+####################
+
+out_dir: phyloacc-config-test-2
+# Output directory (-o)
+# Desired output directory. This will be created for you if it doesn't exist.
+# DEFAULT: phyloacc-[date]-[time]
+
+overwrite_flag:
+# Overwrite existing output directory (--overwrite)
+# Set this to overwrite the output directory if it already exists.
+# Files within that directory may also be overwritten
+# OPTIONS:
+# True: overwrite existing output directory.
+# False: do not overwrite existing output directory.
+# DEFAULT: False
+
+labeltree:
+# Label tree (--labeltree)
+# Simply reads the tree from the input mod_file (-m), labels the internal nodes, and exits.
+# OPTIONS:
+# True: label the tree and exit.
+# False: do not label the tree and continue (normal run).
+# DEFAULT: False
+
+summarize_flag:
+# Summarize input (--summarize)
+# Only generate the input summary plots and page. Do not write or overwrite batch job files.
+# OPTIONS:
+# True: only generate the input summary.
+# False: continue to generate/overwrite batch job files (normal run).
+# DEFAULT: False
+
+####################
+# SCF options
+####################
+
+scf_branch_cutoff:
+# Low sCF threshold (-scf)
+# The value of sCF to consider as 'low' for any given branch in a locus.
+# When run_mode (-r) is adaptive, loci with scf_prop (-s) proportion of branches with sCF 
+#   below this threshold will be run with the gene tree model,
+#   all other loci will be run with the species tree model.
+# DEFAULT: 0.5
+
+scf_prop:
+# Proportion of low sCF branches (-s)
+# When the run_mode (-r) is adaptive, by default sCFs across all branches will be averaged
+#   and loci with average sCF below the scf_branch_cutoff (-scf) will be run with the gene
+#   tree model. Rather than averageing, set this to be a proportion of branches to 
+#   that must have sCF below scf_branch_cutoff (-scf) to be run with the gene tree model,
+#   all other loci will be run with the species tree model. 
+# OPTIONS:
+# DEFAULT: NA; sCF will be averaged across all branches for each locus
+# When a number between 0 and 1 is entered, this will be the proportion of branches that must have sCF below scf_branch_cutoff (-scf) 
+#  to be run with the gene tree model.
+
+####################
+# MCMC options
+####################
+
+mcmc:
+# MCMC steps (-mcmc)
+# The total number of steps in the Markov chain. 
+# DEFAULT: 1000
+
+burnin:
+# MCMC Burnin (-burnin)
+# The number of steps to be discarded in the Markov chain as burnin. 
+# DEFAULT: 500
+
+chain:
+# MCMC chains (-chain)
+# The number of MCMC chains to run. 
+# DEFAULT: 1
+
+thin:
+# MCMC gene tree steps (-thin)
+# For the gene tree model, the number of MCMC steps between gene tree sampling. 
+# The total number of MCMC steps specified with -mcmc will be scaled by this as mcmc*thin 
+# DEFAULT: 1
+
+####################
+# Batching
+####################
+
+batch_size: 5
+# Batch size (-batch)
+# The number of loci to run per batch. 
+# The total number of batches will be (total loci / batch_size).
+# DEFAULT: 50
+
+procs_per_batch:
+# Processes per batch (-p)
+# The number of processes (cores) to use for each batch of PhyloAcc.
+# DEFAULT: 1.
+
+num_jobs: 4
+# Number of jobs (-j)      
+# The number of jobs (batches) that Snakemake will submit at once to your cluster
+# DEFAULT: 1.
+
+cluster_part: shared
+# Cluster partition (-part)
+# The partition or list of partitions (separated by commas) on which to run PhyloAcc jobs.
+# REQUIRED
+
+cluster_nodes:
+# Cluster nodes (-nodes)
+# The number of nodes on the specified partition to submit jobs to. 
+# DEFAULT: 1.
+
+cluster_mem:
+# Cluter memory allotment (-mem)
+# The max memory allotted for each job (batch) in GB. 
+# Just input the number (e.g. 4 for 4GB)
+# DEFAULT: 4.
+
+cluster_time:
+# Cluster max walltime (-time)
+# The time in hours to give each job. 
+# DEFAULT: 1.
+
+####################
+# Executable paths
+####################
+
+phyloacc_st_path:
+# PhyloAcc-ST path (-st-path)
+# The path to the PhyloAcc-ST binary. 
+# DEFAULT: PhyloAcc-ST
+
+phyloacc_gt_path:
+# PhyloAcc-GT path (-gt-path)
+# The path to the PhyloAcc-GT binary.
+# DEFAULT: PhyloAcc-GT
+
+iqtree_path:
+# IQ-Tree path (-iqtree)
+# The path to the IQ-Tree executable for making gene trees with theta (--theta).
+# DEFAULT: iqtree
+
+coal_cmd: java -jar /n/home07/gthomas/env/pkgs/ASTRAL/Astral/astral.5.7.8.jar
+# Coalescent command (-coal)
+# The path to the program to estimate branch lengths in coalescent units with theta (--theta)
+# SUPPORTED PROGRAMS: ASTRAL.
+# DEFAULT: java -jar astral.jar
+
+####################
+# PhyloAcc options
+####################
+
+phyloacc_opts:
+# PhyloAcc options (-phyloacc)
+# A catch-all option for other PhyloAcc parameters.
+# Enter as a semi-colon delimited list of options: 'OPT1 value;OPT2 value'
+# DEFAULT: None
+
+options_flag:
+# Display all PhyloAcc options (--options)
+# Set this to print the full list of PhyloAcc options that can be specified with phyloacc_opts (-phyloacc) and exit.
+# OPTIONS:
+# True: print the options and exit.
+# False: do not print the options and continue.
+# DEFAULT: False
+# Output for this option is as follows:
+# OPTION              DEFAULT
+# ------------------------------
+# SIMULATE            FALSE
+# SEED                1
+# INIT_CONSERVE_RATE  0.5
+# INIT_ACC_RATE       1
+# CONSERVE_PRIOR_A    5
+# CONSERVE_PRIOR_B    0.04
+# ACCE_PRIOR_A        10
+# ACCE_PRIOR_B        0.2
+# ROPT                1
+# CUB                 1
+# NLB                 0.6
+# THIN                1
+# INIT_LRATE          0.8
+# INIT_LRATE2         0.1
+# INIT_GRATE          0.5
+# HYPER_LRATE_A       1
+# HYPER_LRATE_B       1
+# HYPER_LRATE2_A      1
+# HYPER_LRATE2_B      1
+# HYPER_GRATE_A       1
+# HYPER_GRATE_B       1
+# WL                  FALSE
+# BL_WL               15
+# CONSERVE_PROP       0.8
+# CONSERVE_RATE       NA
+# GAP_PROP            0.8
+# CONSTOMIS           0.5
+# BR_SAMPLE_THRESHOLD 10
+# GAPCHAR             -
+# PRUNE_TREE          FALSE
+# TRIM_GAP_PERCENT    0.9
+# MIN_LEN             50
+# INDEL               0
+# SAMPLE_HYPER        0
+# VERBOSE             FALSE
+# NUM_THREAD          1
+# THETA_CUTOFF        NA
+
+####################
+# Misc. options
+####################
+
+depcheck:
+# Dependency check (--depcheck)
+# Run this to check that all dependencies are installed at the provided paths. No other options necessary.
+# OPTIONS:
+# True: run the dependency check and exit.
+# False: do not run the dependency check and continue (normal run).
+# DEFAULT: False
+
+append_log_flag:
+# Append to log file (--append)
+# Set this to keep the old log file even if --overwrite is specified. 
+# New log information will instead be appended to the previous log file.
+# OPTIONS:
+# True: append to the log file.
+# False: overwrite the log file.
+# DEFAULT: False
+
+info_flag:
+# Print info (--info)
+# Print some meta information about the program and exit. No other options required.
+# OPTIONS:
+# True: print the info and exit.
+# False: do not print the info and continue (normal run).
+
+version_flag:
+# Print version information (--version)
+# Simply print the version and exit. Can also be called as '-version', '-v', or '--v'
+# OPTIONS:
+# True: print the version and exit.
+# False: do not print the version and continue (normal run).
+# DEFAULT: False
+
+quiet_flag:
+# Quiet mode (--quiet)
+# Set this flag to prevent PhyloAcc from reporting detailed information about each step.
+# OPTIONS:
+# True: run in quiet mode.
+# False: run in verbose mode.
+# DEFAULT: False
