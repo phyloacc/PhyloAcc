@@ -35,7 +35,7 @@ aln_dir:
 # Tree input
 ####################
 
-mod_file: ratite.mod
+mod_file: ratite-no-labels.mod
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
 # EXAMPLE FILE:

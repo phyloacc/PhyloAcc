@@ -707,7 +707,10 @@ class Tree:
             # If the tree has branch lengths, add the bl
 
             if new_label or node == self.root:
-                new_tree_str = new_tree_str.replace(node, new_label);
+                if self.label[node] != "NA":
+                    new_tree_str = new_tree_str.replace(node + self.label[node], new_label);
+                else:
+                    new_tree_str = new_tree_str.replace(node, new_label);
             # If a new label was created, replace the old node label in the
             # tree with it
 
@@ -730,7 +733,7 @@ class Tree:
             new_label = "-".join(selected_descs);
             label_dict[node] = new_label;
         # For every node, select 2 descendants as the new label
-
+        
         tree_str = self.addLabel(label_dict);
         # Add the new labels to the tree string
 
