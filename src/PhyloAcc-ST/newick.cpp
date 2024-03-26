@@ -412,6 +412,13 @@ void TravelTree3(newick_node *root, PhyloTree &phylo_tree)
     }
 
     phylo_tree.distances[root->id] = root->dist;
+
+    if (root == nullptr || root->taxon == nullptr) {
+        cout << "\n(Error. Some nodes in the tree aren't labeled. Please label all nodes and try again!)" << endl;
+        exit(1);
+    }
+    // if the current node does not have a label, print an error and exit
+
     phylo_tree.nodes_names[root->id] = root->taxon;
     if (root->id < phylo_tree.S)
     {
@@ -477,17 +484,15 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
             
         }
         else if (!strcmp(line_splits[0].c_str(), "TREE:")){
-            root = parseTree((char*)strutils::trim(line_splits[1]).c_str());
+            root = parseTree((char*)strutils::trim(line_splits[1]).c_str());      
         }
     }
 
 //    cout << newick_string << endl;
 
-  // printTree(root);
+    printTree(root);
+    printf("\n");
    
-    
-    
-
     // count the total num of species and label each node and
     int S = 0;
     TravelTree1(root, S);
@@ -504,9 +509,9 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
     phylo_tree.dag = vector< vector<bool> >(N, vector<bool>(N, false));
     TravelTree3(root, phylo_tree);
 
-//    cout << " Done." << endl;
+    // cout << " Done." << endl;
 
-//    cout << "Number of species: " << S << "." << endl << endl;
+    // cout << "Number of species: " << S << "." << endl << endl;
 
     return phylo_tree;
 }

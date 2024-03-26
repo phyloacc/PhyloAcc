@@ -2,6 +2,10 @@ TARGET_ST=PhyloAcc-ST
 TARGET_GT=PhyloAcc-GT
 # The name of the compiled binary
 
+# make PREFIX=$CONDA_PREFIX
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
+# To make locally with the conda environment prefix
+
 CXX=g++
 # Which compiler to use
 # Note: g++ 5.4 resulted in several errors while compiling: SRC/bpp_c2.cpp:345:12: error: ‘::isnan’ has not been declared

@@ -8,6 +8,10 @@ src/PhyloAcc-interface/*.errlog
 src/PhyloAcc-interface/tests/
 support/
 bin/
+PhyloAcc-ST
+PhyloAcc-GT
+blah
+tmp
 
 # Compiled source #
 ###################

@@ -638,6 +638,13 @@ void TravelTree3(newick_node *root, PhyloTree &phylo_tree)
     }
 
     phylo_tree.distances[root->id] = root->dist;
+
+    if (root == nullptr || root->taxon == nullptr) {
+        cout << "\n(Error. Some nodes in the tree aren't labeled. Please label all nodes and try again!)" << endl;
+        exit(1);
+    }
+    // if the current node does not have a label, print an error and exit
+
     if( root->taxon!=NULL) phylo_tree.nodes_names[root->id] = root->taxon;
     phylo_tree.thetas[root->id] = root->theta;
     
@@ -661,7 +668,6 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
         cerr << "(Error. Cannot open the phylogenetic tree input file: " << phylo_tree_path << ")" << endl;
         exit(1);
     }
-    
     
     // count the num of species, base pairs and load the profiles
     PhyloTree phylo_tree;
@@ -708,6 +714,8 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
         }
     }
 
+    printTree(root);
+    printf("\n");
 
     // count the total num of species and label each node and
     int S = 0;
@@ -724,7 +732,6 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
     phylo_tree.thetas = vector<double>(N);
     phylo_tree.dag = vector< vector<bool> >(N, vector<bool>(N, false));
     TravelTree3(root, phylo_tree);
-
     return phylo_tree;
 }
 

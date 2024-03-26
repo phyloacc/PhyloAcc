@@ -5,6 +5,7 @@
 
 import os
 import re
+import math
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
 import phyloacc_lib.tree_old as TREEF
@@ -74,7 +75,7 @@ def genPlots(globs):
     if globs['tree-data-type'] == 'class':
         tree_str = globs['st'].tree_str;
         for node in globs['st'].internals:
-            tree_str = tree_str.replace(globs['st'].label[node], "");
+            tree_str = tree_str.replace(globs['st'].label[node] + ":", ":");
     elif globs['tree-data-type'] == 'func':
         tree_str = TREEF.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
     # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
@@ -82,7 +83,7 @@ def genPlots(globs):
     handle = StringIO(tree_str);
     tree = Phylo.read(handle, "newick");
     # Parse the tree string with Bio
-    
+ 
     target_lg, conserve_lg, outgroup_lg = False, False, False;
     #for clade in tree.get_terminals():
     for clade in tree.find_clades():
@@ -106,7 +107,8 @@ def genPlots(globs):
     if num_spec < 20:
         fig = plt.figure(figsize=(num_spec/4, 25.4/5.08));
     else:
-        fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+        #fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+        fig = plt.figure(figsize=(20, 30));
     # Specify the plot size depending on the number of species
 
     axes = fig.add_subplot(1, 1, 1);
@@ -339,6 +341,24 @@ def genPlots(globs):
 
 #############################################################################
 
+def getBFs(globs):
+# A function to get the BFs into lists for plotting
+# Also removes and warns about BFs that are infinite
+    bf_types = [ "logBF1", "logBF2", "logBF3" ];
+    bf_lists = { bf_type : [] for bf_type in bf_types };
+
+    for locus in globs['all-loci']:
+        for bf_type in bf_types:
+            bf = float(globs['locus-stats']['elem_lik'][locus][bf_type]);
+            if math.isinf(bf):
+                print("WARNING: " + bf_type + " for locus " + locus + " is infinite. This locus may have failed to converge for this model. Excluding from plots...");
+            else:
+                bf_lists[bf_type].append(bf);
+
+    return tuple(bf_lists[bf_type] for bf_type in bf_types)
+
+#############################################################################
+
 def genPlotsPost(globs):
 
     step = "Generating summary plots";
@@ -369,10 +389,8 @@ def genPlotsPost(globs):
     
     ####################
 
-    bf1s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF1']) for locus in globs['all-loci'] ];
-    bf2s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF2']) for locus in globs['all-loci'] ];
-    bf3s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF3']) for locus in globs['all-loci'] ];
-    # Just get lists of the BFs
+    bf1s, bf2s, bf3s = getBFs(globs);
+    # Just get lists of the BFs and filter out the infs for elements that failed to converge
 
     ####################
 
