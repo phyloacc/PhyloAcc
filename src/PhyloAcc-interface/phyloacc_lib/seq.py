@@ -50,14 +50,16 @@ def readFasta(filename, globs):
 
         #print(header, len(seq));
 
-        if globs['debug-aln']:
-            seqdict[curkey] = seq;
-        elif globs['tree-data-type'] == 'class':
-            #if curkey in globs['st'].tips:
-            seqdict[curkey] = seq;
-        elif globs['tree-data-type'] == 'func':
-            #if curkey in globs['tips']:
-            seqdict[curkey] = seq;
+        seqdict[curkey] = seq;
+
+        # if globs['debug-aln']:
+        #     seqdict[curkey] = seq;
+        # elif globs['tree-data-type'] == 'class':
+        #     #if curkey in globs['st'].tips:
+        #     seqdict[curkey] = seq;
+        # elif globs['tree-data-type'] == 'func':
+        #     #if curkey in globs['tips']:
+        #     seqdict[curkey] = seq;
         # Save the sequence in seqdict if it belongs to a tip branch in the input tree  
 
     return seqdict;
@@ -284,7 +286,8 @@ def readSeq(globs):
     # Read sequences if input is a directory of alignment files
     #######################
 
-    checkAlnLabels(globs);
+    if not globs['debug-aln']:
+        checkAlnLabels(globs);
 
     return globs;
 
