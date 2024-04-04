@@ -268,7 +268,6 @@ def htmlSummary():
 
                     <div class="small-sep-div"></div>
 
-                    {comment_start}
                     <div class="row img-row" id="bf-container-row">
                         <div class="col-7-24 margin"></div>
                         <div class="col-10-24 img-container" id="bf1-bf2-container">
@@ -276,8 +275,6 @@ def htmlSummary():
                         </div>
                         <div class="col-7-24 margin"></div>
                     </div>
-                    {comment_end}
-
 
                 </div>
             </div>

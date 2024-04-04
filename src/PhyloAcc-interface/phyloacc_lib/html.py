@@ -37,6 +37,13 @@ def writeHTML(globs):
         comment_end = "-->";
     # Some HTML blocks will be commented out depending on the run mode
 
+    if globs['filter-alns']:
+        filter_comment_start = "";
+        filter_comment_end = "";
+    else:
+        filter_comment_start = "<!-- This block is only displayed when --filter is specified";
+        filter_comment_end = "-->";
+
     if globs['theta']:
         theta_comment_start = "";
         theta_comment_end = "";
@@ -68,6 +75,9 @@ def writeHTML(globs):
             script_call=globs['call'],
             num_aln=str(globs['num-loci']),
             num_no_inf_loci=str(len(globs['no-inf-sites-loci'])),
+            filter_comment_start=filter_comment_start,
+            filter_comment_end=filter_comment_end,
+            num_filtered_loci=str(globs['filtered-loci']),
             num_st_loci=str(globs['st-loci']),
             num_gt_loci=str(globs['gt-loci']),
             num_batches=str(globs['num-batches']),
@@ -82,8 +92,8 @@ def writeHTML(globs):
             num_targets=str(len(globs['groups']['targets'])),
             num_conserved=str(len(globs['groups']['conserved'])),
             num_outgroups=str(len(globs['groups']['outgroup'])),
-            log_file=globs['logfilename'],
-            aln_stats_file=globs['alnstatsfile'],
+            log_file=os.path.basename(globs['logfilename']),
+            aln_stats_file=os.path.basename(globs['alnstatsfile']),
             batch_comment_start=batch_comment_start,
             batch_comment_end=batch_comment_end,
             snakemake_cmd=globs['smk-cmd'],

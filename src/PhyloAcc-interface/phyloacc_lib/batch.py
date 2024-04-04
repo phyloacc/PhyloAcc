@@ -97,8 +97,12 @@ def genJobFiles(globs):
     init_total_loci = init_st_loci + init_gt_loci;
 
     if globs['filter-alns']:
-        st_alns = { aln : globs['alns'][aln] for aln in st_alns if not globs['aln-stats'][aln]['low-qual'] };
-        gt_alns = { aln : globs['alns'][aln] for aln in gt_alns if not globs['aln-stats'][aln]['low-qual'] };
+        filtered_st_alns = [ aln for aln in st_alns if globs['aln-stats'][aln]['low-qual'] ];
+        filtered_gt_alns = [ aln for aln in gt_alns if globs['aln-stats'][aln]['low-qual'] ];
+        globs['filtered-loci'] = len(filtered_st_alns) + len(filtered_gt_alns);
+
+        st_alns = { aln : st_alns[aln] for aln in st_alns if aln not in filtered_st_alns };
+        gt_alns = { aln : gt_alns[aln] for aln in gt_alns if aln not in filtered_gt_alns };
     # If the alignment filter flag is set, remove low quality alignments
 
     globs['st-loci'] = len(st_alns);

@@ -12,6 +12,10 @@ PhyloAcc-ST
 PhyloAcc-GT
 blah
 tmp
+run.sh
+build_gt.sh
+build_st.sh
+.vscode
 
 # Compiled source #
 ###################
@@ -50,3 +54,4 @@ tmp
 .Trashes
 ehthumbs.db
 Thumbs.db
+

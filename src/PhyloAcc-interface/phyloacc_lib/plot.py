@@ -106,6 +106,8 @@ def genPlots(globs):
 
     if num_spec < 20:
         fig = plt.figure(figsize=(num_spec/4, 25.4/5.08));
+    elif num_spec < 60:
+        fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
     else:
         #fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
         fig = plt.figure(figsize=(20, 30));

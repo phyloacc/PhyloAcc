@@ -108,7 +108,7 @@ num_procs: 10
 # Output
 ####################
 
-out_dir: phyloacc-config-test-2
+out_dir: phyloacc-config-test-3
 # Output directory (-o)
 # Desired output directory. This will be created for you if it doesn't exist.
 # DEFAULT: phyloacc-[date]-[time]
@@ -206,7 +206,7 @@ thin:
 # Batching
 ####################
 
-batch_size: 5
+batch_size: 50
 # Batch size (-batch)
 # The number of loci to run per batch. 
 # The total number of batches will be (total loci / batch_size).

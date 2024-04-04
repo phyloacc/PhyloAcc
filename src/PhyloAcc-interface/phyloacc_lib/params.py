@@ -155,6 +155,7 @@ def init():
         'gt-loci' : 0,
         'st-batches' : [],
         'gt-batches' : [],
+        'filtered-loci' : [],
         # Batch variables
 
         'num-procs' : 1,
