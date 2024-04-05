@@ -4,7 +4,7 @@
 
 ## EITHER the following options ##
 
-aln_file:
+aln_file: 
 # Alignment file (-a)
 # An alignment file with all loci concatenated. 
 # bed_file must also be specified. 
@@ -25,7 +25,7 @@ id_file:
 
 ## OR ##
 
-aln_dir: alns
+aln_dir: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/
 # Alignment directory (-d)
 # A directory containing individual alignment files for each locus. 
 # Expected as FASTA format. 
@@ -35,7 +35,7 @@ aln_dir: alns
 # Tree input
 ####################
 
-mod_file: ratite.mod
+mod_file: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/ratite.mod
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
 # EXAMPLE FILE:
@@ -65,7 +65,7 @@ coal_tree:
 # tree in the mod file (-m), but with branch lengths in coalescent units. 
 # Either coal_tree or theta is REQUIRED for the gene tree and adaptive models, not needed for species tree model.
 
-theta_flag:
+theta_flag: true
 # Estimate population size parameter theta (--theta)
 # Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for 
 # estimation of the theta prior. Note that a species tree with branch lengths in units of 
@@ -77,7 +77,7 @@ theta_flag:
 # PhyloAcc Method
 ####################
 
-run_mode:
+run_mode: adaptive
 # Run mode (-r)
 # Determines which version of PhyloAcc will be used.
 # OPTIONS: 
@@ -108,7 +108,7 @@ num_procs: 10
 # Output
 ####################
 
-out_dir: phyloacc-config-test-3
+out_dir: phyloacc-dev
 # Output directory (-o)
 # Desired output directory. This will be created for you if it doesn't exist.
 # DEFAULT: phyloacc-[date]-[time]
@@ -247,12 +247,12 @@ cluster_time:
 # Executable paths
 ####################
 
-phyloacc_st_path:
+phyloacc_st_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-ST
 # PhyloAcc-ST path (-st-path)
 # The path to the PhyloAcc-ST binary. 
 # DEFAULT: PhyloAcc-ST
 
-phyloacc_gt_path:
+phyloacc_gt_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-GT
 # PhyloAcc-GT path (-gt-path)
 # The path to the PhyloAcc-GT binary.
 # DEFAULT: PhyloAcc-GT

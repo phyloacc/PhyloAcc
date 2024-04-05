@@ -194,9 +194,14 @@ def getFooterDateTime():
 
 #############################################################################
 
-def mean(data):
+def mean(data, na_rm=False):
 # Calculates and returns the mean of a list of numbers.
-    return sum(data) / len(data);
+    if na_rm:
+        data = [x for x in data if x not in [None, "NA", "na", "N/A", "n/a", "NaN", "nan"]];
+    if len(data) == 0:
+        return "NA";
+    else:
+        return sum(data) / len(data);
 
 #############################################################################
 

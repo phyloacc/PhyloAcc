@@ -394,8 +394,9 @@ def optParse(globs):
 
         globs['theta'] = getOpt(args.theta_flag, "theta_flag", bool, globs['theta'], config, arg_flags, globs);
 
-        globs['phyloacc'] = getOpt(args.phyloacc_opts, "phyloacc_opts", str, globs['phyloacc'], config, arg_flags, globs, check=False);
+        globs['phyloacc'] = getOpt(args.phyloacc_st_path, "phyloacc_st_path", str, globs['phyloacc'], config, arg_flags, globs, check=False);
         globs['phyloacc-gt'] = getOpt(args.phyloacc_gt_path, "phyloacc_gt_path", str, globs['phyloacc-gt'], config, arg_flags, globs, check=False);
+        globs['phyloacc-opts'] = getOpt(args.phyloacc_opts, "phyloacc_opts", str, globs['phyloacc-opts'], config, arg_flags, globs, check=False);
         globs['iqtree-path'] = getOpt(args.iqtree_path, "iqtree_path", str, globs['iqtree-path'], config, arg_flags, globs, check=False);
         globs['coal-cmd'] = getOpt(args.coal_cmd, "coal_cmd", str, globs['coal-cmd'], config, arg_flags, globs, check=False);
 

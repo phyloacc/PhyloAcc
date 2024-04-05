@@ -26,7 +26,7 @@ def writeAlnStats(globs):
     # Open the alignment stats file for writing
 
         first = True;
-        # First flace
+        # First flag
 
         for locus in loci_sorted:
         # Write every locus

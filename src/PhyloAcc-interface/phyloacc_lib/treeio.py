@@ -237,18 +237,18 @@ def writeCF(globs):
 
             if node in globs['scf']:
 
-                outline.append(round(globs['scf'][node]['scf'], 3));
+                outline.append("NA" if globs['scf'][node]['scf'] == "NA" else round(globs['scf'][node]['scf'], 3));
                 outline.append(round(globs['scf'][node]['concordant-sites'], 2));
 
-                outline.append(round(globs['scf'][node]['sdf1'], 3));
+                outline.append("NA" if globs['scf'][node]['sdf1'] == "NA" else round(globs['scf'][node]['sdf1'], 3));
                 outline.append(round(globs['scf'][node]['disco1-sites'], 2));
 
-                outline.append(round(globs['scf'][node]['sdf2'], 3));
+                outline.append("NA" if globs['scf'][node]['sdf2'] == "NA" else round(globs['scf'][node]['sdf2'], 3));
                 outline.append(round(globs['scf'][node]['disco2-sites'], 2));                
 
                 outline.append(round(globs['scf'][node]['decisive-sites'], 2));
 
-                scf_labels[node] = str(round(globs['scf'][node]['scf'], 3));
+                scf_labels[node] = "NA" if globs['scf'][node]['scf'] == "NA" else str(round(globs['scf'][node]['scf'], 3));
 
                 outline.append(globs['scf'][node]['total-quartets']);
 

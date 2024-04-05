@@ -263,7 +263,8 @@ def genPlots(globs):
         # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
 
         for node in globs['scf']:
-            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['scf'], 2)) + "_");
+            scf_label = "NA" if globs['scf'][node]['scf'] == "NA" else str(round(globs['scf'][node]['scf'], 2));
+            tree_str = tree_str.replace(node, node + "_" + scf_label + "_");
         # For every node in the tree, add the averaged scf value over all loci to the label
 
         tree_str = re.sub("<[\d]+>[_]?", "", tree_str);
@@ -318,11 +319,12 @@ def genPlots(globs):
             if node not in globs['scf']:
                 continue;
 
-            if globs['tree-data-type'] == 'class':
-                bls.append(float(globs['st'].bl[node]));
-            elif globs['tree-data-type'] == 'func':
-                bls.append(float(globs['st'][node][0]));
-            scfs.append(globs['scf'][node]['scf']);
+            if globs['scf'][node]['scf'] != "NA":
+                if globs['tree-data-type'] == 'class':
+                    bls.append(float(globs['st'].bl[node]));
+                elif globs['tree-data-type'] == 'func':
+                    bls.append(float(globs['st'][node][0]));
+                scfs.append(globs['scf'][node]['scf']);
         # Gets the values out of their tables
 
         slope, intercept = np.polyfit(bls, scfs, 1);
