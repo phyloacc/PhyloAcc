@@ -104,6 +104,7 @@ def init():
         'med-nogap-seq-len' : "NA",
         'no-inf-sites-loci' : [],
         'gappy-loci' : [],
+        'filter-alns' : False,
         # Alignment summary stats
 
         'input-groups' : { 'targets' : [], 'outgroup' : [], 'conserved' : [] },
@@ -154,6 +155,7 @@ def init():
         'gt-loci' : 0,
         'st-batches' : [],
         'gt-batches' : [],
+        'filtered-loci' : [],
         # Batch variables
 
         'num-procs' : 1,
@@ -167,7 +169,7 @@ def init():
         'partition' : False,
         'num-nodes' : "1",
         'mem' : "4",
-        'time' : "1:00:00",
+        'time' : "1",
         # Cluster options
 
         'aln-pool' : False,
@@ -242,6 +244,7 @@ def init():
         'norun' : False,
         'no-phyloacc' : False,
         'debug-tree' : False,
+        'debug-aln' : False,
         'debug' : False,
         'nolog' : False,
         # Internal stuff

@@ -5,6 +5,7 @@
 
 import os
 import re
+import math
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
 import phyloacc_lib.tree_old as TREEF
@@ -74,7 +75,7 @@ def genPlots(globs):
     if globs['tree-data-type'] == 'class':
         tree_str = globs['st'].tree_str;
         for node in globs['st'].internals:
-            tree_str = tree_str.replace(globs['st'].label[node], "");
+            tree_str = tree_str.replace(globs['st'].label[node] + ":", ":");
     elif globs['tree-data-type'] == 'func':
         tree_str = TREEF.addBranchLength(globs['labeled-tree'], globs['st'], no_label=True, keep_tp_label=True);
     # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
@@ -82,7 +83,7 @@ def genPlots(globs):
     handle = StringIO(tree_str);
     tree = Phylo.read(handle, "newick");
     # Parse the tree string with Bio
-    
+ 
     target_lg, conserve_lg, outgroup_lg = False, False, False;
     #for clade in tree.get_terminals():
     for clade in tree.find_clades():
@@ -105,8 +106,11 @@ def genPlots(globs):
 
     if num_spec < 20:
         fig = plt.figure(figsize=(num_spec/4, 25.4/5.08));
-    else:
+    elif num_spec < 60:
         fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+    else:
+        #fig = plt.figure(figsize=(num_spec/4, 25.4/2.54));
+        fig = plt.figure(figsize=(20, 30));
     # Specify the plot size depending on the number of species
 
     axes = fig.add_subplot(1, 1, 1);
@@ -259,7 +263,8 @@ def genPlots(globs):
         # Re-add branch lengths and remove labels to the input tree for plotting, keep the treeparse label to add colors below
 
         for node in globs['scf']:
-            tree_str = tree_str.replace(node, node + "_" + str(round(globs['scf'][node]['scf'], 2)) + "_");
+            scf_label = "NA" if globs['scf'][node]['scf'] == "NA" else str(round(globs['scf'][node]['scf'], 2));
+            tree_str = tree_str.replace(node, node + "_" + scf_label + "_");
         # For every node in the tree, add the averaged scf value over all loci to the label
 
         tree_str = re.sub("<[\d]+>[_]?", "", tree_str);
@@ -314,11 +319,12 @@ def genPlots(globs):
             if node not in globs['scf']:
                 continue;
 
-            if globs['tree-data-type'] == 'class':
-                bls.append(float(globs['st'].bl[node]));
-            elif globs['tree-data-type'] == 'func':
-                bls.append(float(globs['st'][node][0]));
-            scfs.append(globs['scf'][node]['scf']);
+            if globs['scf'][node]['scf'] != "NA":
+                if globs['tree-data-type'] == 'class':
+                    bls.append(float(globs['st'].bl[node]));
+                elif globs['tree-data-type'] == 'func':
+                    bls.append(float(globs['st'][node][0]));
+                scfs.append(globs['scf'][node]['scf']);
         # Gets the values out of their tables
 
         slope, intercept = np.polyfit(bls, scfs, 1);
@@ -336,6 +342,24 @@ def genPlots(globs):
         ####################
 
     step_start_time = PC.report_step(globs, step, step_start_time, "Success");
+
+#############################################################################
+
+def getBFs(globs):
+# A function to get the BFs into lists for plotting
+# Also removes and warns about BFs that are infinite
+    bf_types = [ "logBF1", "logBF2", "logBF3" ];
+    bf_lists = { bf_type : [] for bf_type in bf_types };
+
+    for locus in globs['all-loci']:
+        for bf_type in bf_types:
+            bf = float(globs['locus-stats']['elem_lik'][locus][bf_type]);
+            if math.isinf(bf):
+                print("WARNING: " + bf_type + " for locus " + locus + " is infinite. This locus may have failed to converge for this model. Excluding from plots...");
+            else:
+                bf_lists[bf_type].append(bf);
+
+    return tuple(bf_lists[bf_type] for bf_type in bf_types)
 
 #############################################################################
 
@@ -369,10 +393,8 @@ def genPlotsPost(globs):
     
     ####################
 
-    bf1s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF1']) for locus in globs['all-loci'] ];
-    bf2s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF2']) for locus in globs['all-loci'] ];
-    bf3s = [ float(globs['locus-stats']['elem_lik'][locus]['logBF3']) for locus in globs['all-loci'] ];
-    # Just get lists of the BFs
+    bf1s, bf2s, bf3s = getBFs(globs);
+    # Just get lists of the BFs and filter out the infs for elements that failed to converge
 
     ####################
 

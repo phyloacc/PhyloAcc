@@ -267,6 +267,13 @@ def htmlSummary():
                                 <td>{num_no_inf_loci}</td>
                             </tr>
 
+                            {filter_comment_start}
+                            <tr>
+                                <td>Low quality alignments (removed)</td>
+                                <td>{num_filtered_loci}</td>
+                            </tr>      
+                            {filter_comment_end}                      
+
                             <tr>
                                 <td>Alignments for species tree model</td>
                                 <td>{num_st_loci}</td>

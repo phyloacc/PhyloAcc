@@ -50,12 +50,16 @@ def readFasta(filename, globs):
 
         #print(header, len(seq));
 
-        if globs['tree-data-type'] == 'class':
-            if curkey in globs['st'].tips:
-                seqdict[curkey] = seq;
-        elif globs['tree-data-type'] == 'func':
-            if curkey in globs['tips']:
-                seqdict[curkey] = seq;
+        seqdict[curkey] = seq;
+
+        # if globs['debug-aln']:
+        #     seqdict[curkey] = seq;
+        # elif globs['tree-data-type'] == 'class':
+        #     #if curkey in globs['st'].tips:
+        #     seqdict[curkey] = seq;
+        # elif globs['tree-data-type'] == 'func':
+        #     #if curkey in globs['tips']:
+        #     seqdict[curkey] = seq;
         # Save the sequence in seqdict if it belongs to a tip branch in the input tree  
 
     return seqdict;
@@ -149,6 +153,30 @@ def partitionSeqs(concat_seqs, bed_coords):
 
 #############################################################################
 
+def checkAlnLabels(globs):
+    tree_tips = globs['st'].tips;
+    # Get the tips of the input tree
+
+    for aln in globs['alns']:
+        if len(globs['alns'][aln]) != len(tree_tips):
+            if globs['aln-file']:
+                PC.errorOut("SEQ1", "The number of sequences in the alignment do not match the number of tips in the input tree.", globs);
+            else:
+                PC.errorOut("SEQ1", "The number of sequences in the alignment " + aln + " does not match the number of tips in the input tree.", globs);
+            sys.exit(1);
+        # If the number of sequences in the locus does not match the number of tips in the input tree, exit
+
+        for header in globs['alns'][aln]:
+            if header not in tree_tips:
+                if globs['aln-file']:
+                    PC.errorOut("SEQ2", "Sequence " + header + " is in the alignment but not in the tree.", globs);
+                else:
+                    PC.errorOut("SEQ2", "Sequence " + header + " is in alignment " + aln + " but not in the tree.", globs);
+                sys.exit(1);
+        # If a sequence in any locus is not in the input tree, exit
+
+#############################################################################
+
 def readSeq(globs):
 
     if globs['aln-file']:
@@ -203,7 +231,7 @@ def readSeq(globs):
         # step_start_time = PC.report_step(globs, step, False, "In progress...");
         # written = 0;
         # for aln in globs['alns']:
-        #     outdir = "/n/holylfs05/LABS/informatics/Everyone/phyloacc-data/GTpost/Tree4/Theta2/Len4/Simu/alns/";
+        #     outdir = "/n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/";
         #     if not os.path.isdir(outdir):
         #         os.system("mkdir " + outdir);
         #     outfile = os.path.join(outdir, aln + ".fa");
@@ -257,6 +285,9 @@ def readSeq(globs):
 
     # Read sequences if input is a directory of alignment files
     #######################
+
+    if not globs['debug-aln']:
+        checkAlnLabels(globs);
 
     return globs;
 
@@ -321,7 +352,7 @@ def locusAlnStats(locus_item):
     # Count the number of unique sequences
     # Could also count number of times each sequence occurs: https://stackoverflow.com/questions/30692655/counting-number-of-strings-in-a-list-with-python#30692666
 
-    if cur_stats['num-sites-half-gap'] > half_site_len or cur_stats['num-seqs-half-gap'] > half_site_len:
+    if cur_stats['num-sites-half-gap'] >= half_aln_len or cur_stats['num-seqs-half-gap'] >= half_site_len:
         cur_stats['low-qual'] = True;
     # Setting a flag for low quality sequence to be considered when estimating theta
 
@@ -334,26 +365,34 @@ def alnStats(globs):
     step_start_time = PC.report_step(globs, step, False, "In progress...");
     # Status update
 
-    with globs['aln-pool'] as pool:
-        for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['aln-skip-chars']) for locus in globs['alns'])):
-        # Loop over every locus in parallel to calculate stats
-        # Have to do it this way so it doesn't terminate the pool for sCF calculations
-
-            aln, stats = result;
+    if globs['debug-aln']:
+        for locus in globs['alns']:
+            # print();
+            # print(locus);
+            # print(globs['alns'][locus]);
+            aln, stats = locusAlnStats((locus, globs['alns'][locus], globs['aln-skip-chars']));
             globs['aln-stats'][aln] = stats;
-            # Unpack the current result
+    else:
+        with globs['aln-pool'] as pool:
+            for result in pool.imap(locusAlnStats, ((locus, globs['alns'][locus], globs['aln-skip-chars']) for locus in globs['alns'])):
+            # Loop over every locus in parallel to calculate stats
+            # Have to do it this way so it doesn't terminate the pool for sCF calculations
 
-            if globs['run-mode'] == 'st':
-                globs['aln-stats'][aln]['batch-type'] = "st";
-            # With run mode st, all loci are run through the species tree model
+                aln, stats = result;
+                globs['aln-stats'][aln] = stats;
+                # Unpack the current result
 
-            elif globs['run-mode'] == 'gt':
-                globs['aln-stats'][aln]['batch-type'] = "gt";
-            # With run mode gt, all loci are run through the gene tree model
-            
-            if globs['aln-stats'][aln]['informative-sites'] == 0:
-                globs['no-inf-sites-loci'].append(aln);
-            # If the locus has no informative sites, add to the list here
+                if globs['run-mode'] == 'st':
+                    globs['aln-stats'][aln]['batch-type'] = "st";
+                # With run mode st, all loci are run through the species tree model
+
+                elif globs['run-mode'] == 'gt':
+                    globs['aln-stats'][aln]['batch-type'] = "gt";
+                # With run mode gt, all loci are run through the gene tree model
+                
+                if globs['aln-stats'][aln]['informative-sites'] == 0:
+                    globs['no-inf-sites-loci'].append(aln);
+                # If the locus has no informative sites, add to the list here
 
     sorted_aln_lens = sorted([ globs['aln-stats'][aln]['length'] for aln in globs['aln-stats'] ]);
     globs['avg-aln-len'] = PC.mean(sorted_aln_lens);

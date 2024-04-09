@@ -200,6 +200,11 @@ def scf(globs):
     step_start_time = CORE.report_step(globs, step, step_start_time, "Success");
     # Sample quartets for all nodes
 
+    # for each in sampled_quartets["<1>"]:
+    #     print(each);
+
+    #print("Sampled quartets: ", type(sampled_quartets));
+
     ####################
 
     num_alns = len(globs['alns']);
@@ -324,6 +329,10 @@ def scf(globs):
                     #     qfile.write(",".join(outline) + "\n");
                     # For --qstats, writes the quartet stats to a file for the current quartet
 
+                    # if q == (('Dipdao', 'Diphut'), ('Dipqil', 'Dipxin')) and locus == "Chr01_202771296_alignment":
+                    #     print("Quartet: ", q);
+                    #     print(quartet_scores[node][q]['decisive-sites']);
+
                     quartet_counts[node][q]['variable-sites'] += quartet_scores[node][q]['variable-sites'];
                     quartet_counts[node][q]['decisive-sites'] += quartet_scores[node][q]['decisive-sites'];
                     quartet_counts[node][q]['concordant-sites'] += quartet_scores[node][q]['concordant-sites'];
@@ -364,23 +373,30 @@ def scf(globs):
 
         for q in sampled_quartets[node]:
         # Append counts from every quartet on this node
-            node_scfs.append(quartet_counts[node][q]['concordant-sites'] / quartet_counts[node][q]['decisive-sites']);
-            node_sdf1.append(quartet_counts[node][q]['disco1-sites'] / quartet_counts[node][q]['decisive-sites']);
-            node_sdf2.append(quartet_counts[node][q]['disco2-sites'] / quartet_counts[node][q]['decisive-sites']);
+            #print(node, q, quartet_counts[node][q]['decisive-sites']);
+            decisive = quartet_counts[node][q]['decisive-sites'];
+            node_scfs.append("NA" if decisive == 0 else quartet_counts[node][q]['concordant-sites'] / decisive);
+            #node_scfs.append(quartet_counts[node][q]['concordant-sites'] / quartet_counts[node][q]['decisive-sites']);
+            
+            node_sdf1.append("NA" if decisive == 0 else quartet_counts[node][q]['disco1-sites'] / decisive);
+            #node_sdf1.append(quartet_counts[node][q]['disco1-sites'] / quartet_counts[node][q]['decisive-sites']);
+            
+            node_sdf2.append("NA" if decisive == 0 else quartet_counts[node][q]['disco2-sites'] / decisive);
+            #node_sdf2.append(quartet_counts[node][q]['disco2-sites'] / quartet_counts[node][q]['decisive-sites']);
             node_concordant.append(quartet_counts[node][q]['concordant-sites']);
             node_d1.append(quartet_counts[node][q]['disco1-sites']);
             node_d2.append(quartet_counts[node][q]['disco2-sites']);
             node_decisive.append(quartet_counts[node][q]['decisive-sites']);
 
-            if quartet_counts[node][q]['decisive-sites'] != 0:
+            if decisive != 0:
                 globs['scf'][node]['total-quartets'] += 1;
         ## End quartet loop
 
-        globs['scf'][node]['scf'] = CORE.mean(node_scfs);
+        globs['scf'][node]['scf'] = CORE.mean(node_scfs, na_rm=True);
         globs['scf'][node]['concordant-sites'] = CORE.mean(node_concordant);
-        globs['scf'][node]['sdf1'] = CORE.mean(node_sdf1);
+        globs['scf'][node]['sdf1'] = CORE.mean(node_sdf1, na_rm=True);
         globs['scf'][node]['disco1-sites'] = CORE.mean(node_d1);
-        globs['scf'][node]['sdf2'] = CORE.mean(node_sdf2);
+        globs['scf'][node]['sdf2'] = CORE.mean(node_sdf2, na_rm=True);
         globs['scf'][node]['disco2-sites'] = CORE.mean(node_d2);
 
         globs['scf'][node]['decisive-sites'] = CORE.mean(node_decisive);

@@ -247,8 +247,9 @@ class Tree:
         else:
             self.has_bl = True;
             self.bl = { n : self.bl[n] if self.bl[n] != "NA" else "0.0" for n in self.bl };
+        ## Checks for branch lengths
 
-        if all(self.label[n] in ["", "NA", ":0"] for n in self.label):
+        if any(self.label[n] in ["", "NA", ":0", "root"] for n in self.label if n in self.internals):
             self.has_label = False;
             self.label = { n : "NA" for n in self.label };
             # NOTE: does PhyloAcc need the :0 branch length at the root?
@@ -706,7 +707,10 @@ class Tree:
             # If the tree has branch lengths, add the bl
 
             if new_label or node == self.root:
-                new_tree_str = new_tree_str.replace(node, new_label);
+                if self.label[node] != "NA":
+                    new_tree_str = new_tree_str.replace(node + self.label[node], new_label);
+                else:
+                    new_tree_str = new_tree_str.replace(node, new_label);
             # If a new label was created, replace the old node label in the
             # tree with it
 
@@ -729,7 +733,7 @@ class Tree:
             new_label = "-".join(selected_descs);
             label_dict[node] = new_label;
         # For every node, select 2 descendants as the new label
-
+        
         tree_str = self.addLabel(label_dict);
         # Add the new labels to the tree string
 
@@ -964,7 +968,7 @@ def debugTree(globs):
 
     # # print(st.labeled_topo_str);
     # # st.showSplit();
-    #st.showAttrib("label", "anc", "desc");
+    st.showAttrib("label", "anc", "desc");
     #print(st.rooted);
     #print(st.root);
 

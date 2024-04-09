@@ -86,56 +86,59 @@ if __name__ == '__main__':
     ## Initialization
     ####################
 
-    if globs['tree-data-type'] == 'class':
-        globs['tree-string'], globs['st'] = TREEIO.readST(globs);
-    elif globs['tree-data-type'] == 'func':
-        globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
-
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", 45) + globs['tree-string']);
-    # Report the tree that was read -- this line is necessary for phyloacc_post.py to read the tree used in the run
-
-    if globs['debug-tree']:
-        TREE.debugTree(globs);
-        sys.exit(0);
-    # Print the debug stats and exit if --debugtree is set
-
-    if globs['label-tree']:
+    if not globs['debug-aln']:
         if globs['tree-data-type'] == 'class':
-            globs['st'].showAttrib("type", "label", "desc");
-
-            print("\nInput tree with integer labels:");
-            print(globs['st'].tree_str +"\n");
-
-            #if not globs['st'].has_label:
-            print("\nInput tree with descendant labels:");
-            print(globs['st'].labelDesc());
-
-        #print(globs['labeled-tree']);
-        #print();
-        sys.exit(0);
-    elif not globs['st'].has_label:
-        PC.errorOut("MAIN2", "Tree does not have internal nodes labeled, which is required for PhyloAcc. Use --labeltree and replace the tree in your .mod file with the labeled tree.", globs);
-
-    #else:
-    #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);
-    # Print the tree and exit if --labeltree is set
-
-    ## Read species tree
-    ####################
-
-    globs = TREEIO.readSpeciesGroups(globs);
-
-    ## Read species groups
-    ####################
-
-    if not globs['theta'] and globs['coal-tree-file']:
-        if globs['tree-data-type'] == 'class':
-            tree_str, tree = TREEIO.readST(globs, tree_type="coalescent");
+            globs['tree-string'], globs['st'] = TREEIO.readST(globs);
         elif globs['tree-data-type'] == 'func':
-            tree_str, tree_dict, tree, root, tips, internals = TREEIO.readST(globs, tree_type="coalescent");
+            globs['tree-string'], globs['st'], globs['labeled-tree'], globs['root'], globs['tips'], globs['internals'] = TREEIO.readST(globs);
 
-    ## Read coalescent tree if provided
-    ####################
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Tree read from mod file:", 45) + globs['tree-string']);
+        # Report the tree that was read -- this line is necessary for phyloacc_post.py to read the tree used in the run
+
+        if globs['debug-tree']:
+            TREE.debugTree(globs);
+            #   print(globs['st'].has_label);
+            sys.exit(0);
+        # Print the debug stats and exit if --debugtree is set
+
+        if globs['label-tree']:
+            if globs['tree-data-type'] == 'class':
+                globs['st'].showAttrib("type", "label", "desc");
+
+                print("\nInput tree with integer labels:");
+                print(globs['st'].tree_str +"\n");
+
+                #if not globs['st'].has_label:
+                print("\nInput tree with descendant labels:");
+                print(globs['st'].labelDesc());
+
+            #print(globs['labeled-tree']);
+            #print();
+            sys.exit(0);
+        elif not globs['st'].has_label:
+            PC.errorOut("MAIN2", "One or more internal nodes in your tree are unlabeled, which is required for PhyloAcc. Please label all internal nodes (maybe with the --labeltree option) and replace the tree in your .mod file with the labeled tree.", globs);
+
+        #else:
+        #    CORE.printWrite(globs['logfilename'], globs['log-v'], "# INFO: Original tree with node labels:\t" + globs['st'].tree_str);
+        # Print the tree and exit if --labeltree is set
+
+        ## Read species tree
+        ####################
+
+        globs = TREEIO.readSpeciesGroups(globs);
+
+        ## Read species groups
+        ####################
+
+        if not globs['theta'] and globs['coal-tree-file']:
+            if globs['tree-data-type'] == 'class':
+                tree_str, tree = TREEIO.readST(globs, tree_type="coalescent");
+            elif globs['tree-data-type'] == 'func':
+                tree_str, tree_dict, tree, root, tips, internals = TREEIO.readST(globs, tree_type="coalescent");
+
+        ## Read coalescent tree if provided
+        ####################
+    ## End check for --debugaln option
 
     globs = SEQ.readSeq(globs);
 
@@ -146,6 +149,10 @@ if __name__ == '__main__':
     
     ## Calculate some basic alignment stats
     ####################
+
+    if globs['debug-aln']:
+        sys.exit(0);
+    # Exit here if --debugaln is set    
 
     if globs['run-mode'] == 'adaptive':
         #globs = CF.scf(globs, globs['st'], globs['alns'], globs['scf-pool']);
