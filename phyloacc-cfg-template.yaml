@@ -82,7 +82,7 @@ coal_tree:
 # tree in the mod file (-m), but with branch lengths in coalescent units. 
 # Either coal_tree or theta is REQUIRED for the gene tree and adaptive models, not needed for species tree model.
 
-theta_flag: true
+theta_flag:
 # Estimate population size parameter theta (--theta)
 # Set this to add gene tree estimation with IQ-tree and species estimation with ASTRAL for 
 # estimation of the theta prior. Note that a species tree with branch lengths in units of 
