@@ -20,7 +20,7 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
 
     if args_var:
         param_value = args_var;
-    elif config[arg_str]:
+    elif config and config[arg_str]:
         param_value = config[arg_str];
     else:
         param_value = arg_default;
