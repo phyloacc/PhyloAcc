@@ -1,3 +1,20 @@
+############################################################
+# This is a template configuration file for PhyloAcc.
+# All options are listed here with a brief description and their default values.
+#
+# Options can either be specified here or in the command line, for example:
+# phyloacc.py -a alignment.fa -b loci.bed -m model.mod -t species1;species2;species3
+# is the same as setting those options in the configuration file and running
+# phyloacc.py --config <config file name>
+#
+# IMPORTANT: Command line options take precedence over those specified in the configuration file!
+# If neither are specified for a particular option, the default value will be used.
+#
+# This file is YAML formatted, meaning each option is a key-value pair, with the
+# option name being on the left side of the colon and the value on the right side.
+#
+############################################################
+
 ####################
 # Sequence input
 ####################
@@ -25,7 +42,7 @@ id_file:
 
 ## OR ##
 
-aln_dir: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/
+aln_dir: 
 # Alignment directory (-d)
 # A directory containing individual alignment files for each locus. 
 # Expected as FASTA format. 
@@ -35,28 +52,28 @@ aln_dir: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/
 # Tree input
 ####################
 
-mod_file: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/ratite.mod
+mod_file:
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
 # EXAMPLE FILE:
 # REQUIRED.
 
-targets: strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
+targets:
 # Target species (-t)
 # Tip labels in the input tree to be used as target species. 
-# Enter multiple labels separated by semi-colons (;). 
+# Enter multiple labels separated by semi-colons (;), e.g. species1;species2;species3. 
 # REQUIRED.
 
 conserved:
 # Conserved species (-c)
 # Tip labels in the input tree to be used as conserved species. 
-# Enter multiple labels separated by semi-colons (;). 
+# Enter multiple labels separated by semi-colons (;), e.g. species1;species2;species3. 
 # DEFAULT: Any species not specified as targets or outgroup will be set as conserved.
 
-outgroup: allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
+outgroup:
 # Outgroup species (-g)
 # Tip labels in the input tree to be used as outgroup species. 
-# Enter multiple labels separated by semi-colons (;).
+# Enter multiple labels separated by semi-colons (;), e.g. species1;species2;species3.
 # DEFAULT: None. If blank, no species will be set as outgroup.
 
 coal_tree:
@@ -77,7 +94,7 @@ theta_flag: true
 # PhyloAcc Method
 ####################
 
-run_mode: adaptive
+run_mode:
 # Run mode (-r)
 # Determines which version of PhyloAcc will be used.
 # OPTIONS: 
@@ -99,7 +116,7 @@ dollo_flag:
 # Other input options
 ####################
 
-num_procs: 10
+num_procs:
 # Number of processes (-n)
 # The number of processes that this script should use. 
 # DEFAULT: 1.
@@ -108,7 +125,7 @@ num_procs: 10
 # Output
 ####################
 
-out_dir: phyloacc-dev
+out_dir:
 # Output directory (-o)
 # Desired output directory. This will be created for you if it doesn't exist.
 # DEFAULT: phyloacc-[date]-[time]
@@ -206,7 +223,7 @@ thin:
 # Batching
 ####################
 
-batch_size: 50
+batch_size:
 # Batch size (-batch)
 # The number of loci to run per batch. 
 # The total number of batches will be (total loci / batch_size).
@@ -217,12 +234,12 @@ procs_per_batch:
 # The number of processes (cores) to use for each batch of PhyloAcc.
 # DEFAULT: 1.
 
-num_jobs: 4
+num_jobs:
 # Number of jobs (-j)      
 # The number of jobs (batches) that Snakemake will submit at once to your cluster
 # DEFAULT: 1.
 
-cluster_part: shared
+cluster_part:
 # Cluster partition (-part)
 # The partition or list of partitions (separated by commas) on which to run PhyloAcc jobs.
 # REQUIRED
@@ -247,12 +264,12 @@ cluster_time:
 # Executable paths
 ####################
 
-phyloacc_st_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-ST
+phyloacc_st_path:
 # PhyloAcc-ST path (-st-path)
 # The path to the PhyloAcc-ST binary. 
 # DEFAULT: PhyloAcc-ST
 
-phyloacc_gt_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-GT
+phyloacc_gt_path:
 # PhyloAcc-GT path (-gt-path)
 # The path to the PhyloAcc-GT binary.
 # DEFAULT: PhyloAcc-GT
@@ -262,7 +279,7 @@ iqtree_path:
 # The path to the IQ-Tree executable for making gene trees with theta (--theta).
 # DEFAULT: iqtree
 
-coal_cmd: java -jar /n/home07/gthomas/env/pkgs/ASTRAL/Astral/astral.5.7.8.jar
+coal_cmd:
 # Coalescent command (-coal)
 # The path to the program to estimate branch lengths in coalescent units with theta (--theta)
 # SUPPORTED PROGRAMS: ASTRAL.
