@@ -83,7 +83,7 @@ phyloacc.py --config phyloacc-cfg.yaml
 
 These are identical.
 
-See the [Config file template](https://github.com/phyloacc/PhyloAcc/) for a full list of key names.
+See the [Config file template](https://github.com/phyloacc/PhyloAcc/blob/main/phyloacc-cfg-template.yaml) for a full list of key names.
 
 #### IMPORTANT: Options given via the command line take precedence over those given in the config file.
 
