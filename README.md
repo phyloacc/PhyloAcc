@@ -3,12 +3,14 @@
 ## PhyloAcc: Substitution rate estimate and rate shift inference along branches of a phylogeny
 
 [![Install](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](https://phyloacc.github.io/install.html)
-[![OS](https://anaconda.org/bioconda/phyloacc/badges/platforms.svg)](https://phyloacc.github.io/index.html)
+[![OS](https://img.shields.io/badge/Linux%2CWSL%2COSX-orange?label=platforms&color=%23fe7d37)](https://phyloacc.github.io/index.html)
 [![Version](https://img.shields.io/conda/vn/bioconda/phyloacc?label=version)](https://bioconda.github.io/recipes/phyloacc/README.html)
 [![Release Date](https://anaconda.org/bioconda/phyloacc/badges/latest_release_date.svg)](https://bioconda.github.io/recipes/phyloacc/README.html)
 [![Downloads](https://img.shields.io/conda/dn/bioconda/phyloacc.svg?style=flat)](https://bioconda.github.io/recipes/phyloacc/README.html)
-[![Commits](https://img.shields.io/github/commits-since/phyloacc/PhyloAcc/v2.0.0)](https://github.com/phyloacc/PhyloAcc/commits/main)
-[![License](https://anaconda.org/bioconda/phyloacc/badges/license.svg)](https://github.com/phyloacc/PhyloAcc/blob/main/LICENSE.md)
+[![Commits](https://img.shields.io/github/commits-since/phyloacc/PhyloAcc/v2.3.1)](https://github.com/phyloacc/PhyloAcc/commits/main)
+[![License](https://img.shields.io/badge/GPL%203.0%2B-black?label=license&color=%23333333)](https://github.com/phyloacc/PhyloAcc/blob/main/LICENSE.md)
+<!-- [![License](https://anaconda.org/bioconda/phyloacc/badges/license.svg)](https://github.com/phyloacc/PhyloAcc/blob/main/LICENSE.md) -->
+<!-- [![OS](https://anaconda.org/bioconda/phyloacc/badges/platforms.svg)](https://phyloacc.github.io/index.html) -->
 
 # Authors
 ### Han Yan, Zhirui Hu, Gregg Thomas, Scott Edwards, Jun Liu, Tim Sackton
@@ -29,7 +31,7 @@ If conda/bioconda is already set up on your system, you can install PhyloAcc wit
 conda install phyloacc
 ```
 
-For more detailed instructions and troubleshooting, see [the Installation page](https://phyloacc.github.io/install.html). If you have other questions or trouble let us know with [an issue](https://github.com/phyloacc/PhyloAcc/issues).
+For more detailed instructions and troubleshooting, see [the Installation page](https://phyloacc.github.io/install.html). If you have other questions or trouble let us know by posting [an issue on the github repo](https://github.com/phyloacc/PhyloAcc/issues).
 
 ## Usage
 
