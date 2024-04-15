@@ -55,7 +55,7 @@ aln_dir:
 mod_file:
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
-# EXAMPLE FILE:
+# EXAMPLE FILE: https://github.com/phyloacc/PhyloAcc-test-data/blob/main/ratite.mod
 # REQUIRED.
 
 targets:
