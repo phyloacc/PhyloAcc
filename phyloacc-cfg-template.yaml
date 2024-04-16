@@ -104,7 +104,7 @@ run_mode:
 # DEFAULT: st
 
 dollo_flag:
-# Dollo assumption (--dolly)
+# Dollo assumption (--dollo)
 # Set this to use the Dollo assumption in the original model (lineages descendant from an 
 #   accelerated branch cannot change state).
 # OPTIONS:
