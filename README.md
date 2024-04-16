@@ -127,7 +127,6 @@ In practice for many of these, using the command line option may be easier than 
 
 | Command-line option | Config file key | Description | Default value |
 | ------------------- | --------------- |------------ | ------------- |
-| `--config [STRING]` | NA | The path to a YAML formatted configuration file that specifies the program options (see above). Note that options specified on the command line take precedence of those specified in the config file. | Optional |
 | `-a [FASTA FILE]` | `aln_file: [FASTA FILE]` | An alignment file with all loci concatenated. `-b` must also be specified. Expected as FASTA format for now. | **One of (`-a` and `-b`) or `-d` is REQUIRED.** |
 | `-b [BED FILE]` | `bed_file: [BED FILE]` | A bed file with coordinates for the loci in the concatenated alignment file. `-a` must also be specified. | **One of (`-a` and `-b`) or `-d` is REQUIRED.**  |
 | `-i [TEXT FILE]` | `id_file: [TEXT FILE]` | A text file with locus names, one per line, corresponding to regions in the input bed file. If provided, PhyloAcc will only be run on these loci. | Optional. **-a and -b must also be specified.**  |
@@ -155,6 +154,7 @@ In practice for many of these, using the command line option may be easier than 
 
 | Command-line option | Config file key | Description | Default value |
 | ------------------- | --------------- |------------ | ------------- |
+| `--config [STRING]` | _NA_ | The path to a YAML formatted configuration file that specifies the program options (see above). Note that options specified on the command line take precedence of those specified in the config file. | Optional |
 | `-n [INT]` | `num_procs: [INT]` | The number of processes that this script should use. | 1 |
 
 #### Output options
@@ -186,7 +186,7 @@ In practice for many of these, using the command line option may be easier than 
 | `-mcmc [INT]` | `mcmc: [INT]` | The total number of steps in the Markov chain. | 1000 |
 | `-burnin [INT]` | `burnin: [INT]` | The number of steps to be discarded in the Markov chain as burnin. | 500 |
 | `-chain [INT]` | `chain: [INT]` | The number of MCMC chains to run. | 1 |
-| `-thin [INT]` | `thin: [INT]` | For the gene tree model, the number of MCMC steps between gene tree sampling. | 1 |
+| `-thin [INT]` | `thin: [INT]` | For the gene tree model, the number of MCMC steps between gene tree sampling. The total number of MCMC steps specified with `-mcmc` will be scaled by this as $mcmc*thin$ | 1 |
 
 #### Batching and cluster options
 
@@ -225,4 +225,4 @@ In practice for many of these, using the command line option may be easier than 
 | `--info` | `info_flag: [true/false]` | Print some meta information about the program and exit. No other options required. | Optional |
 | `--version` | `version_flag: [true/false]` | Simply print the version and exit. Can also be called as `-version`, `-v`, or `--v`. | Optional |
 | `--quiet` | `quiet_flag: [true/false]` | Set this flag to prevent PhyloAcc from reporting detailed information about each step. | Optional |
-| `-h` | NA | Print a help menu and exit. Can also be called as `--help`. | Optional |
+| `-h` | _NA_ | Print a help menu and exit. Can also be called as `--help`. | Optional |
