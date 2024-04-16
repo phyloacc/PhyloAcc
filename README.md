@@ -121,7 +121,7 @@ phyloacc.py --config phyloacc-cfg.yaml
 
 In practice for many of these, using the command line option may be easier than changing the config file each time.
 
-### Options
+### Options summary
 
 #### Sequence input options
 
@@ -154,7 +154,7 @@ In practice for many of these, using the command line option may be easier than 
 
 | Command-line option | Config file key | Description | Default value |
 | ------------------- | --------------- |------------ | ------------- |
-| `--config [STRING]` | _NA_ | The path to a YAML formatted configuration file that specifies the program options (see above). Note that options specified on the command line take precedence of those specified in the config file. | Optional |
+| `--config [YAML FILE]` | _NA_ | The path to a YAML formatted configuration file that specifies the program options ([see above](#config-file)). Note that options specified on the command line take precedence of those specified in the config file. | Optional |
 | `-n [INT]` | `num_procs: [INT]` | The number of processes that this script should use. | 1 |
 
 #### Output options
