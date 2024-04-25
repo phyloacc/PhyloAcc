@@ -14,7 +14,7 @@ BURNIN {burnin}
 MCMC {mcmc}
 CHAIN {chain}
 TARGETSPECIES {targets}
-OUTGROUP {outgroup}
+{outgroup}
 CONSERVE {conserved}
 NUM_THREAD {procs_per_job}
 {phyloacc_opts}

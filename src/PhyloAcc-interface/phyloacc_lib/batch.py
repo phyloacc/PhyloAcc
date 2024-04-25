@@ -37,9 +37,10 @@ def genJobFiles(globs):
             if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= globs['inf-frac-theta']:
             # Check if the current locus is long enough and has enough informative sites to make a tree
 
-                if globs['aln-stats'][aln]['low-qual']:
+                if globs['aln-stats'][aln]['low-qual'] or globs['aln-stats'][aln]['num-seqs-all-missing'] > 0:
                     continue;
-                # Skip alignments that are low quality
+                # Skip alignments that are low quality or have any sequences with all missing data (as this will
+                # cause iqtree to crash)
 
                 cur_aln_file = os.path.join(iqtree_aln_dir, aln + ".fa");
                 # The filename for the current alignment
@@ -52,7 +53,7 @@ def genJobFiles(globs):
                 # Write the alignment
             ## End alignment writing block
 
-            if alns_written > 5000:
+            if alns_written >= 5000:
                 break;
             # Don't need to make gene trees of every element, just enough to estimate branch lengths
         ## End locus alignment loop
@@ -193,6 +194,12 @@ def genJobFiles(globs):
                         # Add the length to the length sum as the start coordinate for the next locus
                 # Write a bed file that contains all coordinates for the current alignment
 
+                if globs['groups']['outgroup']:
+                    outgroup_str = "OUTGROUP " + ";".join(globs['groups']['outgroup']);
+                else:
+                    outgroup_str = "";
+                # Don't write the OUTGROUP line if there are no outgroups
+
                 if globs['id-flag']:
                     cur_id_file = os.path.join(globs['job-ids'], batch_num_str + "-" + model_type + ".id");
                     cur_id_file = os.path.abspath(cur_id_file);
@@ -234,7 +241,7 @@ def genJobFiles(globs):
                                                                             mcmc=str(globs['mcmc']),
                                                                             chain=str(globs['chain']),
                                                                             targets= ";".join(globs['groups']['targets']),
-                                                                            outgroup=";".join(globs['groups']['outgroup']),
+                                                                            outgroup=outgroup_str,
                                                                             conserved=";".join(globs['groups']['conserved']),
                                                                             procs_per_job=str(globs['procs-per-job']),
                                                                             phyloacc_opts=phyloacc_opt_str,
