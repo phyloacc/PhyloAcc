@@ -154,7 +154,7 @@ class Tree:
                     ## Tips
 
                     else:
-                        cur_label = re.sub("<[\d]+>", "", node);
+                        cur_label = re.sub("<[\d]+>", "", node, 1);
                         node = re.findall("<[\d]+>", node)[0];
                         # Parse out the provided labels in the tree from
                         # the ones generated here for all internal nodes
@@ -208,10 +208,13 @@ class Tree:
         self.internals.append(anc_label);
         self.type[anc_label] = "internal";
         self.root = anc_label;
-        orig_root_label = tree.replace(anc_label, "").replace(";", "");
-        if orig_root_label == "":
-            orig_root_label = "root";
-        self.label[anc_label] = orig_root_label;
+        if tree.count(anc_label) == 1:
+            orig_root_label = tree.replace(anc_label, "").replace(";", "");
+            if orig_root_label == "":
+                orig_root_label = "root";
+            self.label[anc_label] = orig_root_label;
+        else:
+            self.label[anc_label] = anc_label;
         self.bl[anc_label] = "NA";
         self.anc[anc_label] = "NA";
         self.sis[anc_label] = "NA";

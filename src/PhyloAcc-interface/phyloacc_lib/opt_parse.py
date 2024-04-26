@@ -20,7 +20,7 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
 
     if args_var:
         param_value = args_var;
-    elif config and config[arg_str]:
+    elif config and arg_str in config and config[arg_str]:
         param_value = config[arg_str];
     else:
         param_value = arg_default;
@@ -396,7 +396,7 @@ def optParse(globs):
 
         globs['phyloacc'] = getOpt(args.phyloacc_st_path, "phyloacc_st_path", str, globs['phyloacc'], config, arg_flags, globs, check=False);
         globs['phyloacc-gt'] = getOpt(args.phyloacc_gt_path, "phyloacc_gt_path", str, globs['phyloacc-gt'], config, arg_flags, globs, check=False);
-        globs['phyloacc-opts'] = getOpt(args.phyloacc_opts, "phyloacc_opts", str, globs['phyloacc-opts'], config, arg_flags, globs, check=False);
+        phyloacc_opt_input = getOpt(args.phyloacc_opts, "phyloacc_opts", str, None, config, arg_flags, globs, check=False);
         globs['iqtree-path'] = getOpt(args.iqtree_path, "iqtree_path", str, globs['iqtree-path'], config, arg_flags, globs, check=False);
         globs['coal-cmd'] = getOpt(args.coal_cmd, "coal_cmd", str, globs['coal-cmd'], config, arg_flags, globs, check=False);
 
@@ -489,11 +489,11 @@ def optParse(globs):
 
             ## MCMC options
             ####################
-
-            if args.phyloacc_opts:
-                while "; " in args.phyloacc_opts:
-                    args.phyloacc_opts = args.phyloacc_opts.replace("; ", ";");
-                phyloacc_opts = args.phyloacc_opts.split(";");
+            
+            if phyloacc_opt_input and phyloacc_opt_input != "None":
+                while "; " in phyloacc_opt_input:
+                    phyloacc_opt_input = phyloacc_opt_input.replace("; ", ";");
+                phyloacc_opts = phyloacc_opt_input.split(";");
                 # A common error might be for users to put a space after each semi-colon, so we address that here and split the options
 
                 for opt_val in phyloacc_opts:

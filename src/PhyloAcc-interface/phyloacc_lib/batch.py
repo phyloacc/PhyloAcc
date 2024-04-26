@@ -4,6 +4,7 @@
 #############################################################################
 
 import os
+import re
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
 import phyloacc_lib.tree_old as TREEF
@@ -72,7 +73,9 @@ def genJobFiles(globs):
 
         species_tree_file = os.path.join(globs['astral'], "input-species-tree.treefile");
         with open(species_tree_file, "w") as treefile:
-            treefile.write(input_tree_no_bl);
+            #print(globs['tree-string']);
+            #treefile.write(input_tree_no_bl);
+            treefile.write(re.sub(':[\d.eE-]+', '', globs['tree-string']));
         # Write the input tree to its own file for input tp ASTRAL
         
         step_start_time = PC.report_step(globs, step, step_start_time, "Success");
