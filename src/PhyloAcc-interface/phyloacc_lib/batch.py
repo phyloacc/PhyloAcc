@@ -71,11 +71,10 @@ def genJobFiles(globs):
         input_tree_no_bl = TREE.remBranchLength(globs['tree-string']);
         # Remove branch lengths from input tree
 
-        species_tree_file = os.path.join(globs['astral'], "input-species-tree.treefile");
-        with open(species_tree_file, "w") as treefile:
-            #print(globs['tree-string']);
+        with open(globs['coal-tree-input'], "w") as treefile:
+            treefile.write(globs['tree-string']);
             #treefile.write(input_tree_no_bl);
-            treefile.write(re.sub(':[\d.eE-]+', '', globs['tree-string']));
+            #treefile.write(re.sub(':[\d.eE-]+', '', globs['tree-string']));
         # Write the input tree to its own file for input tp ASTRAL
         
         step_start_time = PC.report_step(globs, step, step_start_time, "Success");
@@ -302,7 +301,9 @@ def writeSnakemake(globs):
                                                         iqtree_path=globs['iqtree-path'],
                                                         st_path=globs['phyloacc'],
                                                         gt_path=globs['phyloacc-gt'],
-                                                        coal_tree_path=globs['coal-tree-file']
+                                                        unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
+                                                        coal_tree_path=globs['coal-tree-file'],
+                                                        label_script=globs['label-coal-tree-script']
                                                         ))
 
     if globs['batch']:
@@ -374,6 +375,23 @@ def writeSnakemake(globs):
     else:
         step_start_time = PC.report_step(globs, step, step_start_time, "Success");   
     # Status update     
+
+    ####################
+
+    if globs['theta']:
+        if globs['batch']:
+            step = "Writing label tree script";
+        else:
+            step = "Getting label tree script name";
+        step_start_time = PC.report_step(globs, step, False, "In progress...");
+        # Status update
+
+        if globs['batch']:
+            with open(globs['label-coal-tree-script'], "w") as label_tree_script:
+                label_tree_script.write(TEMPLATES.labelCoalTreeScript().format(astral_input_tree_path=globs['coal-tree-input'],
+                                                                            unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
+                                                                            coal_tree_path=globs['coal-tree-file'] 
+                                                                            ))
 
     return globs; 
 

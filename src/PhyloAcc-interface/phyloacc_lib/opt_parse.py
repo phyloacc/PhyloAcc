@@ -603,7 +603,10 @@ def optParse(globs):
             if globs['coal-tree-file']:
                 globs['coal-tree-file'] = os.path.abspath(globs['coal-tree-file']);
             elif globs['theta']:
-                globs['coal-tree-file'] = os.path.join(globs['astral'], "astral-species-tree.treefile");
+                globs['label-coal-tree-script'] = os.path.join(globs['astral'], "label_astral_tree.sh");
+                globs['coal-tree-input'] = os.path.join(globs['astral'], "input-species-tree.treefile");
+                globs['coal-tree-file-unlabeled'] = os.path.join(globs['astral'], "astral-species-tree.treefile");
+                globs['coal-tree-file'] = os.path.join(globs['astral'], "astral-species-tree-labeled.treefile");
 
             globs['run-name'] = os.path.basename(os.path.normpath(globs['outdir']));
             globs['logfilename'] = os.path.join(globs['outdir'], globs['run-name'] + ".log");

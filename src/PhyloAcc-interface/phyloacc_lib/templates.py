@@ -65,6 +65,7 @@ rule all:
     input:
         {theta_char}expand(os.path.join(IQTREEDIR, "gene-trees", "{{locus}}", "{{locus}}.treefile"), locus=iqtree_loci),
         {theta_char}os.path.join(IQTREEDIR, "gene-trees", "all-gene-trees.treefile"),
+        {theta_char}"{unlabeled_coal_tree_path}",
         {theta_char}"{coal_tree_path}",
         {phyloacc_char}expand(os.path.join(OUTDIR, "{{st_batch}}-phyloacc-st-out", "{{st_batch}}_elem_lik.txt"), st_batch=ST_BATCHES),
         {phyloacc_char}expand(os.path.join(OUTDIR, "{{gt_batch}}-phyloacc-gt-out", "{{gt_batch}}_elem_lik.txt"), gt_batch=GT_BATCHES)
@@ -107,7 +108,7 @@ rule run_astral:
         gene_trees = os.path.join(IQTREEDIR, "gene-trees", "all-gene-trees.treefile"),
         species_tree = os.path.join(ASTRALDIR, "input-species-tree.treefile")
     output:
-        "{coal_tree_path}"
+        "{unlabeled_coal_tree_path}"
     log:
         os.path.join(ASTRALDIR, "astral-species-tree.log")
     shell:
@@ -115,6 +116,19 @@ rule run_astral:
         {astral_path} -q {{input.species_tree}} -i {{input.gene_trees}} -o {{output}} &> {{log}}
         \"\"\"
 
+rule label_astral_tree:
+    input:
+        species_tree = os.path.join(ASTRALDIR, "input-species-tree.treefile"),
+        astral_tree = "{unlabeled_coal_tree_path}"
+    output:
+        "{coal_tree_path}"
+    log:
+        os.path.join(ASTRALDIR, "astral-label-tree.log")
+    shell:
+        \"\"\"
+        {label_script}
+        \"\"\"
+        
 # The above rules estimate a tree with branch lengths in coalescent units if the --theta option
 # is used. Without --theta, the expected outputs from these in rule all are commented out and they will not be run.
 ####################
@@ -193,6 +207,42 @@ verbose: true
 """
 
     return profile_template;
+
+#############################################################################
+
+def labelCoalTreeScript():
+    
+    label_script_template = """#!/bin/bash
+# Read the labels from the input species tree (not astral tree)
+labels1=( $(awk -F'[():]' '{{for(i=1;i<=NF;i++)if($i~/^node/){{print $i}}}}' {astral_input_tree_path}) )
+
+# Initialize an index for labels1
+index=0
+
+# Read tree2.txt character by character
+while IFS= read -r -n1 char
+do
+    # If the character is a ), start replacing until :
+    if [[ $char == ")" ]]
+    then
+        # Print the ) and the label, and increment the index
+        printf ")${{labels1[$index]}}"
+
+        # Skip characters until :
+        while IFS= read -r -n1 char && [[ $char != ":" ]]
+        do
+            continue
+        done
+
+        # Increment the index
+        ((index++))
+    fi
+
+    # Print the character
+    printf "$char"
+done < {unlabeled_coal_tree_path} > {coal_tree_path}
+"""
+    return label_script_template;
 
 #############################################################################
 
