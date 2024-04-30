@@ -554,6 +554,8 @@ def optParse(globs):
                 globs['outdir'] = "phyloacc-out-" + globs['startdatetime'];
             # Get the output directory
 
+            globs['outdir'] = os.path.abspath(globs['outdir']);
+
             if not globs['overwrite'] and os.path.exists(globs['outdir']):
                 PC.errorOut("OP16", "Output directory already exists: " + globs['outdir'] + ". Specify new directory name OR set --overwrite to overwrite all files in that directory.", globs);
             if not os.path.isdir(globs['outdir']) and not globs['norun'] and not globs['info'] and not globs['debug-tree']:

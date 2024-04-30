@@ -126,6 +126,7 @@ rule label_astral_tree:
         os.path.join(ASTRALDIR, "astral-label-tree.log")
     shell:
         \"\"\"
+        chmod +x {label_script}
         {label_script}
         \"\"\"
         
@@ -213,13 +214,31 @@ verbose: true
 def labelCoalTreeScript():
     
     label_script_template = """#!/bin/bash
-# Read the labels from the input species tree (not astral tree)
-labels1=( $(awk -F'[():]' '{{for(i=1;i<=NF;i++)if($i~/^node/){{print $i}}}}' {astral_input_tree_path}) )
 
+## Read the labels from the input species tree (not astral tree)
+# Initialize an empty array
+labels1=()
+
+# Read the input string character by character
+while IFS= read -r -n1 char
+do
+    # If the character is a ), start capturing until :
+    if [[ $char == ")" ]]
+    then
+        label=""
+        while IFS= read -r -n1 char && [[ $char != ":" ]]
+        do
+            label+="$char"
+        done
+        labels1+=("$label")
+    fi
+done < {astral_input_tree_path}
+
+## Replace the labels in the astral tree
 # Initialize an index for labels1
 index=0
 
-# Read tree2.txt character by character
+# Read the input string character by character
 while IFS= read -r -n1 char
 do
     # If the character is a ), start replacing until :
