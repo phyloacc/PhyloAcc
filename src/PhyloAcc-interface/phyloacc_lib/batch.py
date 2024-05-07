@@ -4,6 +4,7 @@
 #############################################################################
 
 import os
+import re
 import phyloacc_lib.core as PC
 import phyloacc_lib.tree as TREE
 import phyloacc_lib.tree_old as TREEF
@@ -37,9 +38,10 @@ def genJobFiles(globs):
             if globs['aln-stats'][aln]['length'] >= 100 and (globs['aln-stats'][aln]['informative-sites'] / globs['aln-stats'][aln]['length']) >= globs['inf-frac-theta']:
             # Check if the current locus is long enough and has enough informative sites to make a tree
 
-                if globs['aln-stats'][aln]['low-qual']:
+                if globs['aln-stats'][aln]['low-qual'] or globs['aln-stats'][aln]['num-seqs-all-missing'] > 0:
                     continue;
-                # Skip alignments that are low quality
+                # Skip alignments that are low quality or have any sequences with all missing data (as this will
+                # cause iqtree to crash)
 
                 cur_aln_file = os.path.join(iqtree_aln_dir, aln + ".fa");
                 # The filename for the current alignment
@@ -52,7 +54,7 @@ def genJobFiles(globs):
                 # Write the alignment
             ## End alignment writing block
 
-            if alns_written > 5000:
+            if alns_written >= 5000:
                 break;
             # Don't need to make gene trees of every element, just enough to estimate branch lengths
         ## End locus alignment loop
@@ -69,9 +71,10 @@ def genJobFiles(globs):
         input_tree_no_bl = TREE.remBranchLength(globs['tree-string']);
         # Remove branch lengths from input tree
 
-        species_tree_file = os.path.join(globs['astral'], "input-species-tree.treefile");
-        with open(species_tree_file, "w") as treefile:
-            treefile.write(input_tree_no_bl);
+        with open(globs['coal-tree-input'], "w") as treefile:
+            treefile.write(globs['tree-string']);
+            #treefile.write(input_tree_no_bl);
+            #treefile.write(re.sub(':[\d.eE-]+', '', globs['tree-string']));
         # Write the input tree to its own file for input tp ASTRAL
         
         step_start_time = PC.report_step(globs, step, step_start_time, "Success");
@@ -172,7 +175,7 @@ def genJobFiles(globs):
 
                 cur_bed_file = os.path.join(globs['job-bed'], batch_num_str + "-" + model_type + ".bed");
                 with open(cur_bed_file, "w") as bedfile:
-                    batch_aln_id = 0;
+                    batch_aln_id = 1;
                     ## NOTE: Right phyloacc requires element IDs to be integers starting from 0. I think this should be changed.
                     for aln in batch_aln_list:
 
@@ -193,11 +196,17 @@ def genJobFiles(globs):
                         # Add the length to the length sum as the start coordinate for the next locus
                 # Write a bed file that contains all coordinates for the current alignment
 
+                if globs['groups']['outgroup']:
+                    outgroup_str = "OUTGROUP " + ";".join(globs['groups']['outgroup']);
+                else:
+                    outgroup_str = "";
+                # Don't write the OUTGROUP line if there are no outgroups
+
                 if globs['id-flag']:
                     cur_id_file = os.path.join(globs['job-ids'], batch_num_str + "-" + model_type + ".id");
                     cur_id_file = os.path.abspath(cur_id_file);
                     with open(cur_id_file, "w") as idfile:
-                        batch_aln_id = 0;
+                        batch_aln_id = 1;
                         for aln in batch_aln_list:
                             idfile.write(str(batch_aln_id) + "\n");
                             batch_aln_id += 1;
@@ -234,7 +243,7 @@ def genJobFiles(globs):
                                                                             mcmc=str(globs['mcmc']),
                                                                             chain=str(globs['chain']),
                                                                             targets= ";".join(globs['groups']['targets']),
-                                                                            outgroup=";".join(globs['groups']['outgroup']),
+                                                                            outgroup=outgroup_str,
                                                                             conserved=";".join(globs['groups']['conserved']),
                                                                             procs_per_job=str(globs['procs-per-job']),
                                                                             phyloacc_opts=phyloacc_opt_str,
@@ -292,7 +301,9 @@ def writeSnakemake(globs):
                                                         iqtree_path=globs['iqtree-path'],
                                                         st_path=globs['phyloacc'],
                                                         gt_path=globs['phyloacc-gt'],
-                                                        coal_tree_path=globs['coal-tree-file']
+                                                        unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
+                                                        coal_tree_path=globs['coal-tree-file'],
+                                                        label_script=globs['label-coal-tree-script']
                                                         ))
 
     if globs['batch']:
@@ -364,6 +375,23 @@ def writeSnakemake(globs):
     else:
         step_start_time = PC.report_step(globs, step, step_start_time, "Success");   
     # Status update     
+
+    ####################
+
+    if globs['theta']:
+        if globs['batch']:
+            step = "Writing label tree script";
+        else:
+            step = "Getting label tree script name";
+        step_start_time = PC.report_step(globs, step, False, "In progress...");
+        # Status update
+
+        if globs['batch']:
+            with open(globs['label-coal-tree-script'], "w") as label_tree_script:
+                label_tree_script.write(TEMPLATES.labelCoalTreeScript().format(astral_input_tree_path=globs['coal-tree-input'],
+                                                                            unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
+                                                                            coal_tree_path=globs['coal-tree-file'] 
+                                                                            ))
 
     return globs; 
 

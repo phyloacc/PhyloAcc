@@ -301,28 +301,37 @@ def locusAlnStats(locus_item):
     aln_len = len(aln[list(aln.keys())[0]]);
 
     cur_stats = { 'num-seqs' : num_seqs, 'length' : aln_len, 'avg-nogap-seq-len' : 0, 'variable-sites' : 0, 'unique-seqs' : 0,
-                                        'informative-sites' : 0, 'num-sites-w-gap' : 0, 'num-sites-half-gap' : 0,
-                                        'num-seqs-half-gap' : 0, 'low-qual' : False, 'batch-type' : "NA" };
+                                         'informative-sites' : 0, 'num-sites-w-gap' : 0, 'num-sites-half-gap' : 0,
+                                         'num-seqs-half-missing' : 0, 'num-seqs-all-missing' : 0, 
+                                         'low-qual' : False, 'batch-type' : "NA" };
     # Initialize the stats dict for this locus
 
     half_aln_len = aln_len / 2;
-    half_site_len = num_seqs / 2;
+    half_num_seqs = num_seqs / 2;
     # Compute half the alignment length and half the site length for the current locus.
     # Used to see if seqs and sites are half-gap or more
 
     ungapped_seq_lens = [];
     for seq in aln:
         ungapped_seq_lens.append(len(aln[seq].replace("-", "")));
+        # Get the length of the current sequence without gaps
+
+        missing_sites = sum(1 for char in aln[seq] if char in "-Nn");
+        if missing_sites >= half_aln_len:
+            cur_stats['num-seqs-half-missing'] += 1;
+            # Count whether the current sequence is more than half missing
+        
+            if missing_sites == aln_len:
+                cur_stats['num-seqs-all-missing'] += 1;
+            # Count whether the current sequence is all missing
+    ## End seq loop             
+
     cur_stats['avg-nogap-seq-len'] = PC.mean(ungapped_seq_lens);
     # Calculate the average sequence length without gaps for each sequence in the alignment
 
     for j in range(aln_len):
         site = "";
         for seq in aln:
-            if aln[seq][j].count("-") >= half_aln_len:
-                cur_stats['num-seqs-half-gap'] += 1;
-            # Count whether the current sequence is more than half gap
-
             site += aln[seq][j];
         # Get each allele from each sequence as the site
 
@@ -343,7 +352,7 @@ def locusAlnStats(locus_item):
         if "-" in site:
             cur_stats['num-sites-w-gap'] += 1;
 
-            if site.count("-") >= half_site_len:
+            if site.count("-") >= half_num_seqs:
                 cur_stats['num-sites-half-gap'] += 1;
         # Count whether this site contains a gap and, if so, whether more than half the sequences are a gap
     ## End site loop
@@ -352,7 +361,7 @@ def locusAlnStats(locus_item):
     # Count the number of unique sequences
     # Could also count number of times each sequence occurs: https://stackoverflow.com/questions/30692655/counting-number-of-strings-in-a-list-with-python#30692666
 
-    if cur_stats['num-sites-half-gap'] >= half_aln_len or cur_stats['num-seqs-half-gap'] >= half_site_len:
+    if cur_stats['num-sites-half-gap'] >= half_aln_len or cur_stats['num-seqs-half-missing'] >= half_num_seqs:
         cur_stats['low-qual'] = True;
     # Setting a flag for low quality sequence to be considered when estimating theta
 

@@ -75,7 +75,10 @@ def init():
         # Option to output plots/html
 
         'theta' : False,
+        'coal-tree-input' : False,
+        'coal-tree-file-unlabeled' : False,
         'coal-tree-file' : False,
+        'label-coal-tree-script' : False,
         'coal-tree-str' : False,
         # Theta estimation
 
