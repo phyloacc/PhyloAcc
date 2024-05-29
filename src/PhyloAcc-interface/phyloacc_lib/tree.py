@@ -732,9 +732,17 @@ class Tree:
 
         tree_str = self.tree_str;
         for node in self.internals:
-            selected_descs = sorted(self.getClade(node))[0:2];
-            new_label = "-".join(selected_descs);
+            d1_clade = self.getClade(self.desc[node][0]);
+            d2_clade = self.getClade(self.desc[node][1]);
+            # Get the clades of the two descendants
+
+            d1 = sorted(d1_clade)[0];
+            d2 = sorted(d2_clade)[0];
+            # Alphabetically sort the tips in the clades and select the first one
+
+            new_label = "-".join(sorted([d1, d2]));
             label_dict[node] = new_label;
+            # Create the new label and add it to the dictionary
         # For every node, select 2 descendants as the new label
         
         tree_str = self.addLabel(label_dict);
