@@ -211,14 +211,24 @@ public:
         N = bpp.N;
         CC = c;
         GG =bpp.element_size[c];
+        root = N-1;   // for gene tree
+        S = bpp.S;
+        
+        children2    = new int[N][2];
+        for(int i=0; i<N; i++)
+        {
+            children2[i][0] = bpp.children[i][0];
+            children2[i][1] = bpp.children[i][1];
+        }
+        
+        gtree = new GTree(N, GG, S, RNG);
+
         if(GG < min_length)
         {
             filter = true;
             return;
         }
         
-        root = N-1;   // for gene tree
-        S = bpp.S;
         GG_block = blocks; //ceil((double)GG/blocks);
         int tot = ceil((double)(GG - 15)/GG_block);
         // if(tot>5) tot=5;
@@ -229,7 +239,6 @@ public:
         lambda = vector< vector<vec> > (GG, vector<vec>(N));
         Tg = vector < vector< int> > (GG, vector<int>(N));
         
-        gtree = new GTree(N, GG, S, RNG);
 
         ratio0 = bpp.ratio0;  //no use
         ratio1 = bpp.ratio1; //no use
@@ -418,6 +427,8 @@ public:
         //cout<<"After filter, number of idblk is "<<idblk_count<<". GG="<<GG<<endl;
         if(idblk_count<=5) idblk_count=0; 
         
+        gtree->GG = GG; 
+        
         // reset GG_block if GG is too long
         //int tot = ceil((double)(GG - 10)/GG_block);
         /*
@@ -440,12 +451,6 @@ public:
             }
         }
 
-        children2    = new int[N][2];
-        for(int i=0; i<N; i++)
-        {
-            children2[i][0] = bpp.children[i][0];
-            children2[i][1] = bpp.children[i][1];
-        }
         
 
         // set missing only for extant species and upper
