@@ -1,6 +1,7 @@
 Version 2.3.4, 09.24.2024
 - Reverted the element ID indexing in the interface from 1 to 0 to match the C++ code
 - Changed how the interface uses regex to read trees so it uses `r`aw strings
+- Fixed bug in which gene trees were still being inferred with the ST model
 
 Version 2.3.0
 - Check for infs in `phyloacc_post.py`
