@@ -1,3 +1,6 @@
+Version 2.3.4, 09.24.2024
+- Reverted the element ID indexing in the interface from 1 to 0 to match the C++ code
+
 Version 2.3.0
 - Check for infs in `phyloacc_post.py`
 - Added error checking for unlabeled trees and alignments with labels that don't match the tree
