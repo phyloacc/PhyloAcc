@@ -392,8 +392,20 @@ def optParse(globs):
     if not globs['label-tree'] and not globs['debug-tree']:
     ## Read main input options if --labeltree isn't set
 
+        globs['run-mode'] = getOpt(args.run_mode, "run_mode", ["st", "gt", "adaptive"], globs['run-mode'], config, arg_flags, globs);
+        globs['coal-tree-file'] = getOpt(args.coal_tree, "coal_tree", "FILE", globs['coal-tree-file'], config, arg_flags, globs);
         globs['theta'] = getOpt(args.theta_flag, "theta_flag", bool, globs['theta'], config, arg_flags, globs);
-
+        
+        if globs['run-mode'] == "st" and (globs['theta'] or globs['coal-tree-file']):
+            warnings.append("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
+            globs['theta'] = False;
+            globs['coal-tree-file'] = None;
+        if globs['run-mode'] != 'st':
+            if (not globs['theta'] and not globs['coal-tree-file']) or (globs['theta'] and globs['coal-tree-file']):
+                PC.errorOut("OP7", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
+        ## Run mode and coalescent tree/theta options
+        ####################
+        
         globs['phyloacc'] = getOpt(args.phyloacc_st_path, "phyloacc_st_path", str, globs['phyloacc'], config, arg_flags, globs, check=False);
         globs['phyloacc-gt'] = getOpt(args.phyloacc_gt_path, "phyloacc_gt_path", str, globs['phyloacc-gt'], config, arg_flags, globs, check=False);
         phyloacc_opt_input = getOpt(args.phyloacc_opts, "phyloacc_opts", str, None, config, arg_flags, globs, check=False);
@@ -440,15 +452,6 @@ def optParse(globs):
             globs['dollo'] = getOpt(args.dollo_flag, "dollo_flag", bool, globs['dollo'], config, arg_flags, globs);
             ## Dollo option
             ####################
-
-            globs['run-mode'] = getOpt(args.run_mode, "run_mode", ["st", "gt", "adaptive"], globs['run-mode'], config, arg_flags, globs);
-            globs['coal-tree-file'] = getOpt(args.coal_tree, "coal_tree", "FILE", globs['coal-tree-file'], config, arg_flags, globs);
-
-            if globs['run-mode'] == "st" and (globs['theta'] or globs['coal-tree-file']):
-                warnings.append("# WARNING: When using the species tree model '-r st', a tree with coalescent units is not required. -l and --theta will be ignored.");
-            if globs['run-mode'] != 'st':
-                if (not globs['theta'] and not globs['coal-tree-file']) or (globs['theta'] and globs['coal-tree-file']):
-                    PC.errorOut("OP7", "When using the gene tree model with '-r gt' or '-r adaptive', a tree with branch lengths in coalescent units must also be provided with -l, or estimated with --theta.", globs);
 
             if globs['theta']:
                 job_sub_dirs = { 'job-alns' : 'alns', 'job-cfgs' : 'cfgs', 'job-bed' : 'bed', 'job-smk' : 'snakemake', 'job-out' : 'phyloacc-output', 'iqtree' : 'iqtree', 'astral' : 'astral' };
