@@ -23,7 +23,7 @@ class Tree:
             tree += ";";
         # Some string handling
 
-        tree = re.sub("#[\d.]+", "", tree);
+        tree = re.sub(r"#[\d.]+", "", tree);
 
         self.orig_tree_str = tree;
         self.topo_str = "";
@@ -61,8 +61,8 @@ class Tree:
         ## Class attributes
         #####
 
-        self.topo_str = re.sub('[)][\d\w<>/.eE_:-]+', ')', tree);
-        self.topo_str = re.sub(':[\d.eE-]+', '', self.topo_str);
+        self.topo_str = re.sub(r'[)][\d\w<>/.eE_:-]+', ')', tree);
+        self.topo_str = re.sub(r':[\d.eE-]+', '', self.topo_str);
         ## Remove the branch lengths and node labels from the input tree string
         #####     
 
@@ -102,7 +102,7 @@ class Tree:
 
         subtrees = {};
 
-        pairs = re.findall("\([\d\w/.,:_<>-]+\)", tree);
+        pairs = re.findall(r"\([\d\w/.,:_<>-]+\)", tree);
 
         node_count = 1;
         while pairs:
@@ -154,8 +154,8 @@ class Tree:
                     ## Tips
 
                     else:
-                        cur_label = re.sub("<[\d]+>", "", node, 1);
-                        node = re.findall("<[\d]+>", node)[0];
+                        cur_label = re.sub(r"<[\d]+>", "", node, 1);
+                        node = re.findall(r"<[\d]+>", node)[0];
                         # Parse out the provided labels in the tree from
                         # the ones generated here for all internal nodes
 
@@ -196,7 +196,7 @@ class Tree:
                 # Replace the current pair with the ancestral label in the tree
             ## End pairs loop
 
-            pairs = re.findall("\([\d\w/.,:_<>-]+\)", tree);
+            pairs = re.findall(r"\([\d\w/.,:_<>-]+\)", tree);
             # Find all new pairs in the tree
         # If there are no pairs left, we've reached the root of the tree
         ## End tree level loop
@@ -748,7 +748,7 @@ class Tree:
         tree_str = self.addLabel(label_dict);
         # Add the new labels to the tree string
 
-        tree_str = re.sub('<[\d]+>', "", tree_str) + ";";
+        tree_str = re.sub(r'<[\d]+>', "", tree_str) + ";";
         # Remove the integer node labels and add a semi-colon
 
         if self.has_label:
@@ -899,8 +899,8 @@ def categorizeBranches(globs, tree):
 def remBranchLength(tree_str):
 # Removes branch lengths and labels from a tree string
 
-    tree_str = re.sub('[)][\d\w<>/.eE_:-]+', ')', tree_str);
-    tree_str = re.sub(':[\d.eE-]+', '', tree_str);
+    tree_str = re.sub(r'[)][\d\w<>/.eE_:-]+', ')', tree_str);
+    tree_str = re.sub(r':[\d.eE-]+', '', tree_str);
 
     return tree_str;
 

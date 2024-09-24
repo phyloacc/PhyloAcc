@@ -175,7 +175,7 @@ def genJobFiles(globs):
 
                 cur_bed_file = os.path.join(globs['job-bed'], batch_num_str + "-" + model_type + ".bed");
                 with open(cur_bed_file, "w") as bedfile:
-                    batch_aln_id = 1;
+                    batch_aln_id = 0;
                     ## NOTE: Right phyloacc requires element IDs to be integers starting from 0. I think this should be changed.
                     for aln in batch_aln_list:
 
@@ -206,7 +206,7 @@ def genJobFiles(globs):
                     cur_id_file = os.path.join(globs['job-ids'], batch_num_str + "-" + model_type + ".id");
                     cur_id_file = os.path.abspath(cur_id_file);
                     with open(cur_id_file, "w") as idfile:
-                        batch_aln_id = 1;
+                        batch_aln_id = 0;
                         for aln in batch_aln_list:
                             idfile.write(str(batch_aln_id) + "\n");
                             batch_aln_id += 1;

@@ -154,7 +154,7 @@ public:
         N = bpp.N;
         CC = c;
         GG =bpp.element_size[c];
-        
+
         if(GG < min_length)
         {
             filter = true;

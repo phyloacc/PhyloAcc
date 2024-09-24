@@ -43,6 +43,7 @@ id_file:
 ## OR ##
 
 aln_dir: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/
+#aln_dir: /n/holylfs05/LABS/informatics/Everyone/phyloacc-data/mammal-input-accelerated/seq/
 # Alignment directory (-d)
 # A directory containing individual alignment files for each locus. 
 # Expected as FASTA format. 
@@ -53,12 +54,14 @@ aln_dir: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/alns/
 ####################
 
 mod_file: /n/home07/gthomas/projects/phyloacc/PhyloAcc-test-data/ratite.mod
+#mod_file: /n/holylfs05/LABS/informatics/Everyone/phyloacc-data/mammal-input-accelerated/mammal_acc1.mod
 # Model file (-m)
 # A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit.
 # EXAMPLE FILE:
 # REQUIRED.
 
 targets: strCam;rhePen;rheAme;casCas;droNov;aptRow;aptHaa;aptOwe;anoDid
+#targets: triMan1;<12>;<9>
 # Target species (-t)
 # Tip labels in the input tree to be used as target species. 
 # Enter multiple labels separated by semi-colons (;), e.g. species1;species2;species3. 
@@ -71,6 +74,7 @@ conserved:
 # DEFAULT: Any species not specified as targets or outgroup will be set as conserved.
 
 outgroup: allMis;allSin;croPor;gavGan;chrPic;cheMyd;anoCar
+#outgroup: monDom5;sarHar1;macEug2;ornAna1
 # Outgroup species (-g)
 # Tip labels in the input tree to be used as outgroup species. 
 # Enter multiple labels separated by semi-colons (;), e.g. species1;species2;species3.
@@ -94,7 +98,7 @@ theta_flag: true
 # PhyloAcc Method
 ####################
 
-run_mode: adaptive
+run_mode: st
 # Run mode (-r)
 # Determines which version of PhyloAcc will be used.
 # OPTIONS: 
@@ -125,7 +129,7 @@ num_procs: 10
 # Output
 ####################
 
-out_dir: phyloacc-dev
+out_dir: phyloacc-dev-smk1
 # Output directory (-o)
 # Desired output directory. This will be created for you if it doesn't exist.
 # DEFAULT: phyloacc-[date]-[time]
@@ -229,7 +233,7 @@ batch_size: 50
 # The total number of batches will be (total loci / batch_size).
 # DEFAULT: 50
 
-procs_per_batch:
+procs_per_batch: 1
 # Processes per batch (-p)
 # The number of processes (cores) to use for each batch of PhyloAcc.
 # DEFAULT: 1.
@@ -264,12 +268,14 @@ cluster_time:
 # Executable paths
 ####################
 
-phyloacc_st_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-ST
+#phyloacc_st_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-ST
+phyloacc_st_path: PhyloAcc-ST
 # PhyloAcc-ST path (-st-path)
 # The path to the PhyloAcc-ST binary. 
 # DEFAULT: PhyloAcc-ST
 
-phyloacc_gt_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-GT
+#phyloacc_gt_path: /n/home07/gthomas/projects/phyloacc/PhyloAcc/PhyloAcc-GT
+phyloacc_gt_path: PhyloAcc-GT
 # PhyloAcc-GT path (-gt-path)
 # The path to the PhyloAcc-GT binary.
 # DEFAULT: PhyloAcc-GT
