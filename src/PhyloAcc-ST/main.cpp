@@ -113,7 +113,6 @@ void LoadParams(int argc, char* argv[])
     }
     // Get the name of the parameters file, or error out if none is provided
 
-    cout << params_path;
     cout << "Loading program configurations from " << params_path << "......" <<endl;
     
     const int BUFF_SIZE = 4096; // max line length
