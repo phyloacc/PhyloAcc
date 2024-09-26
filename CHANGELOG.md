@@ -1,4 +1,4 @@
-Version 2.3.5
+Version 2.4.0, 09.26.2024
 - Added `--local` option to generate a snakemake command that does not use a cluster, intended for testing purposes only.
 - Fixed the `--version`, `--quiet`, and `--options` flags to work with the config file.
 - Fixed spacing when string is longer than the pad.
