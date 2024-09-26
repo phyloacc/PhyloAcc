@@ -176,7 +176,7 @@ def genJobFiles(globs):
                 cur_bed_file = os.path.join(globs['job-bed'], batch_num_str + "-" + model_type + ".bed");
                 with open(cur_bed_file, "w") as bedfile:
                     batch_aln_id = 0;
-                    ## NOTE: Right phyloacc requires element IDs to be integers starting from 0. I think this should be changed.
+                    ## NOTE: Right now phyloacc requires element IDs to be integers starting from 0. I think this should be changed.
                     for aln in batch_aln_list:
 
                         aln_len = globs['aln-stats'][aln]['length'];
@@ -250,6 +250,10 @@ def genJobFiles(globs):
                                                                             dollo_str=dollo_str
                                                                             ))
                 # Write the phyloacc config file for the current concatenated alignment
+
+                if batch_num == 1 and globs['test-cmd-flag']:
+                    globs['test-cmd'] = "PhyloAcc-" + model_type.upper() + " " + cur_cfg_file;
+                # Generate the test command if --testcmd is set.
             ## End batch block
         ## End batch loop
     ## End model partition loop

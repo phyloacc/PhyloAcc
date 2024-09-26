@@ -63,12 +63,21 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
 def addArgument(parser, flag, dest, arg_type, help_str):
 # This function adds an argument to the parser with the specified flag, destination, type, and help message.
 
-    if arg_type == bool:
-        parser.add_argument(flag, dest=dest, help=help_str, action="store_true");
+    if isinstance(flag, list):
+        # If flags is a list, unpack it
+        if arg_type == bool:
+            parser.add_argument(*flag, dest=dest, help=help_str, action="store_true")
+        else:
+            parser.add_argument(*flag, dest=dest, help=help_str, type=arg_type, default=False)
+        return {dest: flag[0]}
     else:
-        parser.add_argument(flag, dest=dest, help=help_str, type=arg_type, default=False);
+        # If flags is a single string
+        if arg_type == bool:
+            parser.add_argument(flag, dest=dest, help=help_str, action="store_true")
+        else:
+            parser.add_argument(flag, dest=dest, help=help_str, type=arg_type, default=False)
+        return {dest: flag}
 
-    return {dest : flag}
 
 #############################################################################
 
@@ -245,6 +254,9 @@ def optParse(globs):
     arg_flags.update(addArgument(parser, "-time", "cluster_time", int,
         "The time in hours to give each job. Default: 1."));
     #parser.add_argument("-time", dest="cluster_time", help="The time in hours to give each job. Default: 1.", default=False);
+
+    arg_flags.update(addArgument(parser, "--local", "local_flag", bool,
+        "Set to generate a local snakemake command to run the pipeline instead of the cluster profile and command. ONLY recommended for testing purposes."));
     # Cluster options
     
     ##########
@@ -274,12 +286,17 @@ def optParse(globs):
 
     #parser.add_argument("--plot", dest="plot_flag", help="Plot some summary statistics from the input data.", action="store_true", default=False);
 
+    arg_flags.update(addArgument(parser, "--testcmd", "test_cmd_flag", bool,
+        "At the end of the program, print out an example command to run a PhyloAcc batch directly."));
+
     arg_flags.update(addArgument(parser, "--summarize", "summarize_flag", bool,
         "Only generate the input summary plots and page. Do not write or overwrite batch job files."));
     #parser.add_argument("--summarize", dest="summarize_flag", help="Only generate the input summary plots and page. Do not write or overwrite batch job files.", action="store_true", default=False);
-    
-    parser.add_argument("--options", dest="options_flag", help="Print the full list of PhyloAcc options that can be specified with -phyloacc and exit.", action="store_true", default=False);
-   
+
+    arg_flags.update(addArgument(parser, "--options", "options_flag", bool,
+        "Print the full list of PhyloAcc options that can be specified with -phyloacc and exit."));    
+    #parser.add_argument("--options", dest="options_flag", help="Print the full list of PhyloAcc options that can be specified with -phyloacc and exit.", action="store_true", default=False);
+
     arg_flags.update(addArgument(parser, "--info", "info_flag", bool,
         "Print some meta information about the program and exit. No other options required."));   
     #parser.add_argument("--info", dest="info_flag", help="Print some meta information about the program and exit. No other options required.", action="store_true", default=False);
@@ -288,7 +305,7 @@ def optParse(globs):
         "Run this to check that all dependencies are installed at the provided path. No other options necessary."));
     #parser.add_argument("--depcheck", dest="depcheck", help="Run this to check that all dependencies are installed at the provided path. No other options necessary.", action="store_true", default=False);
     
-    arg_flags.update(addArgument(parser, "--version", "version_flag", bool,
+    arg_flags.update(addArgument(parser, ["--version", "-version", "--v", "-v"], "version_flag", bool,
         "Simply print the version and exit. Can also be called as '-version', '-v', or '--v'."));
     #parser.add_argument("--version", dest="version_flag", help="Simply print the version and exit. Can also be called as '-version', '-v', or '--v'", action="store_true", default=False);
     
@@ -330,6 +347,37 @@ def optParse(globs):
             config = yaml.safe_load(f);
     else:
         config = {};
+
+    ####################
+
+    globs['version-flag'] = getOpt(args.version_flag, "version_flag", bool, False, config, arg_flags, globs);
+    if globs['version-flag']:
+        print("\n# PhyloAcc version " + globs['version'] + " released on " + globs['releasedate-patch'])
+        sys.exit(0);
+    # The version option to simply print the version and exit.        
+
+    ####################
+
+    globs['quiet'] = getOpt(args.quiet_flag, "quiet_flag", bool, False, config, arg_flags, globs);
+    if not globs['quiet']:
+        print("\n" + globs['call'] + "\n");
+        print("#");
+        print("# " + "=" * 125);
+        print(PC.welcome());
+        print("    Bayesian rate analysis of conserved");
+        print("       non-coding genomic elements\n");
+        # A welcome banner.
+    else:
+        globs['log-v'] = 0;
+        print("# Running phyloacc_interface in quiet mode...");
+    # Check the --quiet option and print a welcome banner if it isn't set.
+
+    ####################
+
+    globs['options-flag'] = getOpt(args.options_flag, "options_flag", bool, False, config, arg_flags, globs);
+    if globs['options-flag']:
+        PC.printOptions(globs);
+    # Check if --options is set to print the PhyloAcc options and exit
 
     ####################
 
@@ -376,6 +424,9 @@ def optParse(globs):
     #globs['label-tree'] = args.labeltree;
     globs['label-tree'] = getOpt(args.labeltree, "labeltree", bool, globs['label-tree'], config, arg_flags, globs);
     # Parse the --labeltree option
+
+    globs['test-cmd-flag'] = getOpt(args.test_cmd_flag, "test_cmd_flag", bool, False, config, arg_flags, globs);
+    # Parse the --testcmd option
 
     ####################
 
@@ -645,20 +696,24 @@ def optParse(globs):
             # Batch size and resource allocation
             ####################
 
-            globs['partition'] = getOpt(args.cluster_part, "cluster_part", str, globs['partition'], config, arg_flags, globs, check=False);
-            if not globs['partition']:
-                PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
-            # Cluster partition option (required)
+            globs['local'] = getOpt(args.local_flag, "local_flag", bool, False, config, arg_flags, globs);
+            warnings.append("# WARNING: Using --local mode. Cluster options will be ignored and profile will not be generated. This is only recommended for testing purposes.");
 
-            globs['num-nodes'] = getOpt(args.cluster_nodes, "cluster_nodes", "INTSTR", globs['num-nodes'], config, arg_flags, globs);
-            # Cluster node option
+            if not globs['local']:
+                globs['partition'] = getOpt(args.cluster_part, "cluster_part", str, globs['partition'], config, arg_flags, globs, check=False);
+                if not globs['partition']:
+                    PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
+                # Cluster partition option (required)
 
-            globs['mem'] = getOpt(args.cluster_mem, "cluster_mem", "INTSTR", globs['mem'], config, arg_flags, globs);
-            # Cluster memory option
+                globs['num-nodes'] = getOpt(args.cluster_nodes, "cluster_nodes", "INTSTR", globs['num-nodes'], config, arg_flags, globs);
+                # Cluster node option
 
-            globs['time'] = getOpt(args.cluster_time, "cluster_time", "INTSTR", globs['time'], config, arg_flags, globs);
-            globs['time'] = globs['time'] + ":00:00";
-            # Cluster time option
+                globs['mem'] = getOpt(args.cluster_mem, "cluster_mem", "INTSTR", globs['mem'], config, arg_flags, globs);
+                # Cluster memory option
+
+                globs['time'] = getOpt(args.cluster_time, "cluster_time", "INTSTR", globs['time'], config, arg_flags, globs);
+                globs['time'] = globs['time'] + ":00:00";
+                # Cluster time option
 
             ## Cluster options
             ####################
@@ -676,11 +731,6 @@ def optParse(globs):
     # # full paths
 
     ####################
-
-    if args.quiet_flag:
-        globs['quiet'] = True;
-        globs['log-v'] = 0;
-    # Check the quiet option
 
     if args.qstats:
         globs['qstats'] = True;
@@ -805,10 +855,13 @@ def startProg(globs):
     PC.printWrite(globs['logfilename'], globs['log-v'], "# CLUSTER OPTIONS:");    
     PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Option", pad) + PC.spacedOut("Setting", opt_pad));
 
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Partition(s)", pad) + globs['partition']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Number of nodes", pad) + globs['num-nodes']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Max mem per job (gb)", pad) + globs['mem']);
-    PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Time per job", pad) + globs['time']); 
+    if globs['local']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --local", pad) + str(globs['local']));
+    else:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Partition(s)", pad) + globs['partition']);
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Number of nodes", pad) + globs['num-nodes']);
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Max mem per job (gb)", pad) + globs['mem']);
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Time per job", pad) + globs['time']); 
     # Cluster options
     #######################
 
@@ -988,6 +1041,11 @@ def startProg(globs):
     #                 PC.spacedOut("True", opt_pad) + 
     #                 "Printing out a bit of debug info.");
     # Reporting the debug option.
+
+    if globs['test-cmd-flag']:
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# --testcmd", pad) + 
+            PC.spacedOut("True", opt_pad) + 
+            "Also printing single batch command.");
 
     if globs['inf-frac-theta'] != 0.2:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# -inf-frac-theta", pad) + 

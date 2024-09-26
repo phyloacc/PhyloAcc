@@ -260,6 +260,15 @@ cluster_time:
 # The time in hours to give each job. 
 # DEFAULT: 1.
 
+local_flag:
+# No cluster submission (--local)
+# Set this to instead generate a snakemake command to run the pipeline locally.
+# Recommended ONLY for testing
+# OPTIONS:
+# True: generate a snakemake command that runs locally.
+# False: generate a snakemake command and profile for a cluster.
+# DEFAULT: False
+
 ####################
 # Executable paths
 ####################
@@ -354,6 +363,15 @@ depcheck:
 # True: run the dependency check and exit.
 # False: do not run the dependency check and continue (normal run).
 # DEFAULT: False
+
+test_cmd_flag:
+# Generate test command (--testcmd)
+# Set this to also display a command that runs PhyloAcc directly on one of the batches
+# OPTIONS:
+# True: display the test command at the end of the program.
+# False: do not display the test command.
+# DEFAULT: False
+
 
 append_log_flag:
 # Append to log file (--append)

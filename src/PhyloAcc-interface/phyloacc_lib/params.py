@@ -173,6 +173,7 @@ def init():
         'num-nodes' : "1",
         'mem' : "4",
         'time' : "1",
+        'local': False,
         # Cluster options
 
         'aln-pool' : False,
@@ -218,10 +219,16 @@ def init():
         'smk-cmd' : '',
         # The final snakemake command to report
 
+        'test-cmd-flag' : False,
+        'test-cmd' : '',
+        # An example command to run a single batch
+
         'label-tree' : False,
         'info' : False,
         'dryrun' : False,
         'quiet' : False,
+        'options-flag': False,
+        'version-flag': False,
         # Other user options
 
         'aln-skip-chars' : ["-", "N"],
