@@ -1,3 +1,9 @@
+Version 2.3.5
+- Added `--local` option to generate a snakemake command that does not use a cluster, intended for testing purposes only.
+- Fixed the `--version`, `--quiet`, and `--options` flags to work with the config file.
+- Fixed spacing when string is longer than the pad.
+- Added `--testcmd` to also print a direct PhyloAcc command at the end of the interface for testing purposes.
+
 Version 2.3.4, 09.24.2024
 - Reverted the element ID indexing in the interface from 1 to 0 to match the C++ code
 - Changed how the interface uses regex to read trees so it uses `r`aw strings

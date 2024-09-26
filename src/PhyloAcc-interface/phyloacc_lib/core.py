@@ -275,6 +275,8 @@ def printWrite(o_name, v, o_line1, o_line2="", pad=0):
 def spacedOut(string, totlen, sep=" "):
 # Properly adds spaces to the end of a message to make it a given length
     spaces = sep * (totlen - len(string));
+    if len(string) > totlen:
+        spaces += sep * 4;
     return string + spaces;
 
 #############################################################################
@@ -444,6 +446,20 @@ def report_step(globs, step, step_start_time, step_status, start=False, full_upd
 
 #############################################################################
 
+def printOptions(globs):
+    opt_pad = 20;
+    print();
+    print("This is a list of other options for PhyloAcc that can be specified with -phyloacc:");
+    print(spacedOut("OPTION", opt_pad) + "DEFAULT");
+    print("-" * 30);
+    for opt in globs['phyloacc-defaults']:
+        print(spacedOut(opt, opt_pad) + globs['phyloacc-defaults'][opt]['default']);
+    print();
+    print("--options set: exiting...");
+    sys.exit(0);
+
+#############################################################################
+
 def welcome():
 # Reads the ASCII art "Referee" text to be printed to the command line.
     return open(os.path.join(os.path.dirname(__file__), "pa-welcome.txt"), "r").read();
@@ -506,6 +522,10 @@ def endProg(globs, interface=True):
             printWrite(globs['logfilename'], 1, globs['smk-cmd'] + "\n\n");
             printWrite(globs['logfilename'], 1, "# Then, if everything looks right, remove --dryrun to execute");
             printWrite(globs['logfilename'], 1, "# You may also want to start your favorite terminal multiplexer (e.g. screen, tmux)");
+
+            if globs['test-cmd-flag']:
+                printWrite(globs['logfilename'], globs['log-v'], "#\n# Additionally, --testcmd was set, so here is an example command for one batch for testing:\n\n");
+                printWrite(globs['logfilename'], globs['log-v'], globs['test-cmd'] + "\n\n");
         else:
             printWrite(globs['logfilename'], globs['log-v'], "#\n# PhyloAcc summary files successfully generated");
             printWrite(globs['logfilename'], 1, "# This was a --summarize run, so no job files were created or overwritten");
