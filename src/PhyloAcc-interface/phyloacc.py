@@ -149,7 +149,9 @@ if __name__ == '__main__':
     ####################
 
     if globs['local']:
-        globs['smk-cmd'] = "snakemake -p -j " + str(globs['num-jobs']) + " -s " + os.path.abspath(globs['smk']);
+        globs['smk-cmd'] = "snakemake -p --jobs " + str(globs['num-jobs']);
+        globs['smk-cmd'] += " --cores " + str(globs['procs-per-job'] * globs['num-jobs']);
+        globs['smk-cmd'] += " -s " + os.path.abspath(globs['smk']);
         globs['smk-cmd'] += " --configfile " + os.path.abspath(globs['smk-config']);
         globs['smk-cmd'] += " --dryrun";
     else:

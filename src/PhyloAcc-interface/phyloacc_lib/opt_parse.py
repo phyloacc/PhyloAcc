@@ -705,14 +705,15 @@ def optParse(globs):
                     PC.errorOut("OP18", "At least one cluster partition must be specified with -part.", globs);
                 # Cluster partition option (required)
 
-                globs['num-nodes'] = getOpt(args.cluster_nodes, "cluster_nodes", "INTSTR", globs['num-nodes'], config, arg_flags, globs);
+                globs['num-nodes'] = str(getOpt(args.cluster_nodes, "cluster_nodes", int, globs['num-nodes'], config, arg_flags, globs));
                 # Cluster node option
 
-                globs['mem'] = getOpt(args.cluster_mem, "cluster_mem", "INTSTR", globs['mem'], config, arg_flags, globs);
+                globs['mem'] = getOpt(args.cluster_mem, "cluster_mem", int, globs['mem'], config, arg_flags, globs);
+                globs['mem'] = str(globs['mem'] * 1000);
                 # Cluster memory option
 
-                globs['time'] = getOpt(args.cluster_time, "cluster_time", "INTSTR", globs['time'], config, arg_flags, globs);
-                globs['time'] = globs['time'] + ":00:00";
+                globs['time'] = str(getOpt(args.cluster_time, "cluster_time", int, globs['time'], config, arg_flags, globs));
+                #globs['time'] = globs['time'] + ":00:00";
                 # Cluster time option
 
             ## Cluster options
@@ -860,8 +861,8 @@ def startProg(globs):
     else:
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Partition(s)", pad) + globs['partition']);
         PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Number of nodes", pad) + globs['num-nodes']);
-        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Max mem per job (gb)", pad) + globs['mem']);
-        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Time per job", pad) + globs['time']); 
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Max mem per job (mb)", pad) + globs['mem']);
+        PC.printWrite(globs['logfilename'], globs['log-v'], PC.spacedOut("# Time per (min)", pad) + globs['time']); 
     # Cluster options
     #######################
 

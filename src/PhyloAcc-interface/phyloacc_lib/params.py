@@ -170,9 +170,9 @@ def init():
         # Number of jobs/procs for PhyloAcc to use
 
         'partition' : False,
-        'num-nodes' : "1",
-        'mem' : "4",
-        'time' : "1",
+        'num-nodes' : 1,
+        'mem' : 4,
+        'time' : 60,
         'local': False,
         # Cluster options
 
