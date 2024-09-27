@@ -195,8 +195,9 @@ In practice for many of these, using the command line option may be easier than 
 | `-j [INT]` | `num_jobs: [INT]` | The number of jobs (batches) to run in parallel. | 1 |
 | `-part "[STRING]"` | `cluster_part: [STRING]` | The SLURM partition or list of partitions (separated by commas) on which to run PhyloAcc jobs. | **REQUIRED** |
 | `-nodes [INT]` | `cluster_nodes: [INT]` | The number of nodes on the specified partition to submit jobs to. | 1 |
-| `-mem [INT]` | `cluster_mem: [INT]` | The max memory for each job in GB. | 4 |
-| `-time [INT]` | `cluster_time: [INT]` | The time in hours to give each job. | 1 |
+| `-mem [INT]` | `cluster_mem: [INT]` | The max memory for each job in MB. | 4 |
+| `-time [INT]` | `cluster_time: [INT]` | The time in minutes to give each job. | 1 |
+| `--local` | `local_flag: [true/false]` | Set this to generate a local snakemake workflow rather than one that will be submitted through SLURM with a profile. For testing purposes. | Optional |
 
 ### Executable path options
 
@@ -218,6 +219,7 @@ In practice for many of these, using the command line option may be easier than 
 
 | Command-line option | Config file key | Description | Default value |
 | ------------------- | --------------- |------------ | ------------- |
+| `--testcmd` | `testcmd_flag: [true/false]` | Also print out a command to run a single batch of PhyloAcc directly (without snakemake). For testing purposes. | Optional |
 | `--depcheck` | `depcheck: [true/false]` | Run this to check that all dependencies are installed at the provided path. No other options necessary. | Optional |
 | `--appendlog` | `append_log_flag: [true/false]` | Set this to keep the old log file even if `--overwrite` is specified. New log information will instead be appended to the previous log file. | Optional |
 | `--info` | `info_flag: [true/false]` | Print some meta information about the program and exit. No other options required. | Optional |

@@ -248,11 +248,11 @@ def optParse(globs):
     #parser.add_argument("-nodes", dest="cluster_nodes", help="The number of nodes on the specified partition to submit jobs to. Default: 1.", default=False);
     
     arg_flags.update(addArgument(parser, "-mem", "cluster_mem", int,
-        "The max memory for each job in GB. Default: 4."));
+        "The max memory for each job in MB. Default: 4."));
     #parser.add_argument("-mem", dest="cluster_mem", help="The max memory for each job in GB. Default: 4.", default=False);
     
     arg_flags.update(addArgument(parser, "-time", "cluster_time", int,
-        "The time in hours to give each job. Default: 1."));
+        "The time in minutes to give each job. Default: 1."));
     #parser.add_argument("-time", dest="cluster_time", help="The time in hours to give each job. Default: 1.", default=False);
 
     arg_flags.update(addArgument(parser, "--local", "local_flag", bool,
