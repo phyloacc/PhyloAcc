@@ -186,23 +186,13 @@ astral_directory: {astral}
 def snakemakeProfile():
     
     profile_template = """jobs: {num_jobs}
-cluster-sync:
-  mkdir -p {cluster_logdir}/{{rule}}/ &&
-  sbatch
-  --wait
-  --partition={{resources.partition}}
-  --nodes={{resources.nodes}}
-  --cpus-per-task={{resources.cpus}}
-  --job-name={{rule}}-{{wildcards}}
-  --mem={{resources.mem}}
-  --time={{resources.time}}
-  --output={cluster_logdir}/{{rule}}/{{rule}}-{{wildcards}}-%j.out
+executor: slurm
 default-resources:
-  - partition='{part}'
-  - nodes='{num_nodes}'
-  - mem='{mem}g'
-  - time='{time}'
-  - cpus={procs_per_job}
+  slurm_partition: '{part}'
+  nodes: {num_nodes}
+  mem_mb: {mem}
+  runtime: {time}
+  cpus_per_task: {procs_per_job}
 latency-wait: 45
 verbose: true
 """
