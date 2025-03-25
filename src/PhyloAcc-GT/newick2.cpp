@@ -177,6 +177,7 @@ newick2_node* parseTree02(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
         }
         else
         {
@@ -184,6 +185,7 @@ newick2_node* parseTree02(char *str)
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcColon = ':';
             // Distance
             pcColon++;
@@ -320,6 +322,7 @@ newick2_node* parseTree02(char *str)
             *pcCurrent = '\0';
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcCurrent = cTemp;
             pcCurrent++;
             pcStart = pcCurrent;
@@ -367,6 +370,7 @@ newick2_node* parseTree2(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
         }
         else
         {
@@ -374,6 +378,7 @@ newick2_node* parseTree2(char *str)
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcColon = ':';
             // Distance
             pcColon++;
@@ -516,7 +521,7 @@ newick2_node* parseTree2(char *str)
             // Find ':' to retrieve distance, if any.
             // At this time *pcCurrent should equal to ')'
             pcStart = pcCurrent;
-            while (*pcCurrent != ':' && *pcCurrent!='#')
+            while (*pcCurrent != ':' && *pcCurrent != '#' && *pcCurrent != '\0')
             {
                 pcCurrent++;
             }
@@ -524,6 +529,7 @@ newick2_node* parseTree2(char *str)
             *pcCurrent = '\0';
             node->taxon = (char*)seqMalloc2(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcCurrent = cTemp;
             pcCurrent++;
             
@@ -636,6 +642,7 @@ void TravelTree3_theta(newick2_node *root2, PhyloTree_theta &phylo_tree)
     newick2_child *child = root2->child;
     while (child != NULL)
     {   
+        // printf("Assigning dag[%d][%d]\n", root2->id, child->node->id);
         phylo_tree.dag[root2->id][child->node->id] = true;
 
         TravelTree3_theta(child->node, phylo_tree);
@@ -660,6 +667,9 @@ PhyloTree_theta LoadPhyloTree_theta(string tree_path)
         cerr<<"(Error. Cannot open tree2 input file: " << tree_path << ")" << endl;
         exit(1);
     }
+
+    cur2_leaf_id = -1;
+    cur2_branch_id = -1;
 
     PhyloTree_theta tree2;
     newick2_node *root2 = NULL;

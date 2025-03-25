@@ -98,7 +98,7 @@ theta_flag: true
 # PhyloAcc Method
 ####################
 
-run_mode: st
+run_mode: adaptive
 # Run mode (-r)
 # Determines which version of PhyloAcc will be used.
 # OPTIONS: 
@@ -129,7 +129,7 @@ num_procs: 10
 # Output
 ####################
 
-out_dir: phyloacc-dev-smk1
+out_dir: phyloacc-dev
 # Output directory (-o)
 # Desired output directory. This will be created for you if it doesn't exist.
 # DEFAULT: phyloacc-[date]-[time]
@@ -238,7 +238,7 @@ procs_per_batch: 1
 # The number of processes (cores) to use for each batch of PhyloAcc.
 # DEFAULT: 1.
 
-num_jobs: 4
+num_jobs: 40
 # Number of jobs (-j)      
 # The number of jobs (batches) that Snakemake will submit at once to your cluster
 # DEFAULT: 1.
@@ -253,13 +253,13 @@ cluster_nodes:
 # The number of nodes on the specified partition to submit jobs to. 
 # DEFAULT: 1.
 
-cluster_mem:
+cluster_mem: 4000
 # Cluter memory allotment (-mem)
 # The max memory allotted for each job (batch) in GB. 
 # Just input the number (e.g. 4 for 4GB)
 # DEFAULT: 4.
 
-cluster_time:
+cluster_time: 30
 # Cluster max walltime (-time)
 # The time in hours to give each job. 
 # DEFAULT: 1.

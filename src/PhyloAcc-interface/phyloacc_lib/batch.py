@@ -306,8 +306,7 @@ def writeSnakemake(globs):
                                                         st_path=globs['phyloacc'],
                                                         gt_path=globs['phyloacc-gt'],
                                                         unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
-                                                        coal_tree_path=globs['coal-tree-file'],
-                                                        label_script=globs['label-coal-tree-script']
+                                                        coal_tree_path=globs['coal-tree-file']
                                                         ))
 
     if globs['batch']:
@@ -382,20 +381,20 @@ def writeSnakemake(globs):
 
     ####################
 
-    if globs['theta']:
-        if globs['batch']:
-            step = "Writing label tree script";
-        else:
-            step = "Getting label tree script name";
-        step_start_time = PC.report_step(globs, step, False, "In progress...");
-        # Status update
+    # if globs['theta']:
+    #     if globs['batch']:
+    #         step = "Writing label tree script";
+    #     else:
+    #         step = "Getting label tree script name";
+    #     step_start_time = PC.report_step(globs, step, False, "In progress...");
+    #     # Status update
 
-        if globs['batch']:
-            with open(globs['label-coal-tree-script'], "w") as label_tree_script:
-                label_tree_script.write(TEMPLATES.labelCoalTreeScript().format(astral_input_tree_path=globs['coal-tree-input'],
-                                                                            unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
-                                                                            coal_tree_path=globs['coal-tree-file'] 
-                                                                            ))
+    #     if globs['batch']:
+    #         with open(globs['label-coal-tree-script'], "w") as label_tree_script:
+    #             label_tree_script.write(TEMPLATES.labelCoalTreeScript().format(astral_input_tree_path=globs['coal-tree-input'],
+    #                                                                         unlabeled_coal_tree_path=globs['coal-tree-file-unlabeled'],
+    #                                                                         coal_tree_path=globs['coal-tree-file'] 
+    #                                                                         ))
 
     return globs; 
 
