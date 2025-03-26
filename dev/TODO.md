@@ -7,7 +7,7 @@ TODO:
 - ~~Make release for these changes and update conda recipe (meta.yaml) to point to it~~
 - ~~Fork bioconda and upload recipe~~
 - Add a simple way to test the PhyloAcc-ST binary, maybe --version option and/or a very small test dataset
-- Remove .py extension from interface (difficult for Windows)
-- Resolve or transfer interface issues
+- ~~Remove .py extension from interface (difficult for Windows)~~
+- ~~Resolve or transfer interface issues~~
 - Add option for number of quartets to sample for sCF
 - Responsive output for variable screen widths
