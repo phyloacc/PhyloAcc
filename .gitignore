@@ -17,6 +17,7 @@ build_gt.sh
 build_st.sh
 .vscode
 phyloacc-dev*
+dev/phyloacc-dev*
 
 
 # Compiled source #

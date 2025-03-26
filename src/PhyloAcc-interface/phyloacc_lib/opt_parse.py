@@ -324,6 +324,9 @@ def optParse(globs):
     parser.add_argument("--nophyloacc", dest="no_phyloacc", help=argparse.SUPPRESS, action="store_true", default=False);
     # Generate the snakemake file but comment out the phyloacc rules, for dev
     
+    parser.add_argument("-lt_source", dest="lt_source", help=argparse.SUPPRESS, type=str, default=False);
+    parser.add_argument("-lt_input", dest="lt_input", help=argparse.SUPPRESS, type=str, default=False);
+    parser.add_argument("-lt_output", dest="lt_output", help=argparse.SUPPRESS, type=str, default=False);
     parser.add_argument("--dev", dest="dev_opt", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--debugtree", dest="debug_tree", help=argparse.SUPPRESS, action="store_true", default=False);
     parser.add_argument("--debugaln", dest="debug_aln", help=argparse.SUPPRESS, action="store_true", default=False);
@@ -331,6 +334,15 @@ def optParse(globs):
     
     args = parser.parse_args();
     # The input options and help messages
+
+    ####################
+
+    if any([args.lt_source, args.lt_input, args.lt_output]):
+        if not all ([args.lt_source, args.lt_input, args.lt_output]):
+            PC.errorOut("OP-LT", "All three options -lt_source, -lt_input, and -lt_output must be specified together.", globs);
+        import phyloacc_lib.labeltree as LT
+        LT.transferLabels(args.lt_source, args.lt_input, args.lt_output);
+        sys.exit(0);
 
     ####################
 
@@ -708,8 +720,8 @@ def optParse(globs):
                 globs['num-nodes'] = str(getOpt(args.cluster_nodes, "cluster_nodes", int, globs['num-nodes'], config, arg_flags, globs));
                 # Cluster node option
 
-                globs['mem'] = getOpt(args.cluster_mem, "cluster_mem", int, globs['mem'], config, arg_flags, globs);
-                globs['mem'] = str(globs['mem'] * 1000);
+                globs['mem'] = str(getOpt(args.cluster_mem, "cluster_mem", int, globs['mem'], config, arg_flags, globs));
+                #globs['mem'] = str(globs['mem'] * 1000);
                 # Cluster memory option
 
                 globs['time'] = str(getOpt(args.cluster_time, "cluster_time", int, globs['time'], config, arg_flags, globs));

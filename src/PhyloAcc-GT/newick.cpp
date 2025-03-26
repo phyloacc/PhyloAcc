@@ -175,6 +175,7 @@ newick_node* parseTree0(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
         }
         else
         {
@@ -182,6 +183,7 @@ newick_node* parseTree0(char *str)
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcColon = ':';
             // Distance
             pcColon++;
@@ -318,6 +320,7 @@ newick_node* parseTree0(char *str)
             *pcCurrent = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcCurrent = cTemp;
             pcCurrent++;
             pcStart = pcCurrent;
@@ -349,7 +352,7 @@ newick_node* parseTree(char *str)
 
     if (*pcStart != '(')
     {
-        // Leaf node. Separate taxon name from distance. If distance not exist then take care of taxon name only
+        // Leaf node. Separate taxon name from distance.
         pcCurrent = str;
         while (*pcCurrent != '\0')
         {
@@ -365,154 +368,162 @@ newick_node* parseTree(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
         }
         else
         {
-            // Taxon
+            // Taxon and distance
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcColon = ':';
-            // Distance
             pcColon++;
-            //node->dist = (float)atof(pcColon);
             node->dist = (double)atof(pcColon);
         }
         node->childNum = 0;
     }
     else
     {
-        // Create node
+        // Internal node.
         node = (newick_node*)seqMalloc(sizeof(newick_node));
         child = NULL;
-        // Search for all child nodes
-        // Find all ',' until corresponding ')' is encountered
         iCount = 0;
-        pcStart++;
+        pcStart++; // Skip the '('
         pcCurrent = pcStart;
         while (iCount >= 0)
         {
             switch (*pcCurrent)
             {
-            case '(':
-                // Find corresponding ')' by counting
-                pcStart = pcCurrent;
-                pcCurrent++;
-                iCount++;
-                while (iCount > 0)
-                {
-                    if (*pcCurrent == '(')
+                case '(':
+                    // Found a subtree, so count parentheses.
+                    pcStart = pcCurrent;
+                    pcCurrent++;
+                    iCount++;
+                    while (iCount > 0)
                     {
-                        iCount++;
+                        if (*pcCurrent == '(')
+                        {
+                            iCount++;
+                        }
+                        else if (*pcCurrent == ')')
+                        {
+                            iCount--;
+                        }
+                        pcCurrent++;
                     }
-                    else if (*pcCurrent == ')')
+                    // Move until ',' or ')' encountered.
+                    while (*pcCurrent != ',' && *pcCurrent != ')')
                     {
-                        iCount--;
+                        pcCurrent++;
                     }
-                    pcCurrent++;
-                }
-                while (*pcCurrent != ',' && *pcCurrent != ')')
-                {
-                    pcCurrent++;
-                }
-                cTemp = *pcCurrent;
-                *pcCurrent = '\0';
-                // Create a child node
-                if (child == NULL)
-                {
-                    node->child = (newick_child*)seqMalloc(sizeof(newick_child));
-                    node->childNum = 1;
-                    child = node->child;
-                }
-                else
-                {
-                    child->next = (newick_child*)seqMalloc(sizeof(newick_child));
-                    node->childNum++;
-                    child = child->next;
-                }
-                child->node = parseTree(pcStart);
-                *pcCurrent = cTemp;
-                if (*pcCurrent != ')')
-                {
-                    pcCurrent++;
-                }
-                break;
+                    cTemp = *pcCurrent;
+                    *pcCurrent = '\0';
+                    // Create a child node.
+                    if (child == NULL)
+                    {
+                        node->child = (newick_child*)seqMalloc(sizeof(newick_child));
+                        node->childNum = 1;
+                        child = node->child;
+                    }
+                    else
+                    {
+                        child->next = (newick_child*)seqMalloc(sizeof(newick_child));
+                        node->childNum++;
+                        child = child->next;
+                    }
+                    child->node = parseTree(pcStart);
+                    *pcCurrent = cTemp;
+                    if (*pcCurrent != ')')
+                    {
+                        pcCurrent++;
+                    }
+                    break;
 
-            case ')':
-                // End of tihs tree. Go to next part to retrieve distance
-                iCount--;
-                break;
+                case ')':
+                    // End of this subtree.
+                    iCount--;
+                    break;
 
-            case ',':
-                // Impossible separation since according to the algorithm, this symbol will never encountered.
-                // Currently don't handle this and don't create any node
-                break;
+                case ',':
+                    // According to the algorithm, this case should not occur.
+                    break;
 
-            default:
-                // leaf node encountered
-                pcStart = pcCurrent;
-                while (*pcCurrent != ',' && *pcCurrent != ')')
-                {
-                    pcCurrent++;
-                }
-                cTemp = *pcCurrent;
-                *pcCurrent = '\0';
-                // Create a child node
-                if (child == NULL)
-                {
-                    node->child = (newick_child*)seqMalloc(sizeof(newick_child));
-                    node->childNum = 1;
-                    child = node->child;
-                }
-                else
-                {
-                    child->next = (newick_child*)seqMalloc(sizeof(newick_child));
-                    node->childNum++;
-                    child = child->next;
-                }
-                child->node = parseTree(pcStart);
-                *pcCurrent = cTemp;
-                if (*pcCurrent != ')')
-                {
-                    pcCurrent++;
-                }
-                break;
+                default:
+                    // Leaf node encountered among the children.
+                    pcStart = pcCurrent;
+                    while (*pcCurrent != ',' && *pcCurrent != ')')
+                    {
+                        pcCurrent++;
+                    }
+                    cTemp = *pcCurrent;
+                    *pcCurrent = '\0';
+                    // Create a child node.
+                    if (child == NULL)
+                    {
+                        node->child = (newick_child*)seqMalloc(sizeof(newick_child));
+                        node->childNum = 1;
+                        child = node->child;
+                    }
+                    else
+                    {
+                        child->next = (newick_child*)seqMalloc(sizeof(newick_child));
+                        node->childNum++;
+                        child = child->next;
+                    }
+                    child->node = parseTree(pcStart);
+                    *pcCurrent = cTemp;
+                    if (*pcCurrent != ')')
+                    {
+                        pcCurrent++;
+                    }
+                    break;
             }
         }
 
-        // If start at ':', then the internal node has no name.
+        // Now we've finished processing children.
+        // Move past the closing ')'
         pcCurrent++;
+
+        // ***** Modification: Check for the tree terminator.
+        if (*pcCurrent == ';')
+            return node;
+
+        // Next, check if the internal node has additional attributes.
         if (*pcCurrent == ':')
         {
+            // Parse branch length.
             pcStart = pcCurrent + 1;
-            while (*pcCurrent != '#' && *pcCurrent != ';')
+            while (*pcCurrent != '#' && *pcCurrent != ';' && *pcCurrent != '\0')
             {
                 pcCurrent++;
             }
             cTemp = *pcCurrent;
             *pcCurrent = '\0';
-            //node->dist = (float)atof(pcStart);
             node->dist = (double)atof(pcStart);
             *pcCurrent = cTemp;
             pcCurrent++;
             
+            // After branch length, check again if we've reached the end.
+            if (*pcCurrent == ';')
+                return node;
+            
+            // Parse theta (if present).
+            pcStart = pcCurrent;
             while (*pcCurrent != '\0' && *pcCurrent != ';')
             {
                 pcCurrent++;
             }
             cTemp = *pcCurrent;
             *pcCurrent = '\0';
-            //node->theta = (float)atof(pcStart);
             node->theta = (double)atof(pcStart);
             *pcCurrent = cTemp;
-            
         }
         else if (*pcCurrent != ';' && *pcCurrent != '\0')
         {
-            // Find ':' to retrieve distance, if any.
-            // At this time *pcCurrent should equal to ')'
+            // Parse taxon name then branch length and theta.
             pcStart = pcCurrent;
-            while (*pcCurrent != ':' && *pcCurrent!='#')
+            while (*pcCurrent != ':' && *pcCurrent != '#' && *pcCurrent != ';' && *pcCurrent != '\0')
             {
                 pcCurrent++;
             }
@@ -520,17 +531,17 @@ newick_node* parseTree(char *str)
             *pcCurrent = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
+            node->taxon[strlen(pcStart)] = '\0';
             *pcCurrent = cTemp;
             pcCurrent++;
             
             pcStart = pcCurrent;
-            while (*pcCurrent != '#' && *pcCurrent != ';')
+            while (*pcCurrent != '#' && *pcCurrent != ';' && *pcCurrent != '\0')
             {
                 pcCurrent++;
             }
             cTemp = *pcCurrent;
             *pcCurrent = '\0';
-            //node->dist = (float)atof(pcStart);
             node->dist = (double)atof(pcStart);
             *pcCurrent = cTemp;
             pcCurrent++;
@@ -542,7 +553,6 @@ newick_node* parseTree(char *str)
             }
             cTemp = *pcCurrent;
             *pcCurrent = '\0';
-            //node->theta = (float)atof(pcStart);
             node->theta = (double)atof(pcStart);
             *pcCurrent = cTemp;
         }
@@ -551,36 +561,45 @@ newick_node* parseTree(char *str)
     return node;
 }
 
-void printTree(newick_node *root)
+
+void printTree(newick_node *root, int isRoot)
 {
-	newick_child *child;
-	if (root->childNum == 0)
-	{
-		printf("%s:%0.6f", root->taxon, root->dist);
-	}
-	else
-	{
-		child = root->child;
-		printf("(");
-		while (child != NULL)
-		{
-			printTree(child->node);
-			if (child->next != NULL)
-			{
-				printf(",");
-			}
-			child = child->next;
-		}
-		if (root->taxon != NULL)
-		{
-			printf(")%s:%0.6f", root->taxon, root->dist);
-		}
-		else
-		{
-			printf("):%0.6f", root->dist);
-		}
-	}
+    newick_child *child;
+    if (root->childNum == 0)
+    {
+        // Leaf: Always print taxon and branch length.
+        printf("%s:%0.6f", root->taxon, root->dist);
+    }
+    else
+    {
+        // Internal node: print children in parentheses.
+        child = root->child;
+        printf("(");
+        while (child != NULL)
+        {
+            // For recursive calls, we're not the root.
+            printTree(child->node, 0);
+            if (child->next != NULL)
+            {
+                printf(",");
+            }
+            child = child->next;
+        }
+        printf(")");
+        // Print taxon if present.
+        if (root->taxon != NULL)
+        {
+            printf("%s", root->taxon);
+        }
+        // Only print branch length if this isn’t the root.
+        if (!isRoot)
+        {
+            printf(":%0.6f", root->dist);
+        }
+    }
 }
+
+
 
 void TravelTree1(newick_node *root, int &S)
 {
@@ -714,8 +733,8 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
         }
     }
 
-    printTree(root);
-    printf("\n");
+    printTree(root, 1);
+    printf(";\n");
 
     // count the total num of species and label each node and
     int S = 0;

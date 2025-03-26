@@ -126,8 +126,7 @@ rule label_astral_tree:
         os.path.join(ASTRALDIR, "astral-label-tree.log")
     shell:
         \"\"\"
-        chmod +x {label_script}
-        {label_script}
+        phyloacc -lt_source {{input.species_tree}} -lt_input {{input.astral_tree}} -lt_output {{output}} &> {{log}}
         \"\"\"
         
 # The above rules estimate a tree with branch lengths in coalescent units if the --theta option

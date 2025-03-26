@@ -1,3 +1,7 @@
+Version 2.4.3, 03.25.2025
+- Fixed how tree labels are read in GT
+- Switched from bash script to Python functions to label ASTRAL tree internal nodes, which required adding the various hidden `-lt` options to `phyloacc.py`
+
 Version 2.4.0, 09.26.2024
 - Added `--local` option to generate a snakemake command that does not use a cluster, intended for testing purposes only.
 - Fixed the `--version`, `--quiet`, and `--options` flags to work with the config file.
