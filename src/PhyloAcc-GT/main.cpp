@@ -21,7 +21,7 @@
 #include <armadillo>
 #include "profile.h"
 #include "newick.h"
-#include "newick2.h"
+//#include "newick2.h"
 #include "bpp.hpp"
 #include "bpp_c.hpp"
 #include "utils.h"
@@ -376,9 +376,9 @@ int main(int argc, char* argv[])
     // load the phylogenetic tree
     PhyloTree phytree = LoadPhyloTree(phytree_path); //Han: .subs_rate contains Q
     
-    PhyloTree_theta tree2;
+   //PhyloTree_theta tree2;
     if(tree_coal_unit !=""){
-        tree2 = LoadPhyloTree_theta(tree_coal_unit);
+        PhyloTree tree2 = LoadPhyloTree_theta(tree_coal_unit);
         //get thetas
         double theta_cum=0;
         int count_cum=0;

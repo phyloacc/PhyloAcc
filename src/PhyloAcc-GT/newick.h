@@ -25,4 +25,5 @@ struct PhyloTree
 // load the phylogenetic tree
 PhyloTree LoadPhyloTree(string params_path);
 PhyloTree LoadPhyloTree_text(string params_path, map<string, int>& speciesname);
+PhyloTree LoadPhyloTree_theta(string params_path);
 #endif // NEWICK_H_INCLUDED

@@ -175,7 +175,7 @@ newick_node* parseTree0(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
-            node->taxon[strlen(pcStart)] = '\0';
+            // node->taxon[strlen(pcStart)] = '\0';  // greg added
         }
         else
         {
@@ -183,7 +183,7 @@ newick_node* parseTree0(char *str)
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
-            node->taxon[strlen(pcStart)] = '\0';
+            // node->taxon[strlen(pcStart)] = '\0';  // greg added
             *pcColon = ':';
             // Distance
             pcColon++;
@@ -242,7 +242,7 @@ newick_node* parseTree0(char *str)
                         node->childNum++;
                         child = child->next;
                     }
-                    child->node = parseTree(pcStart);
+                    child->node = parseTree0(pcStart);
                     *pcCurrent = cTemp;
                     if (*pcCurrent != ')')
                     {
@@ -282,7 +282,7 @@ newick_node* parseTree0(char *str)
                         node->childNum++;
                         child = child->next;
                     }
-                    child->node = parseTree(pcStart);
+                    child->node = parseTree0(pcStart);
                     *pcCurrent = cTemp;
                     if (*pcCurrent != ')')
                     {
@@ -320,7 +320,7 @@ newick_node* parseTree0(char *str)
             *pcCurrent = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
-            node->taxon[strlen(pcStart)] = '\0';
+            // node->taxon[strlen(pcStart)] = '\0'; //greg added
             *pcCurrent = cTemp;
             pcCurrent++;
             pcStart = pcCurrent;
@@ -368,7 +368,7 @@ newick_node* parseTree(char *str)
             // Taxon only
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
-            node->taxon[strlen(pcStart)] = '\0';
+            //node->taxon[strlen(pcStart)] = '\0'; // greg added
         }
         else
         {
@@ -376,7 +376,7 @@ newick_node* parseTree(char *str)
             *pcColon = '\0';
             node->taxon = (char*)seqMalloc(strlen(pcStart) + 1);
             memcpy(node->taxon, pcStart, strlen(pcStart));
-            node->taxon[strlen(pcStart)] = '\0';
+            // node->taxon[strlen(pcStart)] = '\0'; // greg added
             *pcColon = ':';
             pcColon++;
             node->dist = (double)atof(pcColon);
@@ -729,7 +729,7 @@ PhyloTree LoadPhyloTree(string phylo_tree_path)
             
         }
         else if (!strcmp(line_splits[0].c_str(), "TREE:")){
-            root = parseTree((char*)strutils::trim(line_splits[1]).c_str());
+            root = parseTree0((char*)strutils::trim(line_splits[1]).c_str());
         }
     }
 
@@ -784,4 +784,40 @@ PhyloTree LoadPhyloTree_text(string text, map<string, int>& speciesname)
     TravelTree3(root, phylo_tree);
     
     return phylo_tree;
+}
+
+PhyloTree LoadPhyloTree_theta(string tree_path)
+{
+    cout <<"Loading phylogenetic tree in coalescent unit from "<<tree_path<<"... "<<endl;
+    ifstream in_prof(tree_path.c_str());
+    if(!in_prof){
+        cerr<<"(Error. Cannot open tree2 input file: " << tree_path << ")" << endl;
+        exit(1);
+    }
+
+    cur_leaf_id = -1;
+    cur_branch_id = -1;
+
+    PhyloTree tree2;
+    newick_node *root2 = NULL;
+    string linestr;
+    std::getline(in_prof, linestr);
+    linestr = strutils::trim(linestr);
+    vector<string> line_splits = strutils::split(linestr, ' ');
+    root2 = parseTree0((char*)strutils::trim(line_splits[0]).c_str());
+
+    int S2=0;
+    TravelTree1(root2,S2);
+    tree2.S=S2;
+    int N2 = 2*tree2.S-1;
+    map<string, int> speciesname = map<string, int>();
+    TravelTree2(root2, tree2, speciesname);
+    // load the tree structure and species names
+    tree2.species_names = vector<string>(S2);
+    tree2.nodes_names = vector<string>(N2);
+    tree2.distances = vector<double>(N2);
+    tree2.dag = vector< vector<bool> >(N2, vector<bool>(N2, false));
+    TravelTree3(root2, tree2);
+
+    return tree2;
 }
