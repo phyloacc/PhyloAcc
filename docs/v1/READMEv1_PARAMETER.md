@@ -27,6 +27,7 @@ In the parameter file, each parameter is specified in a line with the parameter 
   * *INIT_GRATE*: the initial transition probability from background to conserved state (default: 0.5).
   * *INIT_LRATE*: the initial transition probability from conserved to accelerated state (default: 0.3).
   * *HYPER_LRATE_A, HYPER_LRATE_B*: the parameters for the beta prior of loss probability (default: 1,9).
+  * *HYPER_LRATE2_A, HYPER_LRATE2_B*: the parameters for the beta prior of regain probability (default: 1,9). If *HYPER_LRATE2_A = 0*, the probability of regain is zero, assumes Dollo's law of irreversibility.
   * *HYPER_GRATE_A, HYPER_GRATE_B*: the parameters for the beta prior of gain probability (default: 3,1).
   * *INIT_CONSERVE_RATE*: the initial conserved rate (default: 0.5).
   * *INIT_ACCE_RATE*: the initial accelerated rate (default: 1).
