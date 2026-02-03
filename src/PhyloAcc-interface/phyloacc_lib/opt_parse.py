@@ -697,7 +697,8 @@ def optParse(globs):
             ####################
 
             globs['local'] = getOpt(args.local_flag, "local_flag", bool, False, config, arg_flags, globs);
-            warnings.append("# WARNING: Using --local mode. Cluster options will be ignored and profile will not be generated. This is only recommended for testing purposes.");
+            if globs['local']:
+                warnings.append("# WARNING: Using --local mode. Cluster options will be ignored and profile will not be generated. This is only recommended for testing purposes.");
 
             if not globs['local']:
                 globs['partition'] = getOpt(args.cluster_part, "cluster_part", str, globs['partition'], config, arg_flags, globs, check=False);
