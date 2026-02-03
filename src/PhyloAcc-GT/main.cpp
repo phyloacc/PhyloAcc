@@ -129,13 +129,11 @@ void LoadParams(int argc, char* argv[])
 
     cout << "Loading program configurations from " << params_path << "......" <<endl;
 
-    const int BUFF_SIZE = 4096;
-    char line_buff[BUFF_SIZE];
-
     vector<string> param_line;
     string word;
     int num_words;
     int line_num = 1;
+    string line;
     // Variables for reading the parameter file
 
     ifstream in_params(params_path.c_str());
@@ -146,11 +144,10 @@ void LoadParams(int argc, char* argv[])
     }
     // Check if the parameter file exists and can be opened
 
-    while(!in_params.eof())
+    while (std::getline(in_params, line))
     {
         param_line.clear();
-        in_params.getline(line_buff, BUFF_SIZE);
-        istringstream line_stream(line_buff);
+        istringstream line_stream(line);
         //string tmp; line_stream >> tmp;
 
         while(line_stream >> word) {
@@ -173,7 +170,7 @@ void LoadParams(int argc, char* argv[])
         // Skip comment lines and empty lines in the config file
 
         if (num_words != 2) {
-            cerr << endl << "Line " << line_num << " in the parameter file is not formatted correctly: " << line_buff << endl;
+            cerr << endl << "Line " << line_num << " in the parameter file is not formatted correctly: " << line << endl;
             cerr << "Each line should contain a parameter and a value separated by a space and no other whitespace." << endl << endl;
             exit(1);
         }
@@ -510,12 +507,10 @@ int main(int argc, char* argv[])
             cerr << "Cannot open the id file: " << id_path.c_str() << endl;
             exit(1);
         }
-        while(!in_params.eof())
+        string line;
+        while (std::getline(in_params, line))
         {
-            const int BUFF_SIZE = 1024;
-            char line_buff[BUFF_SIZE];
-            in_params.getline(line_buff, BUFF_SIZE);
-            istringstream line_stream(line_buff);
+            istringstream line_stream(line);
             string tmp; line_stream >> tmp;
             tmp = strutils::trim(tmp);
             if(tmp=="") continue;

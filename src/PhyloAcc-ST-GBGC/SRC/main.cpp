@@ -92,19 +92,16 @@ void LoadParams(int argc, char* argv[])
     
     cout << "Loading program configurations from " << params_path << "......" <<endl;
     
-    const int BUFF_SIZE = 1024;
-    char line_buff[BUFF_SIZE];
-    
     ifstream in_params(params_path.c_str());
     if (!in_params)
     {
         cerr << "Cannot open the parameters file: " << params_path.c_str() << endl;
         exit(1);
     }
-    while(!in_params.eof())
+    string line;
+    while (std::getline(in_params, line))
     {
-        in_params.getline(line_buff, BUFF_SIZE);
-        istringstream line_stream(line_buff);
+        istringstream line_stream(line);
         string tmp; line_stream >> tmp;
         
         // input and output file paths
@@ -356,12 +353,10 @@ int main(int argc, char* argv[])
             cerr << "Cannot open the id file: " << id_path.c_str() << endl;
             exit(1);
         }
-        while(!in_params.eof())
+        string line;
+        while (std::getline(in_params, line))
         {
-            const int BUFF_SIZE = 1024;
-            char line_buff[BUFF_SIZE];
-            in_params.getline(line_buff, BUFF_SIZE);
-            istringstream line_stream(line_buff);
+            istringstream line_stream(line);
             string tmp; line_stream >> tmp;
             tmp = strutils::trim(tmp);
             if(tmp=="") continue;
