@@ -257,6 +257,7 @@ def init():
         'debug-aln' : False,
         'debug' : False,
         'nolog' : False,
+        'softmask' : False,
         # Internal stuff
     }
 

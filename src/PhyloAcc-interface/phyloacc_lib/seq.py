@@ -6,6 +6,7 @@
 import sys
 import os
 import gzip
+import re
 import phyloacc_lib.core as PC
 import multiprocessing as mp
 from itertools import groupby
@@ -47,6 +48,13 @@ def readFasta(filename, globs):
         seq = "".join(readstr(s) for s in fa_iter.__next__());
         # The current header should correspond to the current iterator in fa_iter. This gets all those
         # lines and combines them as a string.
+
+        if globs.get('softmask', False):
+            seq = re.sub(r"[acgt]", "N", seq);
+        # If softmasking is enabled, treat lowercase bases as masked
+
+        seq = seq.upper();
+        # Normalize case so lowercase bases are not distinct from uppercase
 
         #print(header, len(seq));
 
