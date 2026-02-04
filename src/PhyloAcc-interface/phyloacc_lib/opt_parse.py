@@ -121,7 +121,10 @@ def optParse(globs):
     arg_flags.update(addArgument(parser, "-d", "aln_dir", str,
         "A directory containing individual alignment files for each locus in FASTA format. One of -a/-b or -d is REQUIRED."));   
     #parser.add_argument("-d", dest="aln_dir", help="A directory containing individual alignment files for each locus. Expected as FASTA format for now. One of -a/-b or -d is REQUIRED.", default=False);
-    
+
+    arg_flags.update(addArgument(parser, "--softmask", "softmask", bool,
+        "Treat lowercase bases in alignments as masked (converted to N) before processing."));
+
     arg_flags.update(addArgument(parser, "-m", "mod_file", str,
         "A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from phyloFit. REQUIRED."));
     #parser.add_argument("-m", dest="mod_file", help="A file with a background transition rate matrix and phylogenetic tree with branch lengths as output from PHAST. REQUIRED.", default=False);
@@ -506,6 +509,9 @@ def optParse(globs):
 
         globs['filter-alns'] = getOpt(args.filter_alns, "filter_alns", bool, globs['filter-alns'], config, arg_flags, globs);
         # Alignment filtering option
+
+        globs['softmask'] = getOpt(args.softmask, "softmask", bool, globs['softmask'], config, arg_flags, globs);
+        # Soft-masked bases option
 
         # Input files
         ####################

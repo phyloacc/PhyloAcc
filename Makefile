@@ -23,7 +23,7 @@ $(info $$GSL_INCLUDE is [${GSL_INCLUDE}])
 $(info $$GSL_LIB is [${GSL_LIB}])
 # GSL paths with the conda environment prefix
 
-CFLAGS=-Wall -g -O2 -std=c++11
+CFLAGS=-Wall -g -O2 -std=c++14
 LDFLAGS=-lgsl -lm -lgslcblas -larmadillo -fopenmp
 # Options for the g++ commands
 

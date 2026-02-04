@@ -198,7 +198,7 @@ void LoadParams(int argc, char* argv[])
             nprior_b = stod(param_line[1]);
         else if (param_line[0]=="ROPT")
             ropt = stoi(param_line[1]);
-        else if (param_line[0]=="CUB")
+        else if (param_line[0]=="CUB") 
             cub = stod(param_line[1]);
         else if (param_line[0]=="NLB")
             nlb = stod(param_line[1]);

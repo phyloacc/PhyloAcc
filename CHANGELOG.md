@@ -1,3 +1,13 @@
+Version 2.4.5, 02.04.2026
+- Distinguish between lowercase and uppercase bases for QC, and add `--softmask` option to ignore them.
+- Updated build flags to use C++14 to satisfy Armadillo's compiler requirement.
+
+Version 2.4.4, 02.03.2026
+- Fixed a hang when reading config files containing very long single‑line parameters (e.g., large CONSERVE lists) by switching to safe line parsing.
+- Applied the same safer parsing to ID‑file reads in ST/GT variants.
+- No behavior changes for normal‑length configs.
+- Fixes --local warning displaying even when not in --local mode.
+
 Version 2.4.3, 03.25.2025
 - Fixed how tree labels are read in GT
 - Switched from bash script to Python functions to label ASTRAL tree internal nodes, which required adding the various hidden `-lt` options to `phyloacc.py`
