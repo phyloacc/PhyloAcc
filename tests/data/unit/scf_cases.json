@@ -1,0 +1,37 @@
+{
+  "simple_quartet": {
+    "aln": {
+      "A": "AA",
+      "B": "AC",
+      "C": "CA",
+      "D": "CC"
+    },
+    "quartet": [["A", "B"], ["C", "D"]]
+  },
+  "discordant_and_skip": {
+    "aln": {
+      "A": "AAAN",
+      "B": "ACCC",
+      "C": "CAAC",
+      "D": "CCAC"
+    },
+    "quartet": [["A", "B"], ["C", "D"]]
+  },
+  "no_decisive": {
+    "aln": {
+      "A": "AAAA",
+      "B": "AAAT",
+      "C": "AAAA",
+      "D": "AAAA"
+    },
+    "quartet": [["A", "B"], ["C", "D"]]
+  },
+  "missing_species": {
+    "aln": {
+      "A": "AA",
+      "B": "AA",
+      "C": "CC"
+    },
+    "quartet": [["A", "B"], ["C", "D"]]
+  }
+}

@@ -8,8 +8,9 @@ src/PhyloAcc-interface/*.errlog
 src/PhyloAcc-interface/tests/
 support/
 bin/
-PhyloAcc-ST
-PhyloAcc-GT
+old-bin/
+/PhyloAcc-ST
+/PhyloAcc-GT
 blah
 tmp
 run.sh
@@ -18,7 +19,10 @@ build_st.sh
 .vscode
 phyloacc-dev*
 dev/phyloacc-dev*
-
+dev/artifacts/
+.codex
+tests/cpp/phyloacc_cpp_*
+*.errlog
 
 # Compiled source #
 ###################
@@ -57,4 +61,3 @@ dev/phyloacc-dev*
 .Trashes
 ehthumbs.db
 Thumbs.db
-

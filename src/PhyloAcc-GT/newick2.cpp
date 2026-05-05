@@ -8,7 +8,7 @@
 #include <cstring>
 //#include "newick.h"
 
-#include "utils.h"
+#include "../PhyloAcc-common/utils.h"
 
 #define APPEND_LEN	256
 
@@ -694,4 +694,3 @@ PhyloTree_theta LoadPhyloTree_theta(string tree_path)
 
     return tree2;
 }
-

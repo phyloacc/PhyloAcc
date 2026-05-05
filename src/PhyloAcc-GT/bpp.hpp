@@ -25,9 +25,9 @@
 #include <sstream>
 #include <algorithm>
 
-#include "newick.h"
-#include "profile.h"
-#include "utils.h"
+#include "../PhyloAcc-common/newick.h"
+#include "../PhyloAcc-common/profile.h"
+#include "../PhyloAcc-common/utils.h"
 
 using namespace std;
 using namespace arma;
@@ -41,28 +41,28 @@ class BPP
 
 private:
 
-    int G;  //total base pairs
-    int S;
+    int G = 0;  //total base pairs
+    int S = 0;
     vector <unsigned int> element_size;
     vector <unsigned int> element_start;
     vector<string> element_tree;
 
-    int root_ingrp;
+    int root_ingrp = -1;
 
-    double ratio0;
-    double ratio1;
-    double cub;
-    double nlb;
-    int ropt;
+    double ratio0 = 0.0;
+    double ratio1 = 0.0;
+    double cub = 0.0;
+    double nlb = 0.0;
+    int ropt = 0;
 
     // names of species
     vector<int> target_species;
     vector<int> conservedgroup;
     vector<int> dp_species;
-    bool cons_sample;
+    bool cons_sample = false;
     //int refspecies;
 
-    double conserve_prop;
+    double conserve_prop = 0.0;
 
     vector<int> outgroup;
     set<int> upper;
@@ -87,8 +87,8 @@ private:
     mat eigenvec; vec eigenval;
     mat eigeninv;
     mat submat;
-    double indel;
-    double indel2;
+    double indel = 0.0;
+    double indel2 = 0.0;
 
     mat eigenvecprop; vec eigenvalprop;
     mat eigeninvprop; vec piprop;
@@ -100,14 +100,14 @@ private:
     
     vector<vector<string>> genetrees;
 
-    double ind_lrate, ind_lrate2;  //for Z
-    double ind_grate;
+    double ind_lrate = 0.0, ind_lrate2 = 0.0;  //for Z
+    double ind_grate = 0.0;
     double vlr = 100; // proposal variance of loss rate
     double vgr = 100; // proposal variance of gain rate
     //double prior_glr[3];
-    double prior_l_a, prior_l_b;
-    double prior_l2_a, prior_l2_b;
-    double prior_g_a, prior_g_b;
+    double prior_l_a = 0.0, prior_l_b = 0.0;
+    double prior_l2_a = 0.0, prior_l2_b = 0.0;
+    double prior_g_a = 0.0, prior_g_b = 0.0;
 
     vector<mat >  TM_Int;
     vector<mat> log_TM_Int;
@@ -144,32 +144,32 @@ private:
     vector<double> cons_prior_density;
 
     //hyperparameter of prior_c, prior_n;
-    double nprior_a, nprior_b;  //around 1
-    double cprior_a, cprior_b;  //around ratio
+    double nprior_a = 0.0, nprior_b = 0.0;  //around 1
+    double cprior_a = 0.0, cprior_b = 0.0;  //around ratio
 
-    time_t last_time;
-    unsigned long int seed;
-    unsigned long int seed2;
+    time_t last_time = 0;
+    unsigned long int seed = 0;
+    unsigned long int seed2 = 0;
     friend class GTree;
 
 
 public:
-    int N;
-    int C;  //total number of elements
-    int num_base;
+    int N = 0;
+    int C = 0;  //total number of elements
+    int num_base = 0;
     
     vector< string > species_names; // size S
     vector<string> nodes_names;  //size N
     // GSL random number generator
-    gsl_rng * RNG;
+    gsl_rng * RNG = nullptr;
     std::mt19937 twister;
     std::mt19937 twister2; //for shuffling input data only.
     
     // species tree (using array to accelerate)
-    int    (*children)[2];
-    int     *parent;
-    double  *distances;
-    double  *thetas;
+    int    (*children)[2] = nullptr;
+    int     *parent = nullptr;
+    double  *distances = nullptr;
+    double  *thetas = nullptr;
     vector<double> heights;
     vector<int> move_br; //branches that may diff from Sp tree
 
@@ -177,7 +177,7 @@ public:
     vector<vector< double >>   log_liks_Z; //Store max posterior 
     vector<vector<double>> log_mle;
     
-    double br_sample_cutoff;
+    double br_sample_cutoff = 0.0;
     
     //Han*: BPP dirichlet prior param arguments added
     //BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, double _prep_grate, double _prep_lrate, double _prep_lrate2, double _prior_g_a, double _prior_g_b, double _prior_l_a, double _prior_l_b,double _prior_l2_a, double _prior_l2_b, double _indel, double _indel2, double missing_thres, bool _sample_indel)
@@ -356,7 +356,7 @@ public:
     move_br = vector<int> (N, 0);
     cons_sample = false;
     if(dp_species.size()>0){ 
-        for(int i=0; i<dp_species.size(); i++){
+        for(std::size_t i = 0; i < dp_species.size(); i++){
             bool upper_rel = true;
             set<int>:: iterator it_out=upper.find(dp_species[i]);
             if(it_out ==upper.end()){

@@ -31,6 +31,24 @@ mamba install phyloacc
 
 For more detailed instructions and troubleshooting, see [the Installation page](https://phyloacc.github.io/install.html). If you have other questions or trouble let us know by posting [an issue on the github repo](https://github.com/phyloacc/PhyloAcc/issues).
 
+## Developer Build Notes
+
+- The supported regression-testing build path in this repo is the conda-forge/bioconda-aligned GCC 14 toolchain, not an arbitrary local `g++`.
+- In this workspace that means building with the wrapper used by the test suite, for example:
+
+```bash
+conda run -n phyloacc-test make -B \
+  CXX=/n/holylfs05/LABS/informatics/Lab/projects/gwct/phyloacc/PhyloAcc/dev/cc14-wrap.sh \
+  PREFIX=/n/home07/gthomas/miniconda3/envs/phyloacc-test \
+  PhyloAcc-ST PhyloAcc-GT
+```
+
+- `src/PhyloAcc-common/` is now the active shared implementation path for common parsing and helper code.
+- The intentionally local code boundary is now the active inference layer:
+  - GT-specific machinery such as `genetree.*` and `newick2.*`
+  - ST/GT-specific parts of `bpp.*`, `bpp_c.*`, and `bpp_c2.cpp` where further unification would require algorithmic or numerical-semantic changes
+- Shared parsing, profile loading, tree loading, utility code, and shared output/helper scaffolding should live in `src/PhyloAcc-common/`.
+
 # Usage
 
 For more detailed information and example commands, see [the README on the PhyloAcc website](https://phyloacc.github.io/readme.html)

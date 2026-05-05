@@ -19,12 +19,13 @@
 //#include <omp.h> //libiomp/
 #include <string>
 #include <armadillo>
-#include "profile.h"
-#include "newick.h"
+#include "../PhyloAcc-common/profile.h"
+#include "../PhyloAcc-common/newick.h"
 #include "newick2.h"
 #include "bpp.hpp"
 #include "bpp_c.hpp"
-#include "utils.h"
+#include "../PhyloAcc-common/utils.h"
+#include "config.h"
 #include <math.h>
 #include <gsl/gsl_errno.h>
 
@@ -106,231 +107,68 @@ vector<double> prior_dir_par(2,10);  //Han: it's beta prior for pi. Keep the old
 /////////////////////////////////////////////////////////////////
 // Functions
 
-bool stringToBool(const std::string& s) {
-    return s == "true" || s == "1";
-}
-
-// load the program parameters
 void LoadParams(int argc, char* argv[])
 {
-    cout << "Loading input data and running parameters......" << endl;
-    
-    if (argc > 1)
-    {
-        params_path = string(argv[1]);
-    }
-    else
-    {
-        //params_path = "/Users/zhu/PhyloAcc/code/PhyloAcc-test-data/phyloacc-test-config.txt";  //params2
-        cout << "Please specify the path of the parameter file." << endl;
-        exit(1);
-    }
-    // Get the name of the parameters file, or error out if none is provided
+    phyloacc::Config config = phyloacc::LoadConfig(argc, argv, phyloacc::DefaultGTConfig(), true, false);
 
-    cout << "Loading program configurations from " << params_path << "......" <<endl;
-
-    vector<string> param_line;
-    string word;
-    int num_words;
-    int line_num = 1;
-    string line;
-    // Variables for reading the parameter file
-
-    ifstream in_params(params_path.c_str());
-    if (!in_params)
-    {
-        cerr << "Cannot open the parameters file: " << params_path.c_str() << endl;
-        exit(1);
-    }
-    // Check if the parameter file exists and can be opened
-
-    while (std::getline(in_params, line))
-    {
-        param_line.clear();
-        istringstream line_stream(line);
-        //string tmp; line_stream >> tmp;
-
-        while(line_stream >> word) {
-            param_line.push_back(word);
-        }
-        // Read the line into line_buff, then parse it into param_line
-
-        num_words = param_line.size();
-        // Count the number of words in the line
-
-        // for(const auto &word : param_line) {
-        //     cout << word << ' ';
-        // }
-        // cout << '\n';
-        // cout << num_words << endl;
-        // Debugging
-
-        if (param_line[0][0] == '#' || num_words == 0)
-            continue;
-        // Skip comment lines and empty lines in the config file
-
-        if (num_words != 2) {
-            cerr << endl << "Line " << line_num << " in the parameter file is not formatted correctly: " << line << endl;
-            cerr << "Each line should contain a parameter and a value separated by a space and no other whitespace." << endl << endl;
-            exit(1);
-        }
-        // Check that the line is formatted correctly
-
-        // simulate or inference
-        if (param_line[0]=="SIMULATE")
-            simulate = stringToBool(param_line[1]);
-        // input and output file paths
-        else if (param_line[0]=="PHYTREE_FILE")
-            phytree_path = param_line[1];
-        else if (param_line[0]=="TREE_IN_COALESCENT_UNIT")
-            tree_coal_unit = param_line[1];
-        else if (param_line[0]=="ALIGN_FILE")
-            align_path = param_line[1];
-        else if (param_line[0]=="SEG_FILE")
-            segment_path = param_line[1];
-        else if (param_line[0]=="ID_FILE")
-            id_path = param_line[1];
-        else if (param_line[0]=="BATCH")
-            batch = stoi(param_line[1]);
-        else if (param_line[0]=="RESULT_FOLDER")
-            output_path = param_line[1];
-        else if (param_line[0]=="PREFIX")
-            result_prefix = param_line[1];
-        else if (param_line[0]=="SEED")
-            seed = stoi(param_line[1]);
-        else if (param_line[0]=="SEEDS")
-            seed2 = stoi(param_line[1]);
-        else if (param_line[0]=="INIT_CONSERVE_RATE")
-            ratio0 = stod(param_line[1]);
-        else if (param_line[0]=="INIT_ACCE_RATE")
-            ratio1 = stod(param_line[1]);
-        else if (param_line[0]=="CONSERVE_PRIOR_A")
-            cprior_a = stod(param_line[1]);
-        else if (param_line[0]=="CONSERVE_PRIOR_B")
-            cprior_b = stod(param_line[1]);
-        else if (param_line[0]=="ACCE_PRIOR_A")
-            nprior_a = stod(param_line[1]);
-        else if (param_line[0]=="ACCE_PRIOR_B")
-            nprior_b = stod(param_line[1]);
-        else if (param_line[0]=="ROPT")
-            ropt = stoi(param_line[1]);
-        else if (param_line[0]=="CUB")
-            cub = stod(param_line[1]);
-        else if (param_line[0]=="NLB")
-            nlb = stod(param_line[1]);
-
-        // running parameters
-        else if (param_line[0]=="BURNIN")
-            num_burn = stoi(param_line[1]);
-        else if (param_line[0]=="MCMC")
-            num_mcmc = stoi(param_line[1]);
-        else if (param_line[0]=="THIN") //ADAPT_FREQ
-            num_thin = stoi(param_line[1]);
-        else if (param_line[0]=="INIT_LRATE")
-            prep_lrate = stod(param_line[1]);
-        else if (param_line[0]=="INIT_LRATE2")
-            prep_lrate2 = stod(param_line[1]);
-        else if (param_line[0]=="INIT_GRATE")
-            prep_grate = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_LRATE_A")
-            prior_lrate_a = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_LRATE_B")
-            prior_lrate_b = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_LRATE2_A")
-            prior_lrate2_a = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_LRATE2_B")
-            prior_lrate2_b = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_GRATE_A")
-            prior_grate_a = stod(param_line[1]);
-        else if (param_line[0]=="HYPER_GRATE_B")
-            prior_grate_b = stod(param_line[1]);
-        else if (param_line[0]=="CHAIN")
-            num_chain = stoi(param_line[1]);
-        else if (param_line[0]=="WL")
-            WL = stringToBool(param_line[1]);
-        else if (param_line[0]=="BLK_WL")
-            block = stoi(param_line[1]);
-
-        // constraint
-        else if (param_line[0] == "OUTGROUP")
-            outgroup = param_line[1];
-        else if (param_line[0] == "TARGETSPECIES")
-            targetspecies = param_line[1];
-        else if (param_line[0] == "CONSERVE")
-            conservegroup = param_line[1];
-        else if (param_line[0] == "CONSERVE_PROP")
-            conserve_prop = stod(param_line[1]);
-        else if (param_line[0] == "GAP_PROP")
-            missing_thres = stod(param_line[1]);
-        //else if (param_line[0] == "REF")
-         //   refspecies = param_line[1];
-        else if (param_line[0] == "CONSTOMIS")
-            consToMis = stod(param_line[1]);
-        else if (param_line[0]=="BR_SAMPLE_THRESHOLD")
-            br_sample_cutoff = stod(param_line[1]);
-        else if (param_line[0]=="THETA_CUTOFF")
-            theta_cutoff = stod(param_line[1]);
-        else if( param_line[0]=="DEEP_COAL_BRANCH")
-            deepcoal_species = param_line[1];
-
-        // treat indel as additional character
-        else if (param_line[0] == "GAPCHAR")
-            gapchar = param_line[1][0];
-        else if (param_line[0] == "PRUNE_TREE")
-            prune = stringToBool(param_line[1]);
-        else if (param_line[0] == "TRIM_GAP_PERCENT")
-            revgap = stod(param_line[1]);
-        else if (param_line[0] == "MIN_LEN")
-            min_length = stoi(param_line[1]);
-        else if (param_line[0] == "INDEL") // not used
-            indel = stoi(param_line[1]);
-        else if (param_line[0] == "INDEL2") // not used
-            indel2 = stoi(param_line[1]);
-        else if(param_line[0] == "SAMPLE_INDEL")  // not used
-            sample_indel = stringToBool(param_line[1]);
-        else if(param_line[0] == "SAMPLE_HYPER")
-            sample_hyper = stringToBool(param_line[1]);
-        else if(param_line[0] == "VERBOSE")
-            verbose = stringToBool(param_line[1]);
-        else if(param_line[0] == "VERBOSE_GENETREE") //Han*: output sampled gene trees
-            verboseGT = stringToBool(param_line[1]);
-        else if(param_line[0] == "NUM_THREAD")
-            num_thread = stoi(param_line[1]);
-        else
-            cout << "Unknown parameter: " << param_line[0] << ", skipping..." << endl;
-
-        line_num++;
-        // Increment the line number
-    }
-    
-    if(prior_lrate2_a==0) prep_lrate2 = 0;
-
-    // trimming file names
-    phytree_path = strutils::trim(phytree_path, " \"\t\n");
-    align_path = strutils::trim(align_path, " \"\t\n");
-    output_path  = strutils::trim(output_path,  " \"\t\n");
-    segment_path = strutils::trim(segment_path, " \"\t\n");
-    tree_coal_unit = strutils::trim(tree_coal_unit, " \"\t\n");
-}
-
-////////////////////
-
-bool DirectoryExists( string pzPath )
-{
-    if ( pzPath == "") return false;
-
-    DIR *pDir;
-    bool bExists = false;
-
-    pDir = opendir (pzPath.c_str());
-
-    if (pDir != NULL)
-    {
-        bExists = true;
-        (void) closedir (pDir);
-    }
-
-    return bExists;
+    params_path = config.params_path;
+    phytree_path = config.phytree_path;
+    align_path = config.align_path;
+    output_path = config.output_path;
+    output_path2 = config.output_path2;
+    segment_path = config.segment_path;
+    id_path = config.id_path;
+    result_prefix = config.result_prefix;
+    tree_coal_unit = config.tree_coal_unit;
+    outgroup = config.outgroup;
+    targetspecies = config.targetspecies;
+    conservegroup = config.conservegroup;
+    deepcoal_species = config.deepcoal_species;
+    conserve_prop = config.conserve_prop;
+    num_thread = config.num_thread;
+    num_burn = config.num_burn;
+    num_mcmc = config.num_mcmc;
+    num_thin = config.num_thin;
+    num_chain = config.num_chain;
+    prep_lrate = config.prep_lrate;
+    prep_lrate2 = config.prep_lrate2;
+    prep_grate = config.prep_grate;
+    prior_lrate2_a = config.prior_lrate2_a;
+    prior_lrate2_b = config.prior_lrate2_b;
+    prior_lrate_a = config.prior_lrate_a;
+    prior_lrate_b = config.prior_lrate_b;
+    prior_grate_a = config.prior_grate_a;
+    prior_grate_b = config.prior_grate_b;
+    ratio0 = config.ratio0;
+    ratio1 = config.ratio1;
+    missing_thres = config.missing_thres;
+    nprior_a = config.nprior_a;
+    nprior_b = config.nprior_b;
+    cprior_a = config.cprior_a;
+    cprior_b = config.cprior_b;
+    ropt = config.ropt;
+    cub = config.cub;
+    nlb = config.nlb;
+    batch = config.batch;
+    seed = config.seed;
+    seed2 = config.seed2;
+    indel = config.indel;
+    indel2 = config.indel2;
+    sample_indel = config.sample_indel;
+    sample_hyper = config.sample_hyper;
+    gapchar = config.gapchar;
+    verbose = config.verbose;
+    consToMis = config.consToMis;
+    block = config.block;
+    prune = config.prune;
+    revgap = config.revgap;
+    min_length = config.min_length;
+    WL = config.WL;
+    simulate = config.simulate;
+    verboseGT = config.verboseGT;
+    br_sample_cutoff = config.br_sample_cutoff;
+    theta_cutoff = config.theta_cutoff;
+    prior_dir_par = config.prior_dir_par;
 }
 
 ////////////////////
@@ -359,7 +197,7 @@ int main(int argc, char* argv[])
     LoadParams(argc, argv);
 
     // check output path
-    if(! DirectoryExists(output_path))
+    if(! phyloacc::DirectoryExists(output_path))
     {
     	cout << "output path doesn't exist or empty!" << endl;
     	return 1;

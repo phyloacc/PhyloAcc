@@ -10,6 +10,11 @@
 #include "bpp.hpp"
 #include <gsl/gsl_errno.h>
 
+#include "../PhyloAcc-common/bpp_monitor.h"
+#include "../PhyloAcc-common/bpp_tree.h"
+#include "../PhyloAcc-common/bpp_update.h"
+#include "../PhyloAcc-common/bpp_transition.h"
+
 //struct Cmp
 //{
 //    bool operator ()(const pair<int, double> &a, const pair<int, double> &b)
@@ -18,16 +23,9 @@
 //    }
 //};
 
-void BPP_C::getSubtree(int root, vector<int> & visited_init)  // traverse from root to children, include root
+void BPP_C::getSubtree(int root, vector<int> & visited_init)
 {
-    int j = root;
-
-    for(int chi=0;chi<2;chi++)
-    {
-        if(children2[j][chi]!=-1)
-            getSubtree(children2[j][chi], visited_init);
-    }
-    visited_init.push_back(j);
+    phyloacc::CollectSubtreeNodes(root, children2, visited_init);
 }
 
 
@@ -482,7 +480,7 @@ void BPP_C::Gibbs(int iter, int max_iter, BPP &bpp, ofstream & outZ, string outp
             {
                 double logNorm1 =0;
                 logNorm = 0;
-                for(std::size_t i =new_burn; i< new_burn+new_mcmc;i++)
+                for(int i = new_burn; i < new_burn + new_mcmc; i++)
                 {
                     logNorm += trace_logNormratio[i];
                     if(i >= new_burn + ceil(new_mcmc/2)) logNorm1 += trace_logNormratio[i];
@@ -651,7 +649,7 @@ void BPP_C::Gibbs(int iter, int max_iter, BPP &bpp, ofstream & outZ, string outp
 
             double accept1=0.0;
             if(m%num_thin==0){
-            for (int b = 0; b <gtree->gene_nodes.size() ; b++)
+            for (std::size_t b = 0; b < gtree->gene_nodes.size(); b++)
             {   
                 if (gtree->gene_nodes[b] >= S){ //sample internal node's kid's branch
                     GTree gt_org(N, S);
@@ -712,7 +710,7 @@ void BPP_C::Gibbs(int iter, int max_iter, BPP &bpp, ofstream & outZ, string outp
 
         if (m == 0){ 
             bpp.log_mle[resZ][CC] = log_lik_old[0] + logp_Z[0];
-        }else if (m >= new_burn & (log_lik_old[0] + logp_Z[0]) > bpp.log_mle[resZ][CC]){
+        }else if (m >= new_burn && (log_lik_old[0] + logp_Z[0]) > bpp.log_mle[resZ][CC]){
             bpp.log_mle[resZ][CC] = log_lik_old[0] + logp_Z[0];
         }
     }
@@ -811,120 +809,30 @@ double BPP_C::priorP_Z(BPP & bpp)
 
 void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2, BPP & bpp)
 {
-
-    mat nZ = zeros(3,3); // record number of Z transitions
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-    {
-        int p = bpp.parent[*it];
-        //if(Z[p] < 2)
-        //{
-            nZ(Z[*it],Z[p]) += 1;
-        //}
-
-
-    }
-
-    //cout << "Count matrix: " << nZ << endl;
-    gr = gsl_ran_beta(RNG, prior_g_a + nZ(1,0) + nZ(2,0) , prior_g_b + nZ(0,0));
-
-    //for(vector<int>:: iterator it = upper_c.begin(); it < upper_c.end() -1;it++)
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-    {
-        if(fixZ[*it] == 1)
-        {
-            int p = bpp.parent[*it];
-            assert(p!=N);
-            //if(Z[p] < 2)
-            //{
-                nZ(Z[*it],Z[p]) -= 1;
-            //}
-        }
-    }
-
-    lr = gsl_ran_beta(RNG, prior_l_a + nZ(2,1), prior_l_b + nZ(1,1));
-    if(prior_l2_a == 0)
-    {
-        lr2 = 0;
-    }else{
-        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2));
-    }
-
-    for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
-    {
-        int s = *it;
-
-        if(fixZ[*it] == 1)
-        {
-            log_TM_Int[*it](1,1) = 0;
-            log_TM_Int[*it](2,1) = log(0);
-
-            log_TM_Int[*it](0,0) = log(1 - gr);
-            log_TM_Int[*it](1,0) = log(gr);
-            log_TM_Int[*it](2,0) = log(0);
-
-        }else{
-            log_TM_Int[s](0,0) = log(1 - gr);
-            log_TM_Int[s](1,0) = log(gr);
-
-            double y = 1 - lr;
-            log_TM_Int[s](1,1) = log(y);
-            log_TM_Int[s](2,1) = log(1-y);
-            
-            log_TM_Int[s](2,2) = log(1 - lr2);
-            log_TM_Int[s](1,2) = log(lr2);
-        }
-
-    }
-
+    phyloacc::SampleTransitionRates(
+        RNG, nodes, Z, fixZ, bpp.parent, N, false,
+        prior_g_a, prior_g_b, prior_l_a, prior_l_b, prior_l2_a, prior_l2_b,
+        gr, lr, lr2, log_TM_Int);
 }
 
 // only update probability of nodes above changedZ
 void BPP_C::getUpdateNode(vector<int> changedZ, vector<bool> & visited_init, BPP & bpp) //changedZ from small to large (bottom to top)
 {
-    for(int i =0;i<N;i++)
-        visited_init[i] = true;
-
-    if(changedZ.size()==0) return;
-    for(vector<int>::iterator it = changedZ.end()-1 ; it >= changedZ.begin(); --it){
-        int j = *it;
-        //j = bpp.parent[j];
-
-        while(j!=N)
-        {
-            if(!visited_init[j]) break;
-            visited_init[j] = false;
-            //for(int g=0; g<GG; g++) lambda[g][j].zeros();  // only fathers of changedZ!
-
-            j = bpp.parent[j];
-            assert(j!=-1);
-
-        }
-    }
-
+    phyloacc::MarkChangedZAncestors(changedZ, N, N, bpp.parent, false, false, visited_init, nullptr);
 }
 
 void BPP_C::MonitorChain(int  m,int iter, int max_iter, BPP &bpp, double ind_prop, const double add_loglik,const int resZ, bool recordtree)  //calculate P(X|Z, TM(r) ),
 //void BPP_C::MonitorChain(int  m, BPP &bpp, double ind_prop, const double add_loglik,const int resZ, bool recordtree, int lensC)  //Han*: Debug
 {
 
-
-    for(int s=0; s<N;s++)
-    {
-        trace_Z[m][s] = Z[s];
-    }
+    phyloacc::CopyTraceZ(m, N, Z, trace_Z);
 
    // P(X, M,  r, T|Z) = P(X, M |r, Z, T ) * P(r)  * P(T)
     // trace_loglik P(Y|r, Z, T)
    // add_loglik = P(T) * P(M | Z, T )
-   trace_full_loglik[m] = trace_loglik[m] + add_loglik ; //P(Y,Missing, Z, G| hyper etc)
-
-   trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b)); //P(Y,Miss,Z,G,rc |rest)
-
-    if(resZ !=0)
-   {    //P(Y,Miss,Z,G,rc, rn |rest)
-        trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b));
-
-    }
+    trace_full_loglik[m] = phyloacc::ComputeBaseFullLogLik(
+        trace_loglik[m], add_loglik, trace_c_rate[m], bpp.cprior_a, bpp.cprior_b,
+        resZ, trace_n_rate[m], bpp.nprior_a, bpp.nprior_b);
 
     //P(Y,Miss,Z,G,rc, rn, pi |rest)
     trace_full_loglik[m]+=log(gsl_ran_beta_pdf(2*trace_pi[m][0],prior_dir_param[0],prior_dir_param[1]));
@@ -1005,12 +913,8 @@ void BPP_C::MonitorChain(int  m,int iter, int max_iter, BPP &bpp, double ind_pro
         }
     }
     
-    if(m>=new_burn && trace_full_loglik[m]>MaxLoglik)
+    if(phyloacc::UpdateMaxState(m, new_burn, trace_full_loglik[m], MaxLoglik, Max_Z, Max_m, Z))
     {
-        MaxLoglik = trace_full_loglik[m];
-      
-        Max_Z = Z;
-        Max_m = m;
         Max_pi=trace_pi[m];
             
         std::stringstream buffer;
@@ -1059,7 +963,6 @@ void BPP_C::getEmission(int len, BPP & bpp)
     {
         int ss = *it;
         int sp = bpp.parent[ss];
-        double height_ps = sp < N? bpp.heights[sp] : INFINITY;
         
         vector<double> emissions = vector<double>(3, 0); //
 
@@ -1218,7 +1121,6 @@ void BPP_C::getEmission(int len, BPP & bpp)
 
 void BPP_C::getUpdateNode(bool neut,vector<bool> & visited_init, BPP & bpp) //changedZ from small to large (bottom to top)
 {
-
     for(vector<int>::iterator it = nodes.begin(); it < nodes.end();it++){
         int s = *it;
         if(missing[s])  continue;
@@ -1237,7 +1139,6 @@ void BPP_C::getUpdateNode(bool neut,vector<bool> & visited_init, BPP & bpp) //ch
         }
     }
 }
-
 
 double BPP_C::sample_rate(int indictor, int iter, int max_iter, vector<int> lens, int resZ, double old_rate, bool neut, vector<bool> visited, vec & loglik_old, BPP& bpp, int M, bool adaptive, double adaptive_factor)
 {  //element number ,n or c, #MH steps
@@ -1274,7 +1175,6 @@ double BPP_C::sample_rate(int indictor, int iter, int max_iter, vector<int> lens
             }
             else cur_r = old_rate;
     }else{
-        int len = lens[indictor];
         vector<map<int, vector<mat>>> lambda_tmp = vector<map<int,vector<mat>>> (N, map<int,vector<mat>>()); // store orginial lambda
 
         for(int mm =0; mm<M;mm++)

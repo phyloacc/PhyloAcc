@@ -28,10 +28,10 @@
 #include <sstream>
 #include <algorithm>
 
-#include "newick.h"
-#include "profile.h"
+#include "../PhyloAcc-common/newick.h"
+#include "../PhyloAcc-common/profile.h"
 #include "bpp.hpp"
-#include "utils.h"
+#include "../PhyloAcc-common/utils.h"
 
 
 using namespace std;
@@ -41,18 +41,18 @@ class BPP_C
 {
     private:
     
-    int CC;  //current number of elements
-    int GG; //base pairs current elements
+    int CC = 0;  //current number of elements
+    int GG = 0; //base pairs current elements
     
-    int S;
-    int N;
+    int S = 0;
+    int N = 0;
     
     vector< vector<vec > > ambiguousS_null;  //base * species# * 4;
     
-    int    (*children2)[2];  //children from pruned tree
-    double  *distances2;
-    int *parent2;
-    int root;
+    int    (*children2)[2] = nullptr;  //children from pruned tree
+    double  *distances2 = nullptr;
+    int *parent2 = nullptr;
+    int root = -1;
     vec pi;
     vec log_pi;
     
@@ -64,14 +64,14 @@ class BPP_C
     vector<int> upper_conserve_c;
     
    // double prior_glr[3];
-    double prior_l_a, prior_l_b;
-     double prior_l2_a, prior_l2_b;
-     double prior_g_a, prior_g_b;
-    double ratio0;
-    double ratio1;
-    int num_burn;   // num of burn-in updates
-    int num_mcmc;   // num of MCMC updates
-    int num_thin;   // num of updates between two samples
+    double prior_l_a = 0.0, prior_l_b = 0.0;
+     double prior_l2_a = 0.0, prior_l2_b = 0.0;
+     double prior_g_a = 0.0, prior_g_b = 0.0;
+    double ratio0 = 0.0;
+    double ratio1 = 0.0;
+    int num_burn = 0;   // num of burn-in updates
+    int num_mcmc = 0;   // num of MCMC updates
+    int num_thin = 0;   // num of updates between two samples
     int adaptive_freq = 100;
    
     vector<int>Z ; //N *0, accelerate(time,0-1), loss(-1)
@@ -89,7 +89,7 @@ class BPP_C
     
     
     // MCMC updating states
-    int m;                                      // current MCMC step
+    int m = 0;                                      // current MCMC step
     
     vector<mat> log_TM_Int;
     
@@ -106,8 +106,8 @@ class BPP_C
     
     
     // samples to output
-    double MaxLoglik;
-    int Max_m;
+    double MaxLoglik = -INFINITY;
+    int Max_m = 0;
     vector <int > Max_Z;
     
     vector< double >  trace_loglik;  //P(X|Z, TM, r)
@@ -123,22 +123,22 @@ class BPP_C
     int accept_n_rate = 0;
     int accept_c_rate = 0;  //how many accepted in current cycle
     
-    double prop_n;  //for adaptive MCMC, changed by acceptance rate
-    double prop_c;
+    double prop_n = 0.0;  //for adaptive MCMC, changed by acceptance rate
+    double prop_c = 0.0;
     
     
     
     // GSL random number generator
-    gsl_rng * RNG;
+    gsl_rng * RNG = nullptr;
     
-    time_t last_time;
+    time_t last_time = 0;
     
-    unsigned long int seed;
+    unsigned long int seed = 0;
 
     
 public:
     bool failure = false;
-    bool verbose; 
+    bool verbose = false; 
     
     BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, bool prune=0, double revgap=0, int min_length =50, double nconsToMis = 1)//, double _indel)
     {
@@ -285,7 +285,7 @@ public:
                 
             }
             
-            if(GG - missingBase.size() < min_length)
+            if(static_cast<int>(GG - missingBase.size()) < min_length)
             {
                 filter = true;
                 return;

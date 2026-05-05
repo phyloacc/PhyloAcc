@@ -1,0 +1,46 @@
+{
+  "files": {
+    "tests/test_cpp_unit.py": {
+      "last_run": "2026-04-15T15:34:04",
+      "status": "PASS"
+    },
+    "tests/test_interface.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_optional_testdata.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_st_gt.py": {
+      "last_run": "2026-04-15T15:34:04",
+      "status": "PASS"
+    },
+    "tests/test_unit_alignment.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_unit_batch.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_unit_scf.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_unit_templates.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    },
+    "tests/test_unit_tree_groups.py": {
+      "last_run": "2026-04-15T12:15:11",
+      "status": "PASS"
+    }
+  },
+  "session": {
+    "command": "PHYLOACC_RUN_GT=1 /n/home07/gthomas/miniconda3/envs/phyloacc-test/bin/python -m pytest tests/test_st_gt.py tests/test_cpp_unit.py -q",
+    "exitstatus": 0,
+    "summary": "12 passed in 204.00s",
+    "timestamp": "2026-04-15T15:34:04"
+  }
+}

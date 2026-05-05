@@ -10,6 +10,11 @@
 #include "bpp.hpp"
 #include <gsl/gsl_errno.h>
 
+#include "../PhyloAcc-common/bpp_monitor.h"
+#include "../PhyloAcc-common/bpp_tree.h"
+#include "../PhyloAcc-common/bpp_update.h"
+#include "../PhyloAcc-common/bpp_transition.h"
+
 //void BPP_C::getSubtree(int root, set<int>& child, vector<int> & visited_init)  // traverse from root, stop at children, 74 & 64; do include 1-S!
 //{
 //    
@@ -41,22 +46,9 @@
 
 
 
-void BPP_C::getSubtree(int root, vector<int> & visited_init)  // traverse from root to children, include root
+void BPP_C::getSubtree(int root, vector<int> & visited_init)
 {
-    
-    
-    int j = root;
-    
-    for(int chi=0;chi<2;chi++)
-    {
-        if(children2[j][chi]!=-1)
-            getSubtree(children2[j][chi], visited_init);
-        
-        
-    }
-    
-       visited_init.push_back(j);
-    
+    phyloacc::CollectSubtreeNodes(root, children2, visited_init);
 }
 
 
@@ -521,95 +513,10 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
 
 void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
 {
-    
-    mat nZ = zeros(3,3); // record number of Z transitions
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-    {
-        int p = parent2[*it];
-        //if(Z[p] < 2)
-        //{
-            nZ(Z[*it],Z[p]) += 1;
-        //}
-        
-        
-    }
-    
-    //cout << "Count matrix: " << nZ << endl;
-    gr = gsl_ran_beta(RNG, prior_g_a + nZ(1,0) + nZ(2,0) , prior_g_b + nZ(0,0)); // nZ(2, 0) should be zero
-    
-    //for(vector<int>:: iterator it = upper_c.begin(); it < upper_c.end() -1;it++)
-    for(vector<int>::iterator it = nodes.begin(); it < nodes.end() - 1; it++)
-    {
-        if(fixZ[*it] == 1)
-        {
-            int p = parent2[*it];
-            assert(p!=N);
-            assert(Z[p] < 2);
-            //if(Z[p] < 2) // Z[p] shouldn't be 2
-            //{
-                nZ(Z[*it],Z[p]) -= 1;
-            //}
-        }
-    }
-    
-    lr = gsl_ran_beta(RNG, prior_l_a + nZ(2,1), prior_l_b + nZ(1,1));
-    if(prior_l2_a == 0)
-    {
-        lr2 = 0;
-    }else{
-        lr2 = gsl_ran_beta(RNG, prior_l2_a + nZ(1,2), prior_l2_b + nZ(2,2));
-    }
-    
-    //cout << "Count matrix: " << nZ << endl;
-    //cout <<gr << ", " <<lr <<", " << lr2 << endl;
-    
-    //double theta[3];
-    //double alpha[3] = { prior_glr[0] + nZ(2,0), prior_glr[1] + nZ(1,0), prior_glr[2] + nZ(0,0)};
-    //gsl_ran_dirichlet (RNG, 3, alpha, theta);
-    //trace_l2_rate[m + 1] = theta[0];
-    //trace_g_rate[m + 1] = theta[1];
-    
-    
-    for(vector<int>::iterator it = nodes.begin(); it <nodes.end(); it++)
-    {
-        int s = *it;
-        
-        if(fixZ[*it] == 1)
-        {
-            log_TM_Int[*it](1,1) = 0;
-            log_TM_Int[*it](2,1) = log(0);
-            
-            log_TM_Int[*it](0,0) = log(1 - gr);
-            log_TM_Int[*it](1,0) = log(gr);
-            log_TM_Int[*it](2,0) = log(0);
-            
-        }else{
-            log_TM_Int[s](0,0) = log(1 - gr);
-            log_TM_Int[s](1,0) = log(gr);
-            log_TM_Int[s](2,0) = log(0);
-            
-            double y = 1 - lr;
-            log_TM_Int[s](1,1) = log(y);
-            log_TM_Int[s](2,1) = log(1-y);
-            
-            log_TM_Int[s](1,2) = log(lr2);
-            log_TM_Int[s](2,2) = log(1-lr2);
-        }
-        
-    }
-
-
-//    for(vector<int>:: iterator it = upper_c.begin(); it!=upper_c.end();it++)
-//    {
-//        log_TM_Int[*it](1,1) = 0;
-//        log_TM_Int[*it](2,1) = log(0);
-//
-//        log_TM_Int[*it](0,0) = log(1 - trace_g_rate[m + 1]);
-//        log_TM_Int[*it](1,0) = log(trace_g_rate[m + 1]);
-//        log_TM_Int[*it](2,0) = log(0);
-//
-//    }
-    
+    phyloacc::SampleTransitionRates(
+        RNG, nodes, Z, fixZ, parent2, N, true,
+        prior_g_a, prior_g_b, prior_l_a, prior_l_b, prior_l2_a, prior_l2_b,
+        gr, lr, lr2, log_TM_Int);
 }
 
 
@@ -619,26 +526,7 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
 // only update probability of nodes above changedZ
 void BPP_C::getUpdateNode(vector<int> changedZ, vector<bool> & visited_init) //changedZ from small to large (bottom to top)
 {
-    for(int i =0;i<N;i++)
-        visited_init[i] = true;
-    
-    if(changedZ.size()==0) return;
-    for(vector<int>::iterator it = changedZ.end()-1 ; it >= changedZ.begin(); --it){
-        int j = *it;
-        j = parent2[j];
-        
-        while(j!=N)
-        {
-            if(!visited_init[j]) break;
-            visited_init[j] = 0;
-            for(int g=0; g<GG; g++) lambda[g][j].zeros();  // only fathers of changedZ!
-            
-            j = parent2[j];
-            assert(j!=-1);
-            
-        }
-    }
-    
+    phyloacc::MarkChangedZAncestors(changedZ, N, N, parent2, true, true, visited_init, &lambda);
 }
 
 void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // impute base pair of each internal node (except missing nodes)
@@ -740,11 +628,7 @@ void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // 
 
 void BPP_C::MonitorChain(int  m, BPP &bpp, double & loglik, const double add_loglik,const int resZ)  //calculate P(X|Z, TM(r) ),
 {
-    for(int s=0; s<N;s++)
-    {
-        trace_Z[m][s] = Z[s];
-
-    }
+    phyloacc::CopyTraceZ(m, N, Z, trace_Z);
 
     if(m==0)
     {
@@ -765,53 +649,11 @@ void BPP_C::MonitorChain(int  m, BPP &bpp, double & loglik, const double add_log
     //double gain, loss;
     //log_f_Z(Z, log_TM_Int, gain, loss);
     
-    trace_full_loglik[m] = trace_loglik[m] + add_loglik ; // 0703 add prior of Z to eval2
-    
-    /*int status = gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b);
-    if (status) {
-        if (status == GSL_EDOM) {
-            fprintf (stderr, "%d, invalid argument for conserved rate in computing loglik, %f\n", CC,trace_c_rate[m]);
-            cout << bpp.cprior_a << " " << bpp.cprior_b <<endl;
-        } else {
-            fprintf (stderr, "%d, failed in computing loglik, gsl_errno=%d\n",CC,
-                     status);
-        }
-        //m = num_burn+num_mcmc-1;
-        failure = 1;
-        return;
-    }*/
-    
-    trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_c_rate[m],bpp.cprior_a,bpp.cprior_b));
-    
-    if(resZ !=0)
-    {
-        /*int status = gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b);
-        if (status) {
-          if (status == GSL_EDOM) {
-            fprintf (stderr, "%d, invalid argument for accelerated rate in computing loglik, %f\n", CC,trace_n_rate[m]);
-        } else {
-            fprintf (stderr, "%d, failed in computing loglik, gsl_errno=%d\n",
-                     CC,status);
-        }
-        //m = num_burn+num_mcmc-1;
-        failure = 1;
-        return;
-        }*/
-        
-        trace_full_loglik[m] += log(gsl_ran_gamma_pdf(trace_n_rate[m],bpp.nprior_a,bpp.nprior_b));
-        
+    trace_full_loglik[m] = phyloacc::ComputeBaseFullLogLik(
+        trace_loglik[m], add_loglik, trace_c_rate[m], bpp.cprior_a, bpp.cprior_b,
+        resZ, trace_n_rate[m], bpp.nprior_a, bpp.nprior_b);
 
-    }
-    
-    
-    
-    
-    if(m>=num_burn && trace_full_loglik[m]>MaxLoglik)
-    {
-        MaxLoglik = trace_full_loglik[m];
-        Max_Z = Z;
-        Max_m = m;
-    }
+    phyloacc::UpdateMaxState(m, num_burn, trace_full_loglik[m], MaxLoglik, Max_Z, Max_m, Z);
     
     if(m%500==0 && verbose){ 
         cout <<CC <<": " << trace_loglik[m] <<", " << trace_full_loglik[m]<< ", " << trace_n_rate[m] << ", " << trace_c_rate[m] <<", " <<  prop_c <<", " << prop_n <<", ";
@@ -1593,7 +1435,3 @@ vector<int>  BPP_C::Move_Z(int & propConf, int & revConf, int & changeZ){
 
 
     
-
-
-
-

@@ -23,8 +23,8 @@ private:
     
 public:
     // gene tree
-    int GG;
-    int root;
+    int GG = 0;
+    int root = -1;
     int    (*children_gene)[2];
     int     *parent_gene;
     bool     *missing_gene;
@@ -46,6 +46,7 @@ public:
     {
         N = _N;
         S = _S;
+        RNG = nullptr;
         
         lambda = vector< map<int, vector<mat>> >(N, map<int, vector<mat>>());
         Tg = vector< map<int, vector < int> >> (N, map<int, vector<int>>());
@@ -56,6 +57,16 @@ public:
         heights_gene   = new double[N];
         childID_gene = new int[N];
         missing_gene = new bool[N];
+
+        for(int i = 0; i < N; i++)
+        {
+            children_gene[i][0] = -1;
+            children_gene[i][1] = -1;
+            parent_gene[i] = -1;
+            heights_gene[i] = 0.0;
+            childID_gene[i] = -1;
+            missing_gene[i] = false;
+        }
         
         parent_gene2 = vector<map<int, int>>(N);
         temp_coal = vector<vector<int>>(N);
@@ -78,6 +89,16 @@ public:
         heights_gene   = new double[N];
         childID_gene = new int[N];
         missing_gene = new bool[N];
+
+        for(int i = 0; i < N; i++)
+        {
+            children_gene[i][0] = -1;
+            children_gene[i][1] = -1;
+            parent_gene[i] = -1;
+            heights_gene[i] = 0.0;
+            childID_gene[i] = -1;
+            missing_gene[i] = false;
+        }
         
         parent_gene2 = vector<map<int, int>>(N);
         temp_coal = vector<vector<int>>(N);
