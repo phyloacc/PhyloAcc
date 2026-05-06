@@ -1,8 +1,15 @@
+import math
+import os
+import platform
 from pathlib import Path
 
 import pytest
 
-from conftest import run_cmd, compare_or_record_golden
+from conftest import run_cmd, compare_or_record_golden, _read_tsv_numeric
+
+
+GT_GOLDEN_PACKAGED = Path("tests/golden/minimal/gt_rate_postZ_M0.txt")
+GT_GOLDEN_OSX_ARM64_PIXI = Path("tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.txt")
 
 
 def _resolve_gt_integration_data(tmp_path):
@@ -34,6 +41,46 @@ def _resolve_gt_integration_data(tmp_path):
     subset_bed.write_text("\n".join(lines) + "\n", encoding="utf-8")
     gt_ids.write_text("\n".join(str(int(locus_id) - 1) for locus_id in id_list) + "\n", encoding="utf-8")
     return {"aln": aln, "bed": subset_bed, "mod": mod, "coal": coal, "ids": gt_ids}
+
+
+def _resolve_gt_golden():
+    override = os.environ.get("PHYLOACC_GT_GOLDEN")
+    if override:
+        return Path(override)
+
+    golden_id = os.environ.get("PHYLOACC_GT_GOLDEN_ID")
+    if golden_id:
+        if golden_id == "packaged-gcc14":
+            return GT_GOLDEN_PACKAGED
+        if golden_id == "osx-arm64-clang-pixi":
+            return GT_GOLDEN_OSX_ARM64_PIXI
+        raise AssertionError(f"Unknown PHYLOACC_GT_GOLDEN_ID: {golden_id}")
+
+    is_osx_arm64_pixi = (
+        platform.system() == "Darwin"
+        and platform.machine() == "arm64"
+        and os.environ.get("PIXI_PROJECT_NAME") == "phyloacc"
+        and "clang++" in os.environ.get("CXX", "")
+    )
+    if is_osx_arm64_pixi:
+        return GT_GOLDEN_OSX_ARM64_PIXI
+
+    return GT_GOLDEN_PACKAGED
+
+
+def _assert_gt_output_invariants(output_path):
+    header, rows = _read_tsv_numeric(output_path)
+    assert header[:6] == ["No.", "n_rate", "c_rate", "g_rate", "l_rate", "l2_rate"]
+    assert len(rows) == 5
+
+    for expected_id, row in enumerate(rows):
+        assert row[0] == expected_id
+        for value in row:
+            assert math.isfinite(value)
+        for value in row[1:6]:
+            assert value >= 0.0
+        for value in row[6:]:
+            assert 0.0 <= value <= 1.0
 
 
 def _write_st_cfg(cfg_path, minimal_data, out_dir):
@@ -115,9 +162,10 @@ def test_gt_minimal_run(minimal_data, tmp_path, phyloacc_gt_bin):
 
     out_file = out_dir / "test_rate_postZ_M0.txt"
     assert out_file.exists(), f"Expected output not found: {out_file}"
+    _assert_gt_output_invariants(out_file)
     compare_or_record_golden(
         out_file,
-        Path("tests/golden/minimal/gt_rate_postZ_M0.txt"),
+        _resolve_gt_golden(),
         atol=1e-6,
         rtol=1e-5,
     )

@@ -3,7 +3,7 @@ PREFIX ?= $(CONDA_PREFIX)
 
 CPPFLAGS := -I$(PREFIX)/include
 CXXFLAGS := -O2 -g -std=c++14
-LDFLAGS := -L$(PREFIX)/lib
+LDFLAGS := -L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib
 LDLIBS := -larmadillo
 COMMON_DIR := ../../src/PhyloAcc-common
 ST_DIR := ../../src/PhyloAcc-ST

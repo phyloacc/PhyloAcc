@@ -29,9 +29,9 @@ Minimal Test Data
 - The optional larger integration tier uses files from `../PhyloAcc-test-data/` and is kept separate from the minimal synthetic fixtures.
 
 Latest Suite Status
-- Last pytest session: `2026-04-15`
-- Command shape used here: `PHYLOACC_RUN_GT=1 /n/home07/gthomas/miniconda3/envs/phyloacc-test/bin/python -m pytest tests/test_st_gt.py tests/test_cpp_unit.py -q`
-- Result: `12 passed in 204.00s`
+- Last pytest session: `2026-05-06`
+- Command shape used here: `PHYLOACC_RUN_GT=1 PHYLOACC_RUN_TESTDATA=1 /Users/tim/Work/PhyloAcc/.pixi/envs/default/bin/python3.12 -m pytest -q`
+- Result: `33 passed in 116.20s`
 - GT golden status: `tests/golden/minimal/gt_rate_postZ_M0.txt` exists
 
 Status Legend
@@ -46,23 +46,23 @@ Test Inventory
 
 | Test | Type | Purpose | Data | Data origin | Status | Last run | Notes |
 |---|---|---|---|---|---|---|---|
-| `tests/test_unit_alignment.py` | Python unit | BED parsing, ID filtering, partitioning, alignment stats, low-quality detection, and label validation | `tests/data/minimal/aln.fa` and `tests/data/minimal/bed.bed` plus inline dict fixtures | Minimal files are hand-written; some edge cases are built directly in the test with inline literals. | `■ PASS` | `2026-04-15` | Fast deterministic Python coverage. |
-| `tests/test_unit_scf.py` | Python unit | sCF counting, discordant-site accounting, skip handling, and zip vs loop consistency | `tests/data/unit/scf_cases.json` | The quartet alignments are stored as hand-written JSON fixtures so the expected site-pattern counts stay explicit and deterministic. | `■ PASS` | `2026-04-15` | Fast deterministic Python coverage. |
-| `tests/test_unit_templates.py` | Python unit | Interface config template generation for ST and GT | Inline string literals only | No external data; template inputs are hand-written format arguments. | `■ PASS` | `2026-04-15` | Locks down emitted config structure. |
-| `tests/test_unit_tree_groups.py` | Python unit | Propagation of target, conserved, and outgroup branch categories from tip assignments | `tests/data/unit/tree_groups.nwk` | The test tree is stored as a hand-written Newick fixture file. | `■ PASS` | `2026-04-15` | Covers internal branch categorization logic in tree.py. |
-| `tests/test_unit_batch.py` | Python unit | Batch job-file generation for ST and GT configs, including ID files and model-specific options | Temporary files written under `tmp_path` from inline sequences/tree strings | Configs, model file, and coal tree are generated on the fly from hand-written literals. | `■ PASS` | `2026-04-15` | Covers config-writing logic in batch.py without running PhyloAcc. |
-| `tests/test_interface.py` | Integration | Summarize-only interface execution on minimal synthetic data | `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed`, `tests/data/minimal/model.mod` | These minimal files are hand-written synthetic fixtures in `tests/data/minimal/`. | `■ PASS` | `2026-04-15` | Exercises Python entrypoint without a full workflow run. |
-| `tests/test_st_gt.py` | Integration + golden | ST execution on minimal data and GT execution against the ratite subset, both compared to goldens | ST: `tests/data/minimal/*`; GT: ratite subset from `../PhyloAcc-test-data/` plus `tests/golden/minimal/*` | Minimal ST fixtures are hand-written; GT uses a subset selected from the external test-data repo and recorded goldens. | `■ PASS` | `2026-04-15` | Requires PHYLOACC_RUN_GT=1 for GT coverage. |
-| `tests/test_optional_testdata.py` | Optional integration + golden | Interface summarize and ST golden comparison using ../PhyloAcc-test-data | `../PhyloAcc-test-data/bioconda-test-data/*` plus `tests/golden/testdata/st_rate_postZ_M0.txt` | This data comes from the external `PhyloAcc-test-data` repo; the test subsets loci via `id-subset.txt`. | `■ PASS` | `2026-04-15` | Requires PHYLOACC_RUN_TESTDATA=1. |
-| `tests/test_cpp_unit.py` | Pytest wrapper | Runs lightweight C++ unit binaries and failure-path wrappers | Minimal fixtures in `tests/data/minimal/` plus wrapper-generated temp malformed files | The wrappers use hand-written minimal fixtures and create malformed FASTA/BED inputs on the fly when needed. | `■ PASS` | `2026-04-15` | This is the Python harness for the C++ sanity binaries. |
-| `tests/cpp/test_st_main.cpp` | C++ unit binary | ST tree/profile parse sanity on minimal data | `tests/data/minimal/model.mod`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/test_gt_main.cpp` | C++ unit binary | GT coalescent-tree/profile parse sanity on minimal data | `tests/data/minimal/tree_coal.tre`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/fail_st_main.cpp` | C++ failure-path binary | Intentional ST load failure to confirm transparent error behavior | No real data file; intentionally missing `.mod` path | The failure is generated by pointing the loader at a nonexistent hand-specified path. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/fail_gt_main.cpp` | C++ failure-path binary | Intentional GT coalescent-tree load failure to confirm transparent error behavior | No real data file; intentionally missing `.tre` path | The failure is generated by pointing the loader at a nonexistent hand-specified path. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/fail_st_profile_main.cpp` | C++ failure-path binary | Intentional ST profile-load failure for malformed FASTA input | Paths supplied by shell wrappers | The wrappers either point to missing files or write malformed FASTA/BED fixtures on the fly. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/fail_gt_profile_main.cpp` | C++ failure-path binary | Intentional GT profile-load failure for malformed FASTA input | Paths supplied by shell wrappers | The wrappers either point to missing files or write malformed FASTA/BED fixtures on the fly. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/wrap_fail_st.sh` | Shell wrapper | Validates the expected ST failure message | No real data file; missing `.mod` path | The wrapper simply invokes the helper against a nonexistent model path. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
-| `tests/cpp/wrap_fail_gt.sh` | Shell wrapper | Validates the expected GT failure message | No real data file; missing `.tre` path | The wrapper simply invokes the helper against a nonexistent coalescent-tree path. | `■ PASS` | `2026-04-15` | Observed via tests/test_cpp_unit.py. |
+| `tests/test_unit_alignment.py` | Python unit | BED parsing, ID filtering, partitioning, alignment stats, low-quality detection, and label validation | `tests/data/minimal/aln.fa` and `tests/data/minimal/bed.bed` plus inline dict fixtures | Minimal files are hand-written; some edge cases are built directly in the test with inline literals. | `■ PASS` | `2026-05-06` | Fast deterministic Python coverage. |
+| `tests/test_unit_scf.py` | Python unit | sCF counting, discordant-site accounting, skip handling, and zip vs loop consistency | `tests/data/unit/scf_cases.json` | The quartet alignments are stored as hand-written JSON fixtures so the expected site-pattern counts stay explicit and deterministic. | `■ PASS` | `2026-05-06` | Fast deterministic Python coverage. |
+| `tests/test_unit_templates.py` | Python unit | Interface config template generation for ST and GT | Inline string literals only | No external data; template inputs are hand-written format arguments. | `■ PASS` | `2026-05-06` | Locks down emitted config structure. |
+| `tests/test_unit_tree_groups.py` | Python unit | Propagation of target, conserved, and outgroup branch categories from tip assignments | `tests/data/unit/tree_groups.nwk` | The test tree is stored as a hand-written Newick fixture file. | `■ PASS` | `2026-05-06` | Covers internal branch categorization logic in tree.py. |
+| `tests/test_unit_batch.py` | Python unit | Batch job-file generation for ST and GT configs, including ID files and model-specific options | Temporary files written under `tmp_path` from inline sequences/tree strings | Configs, model file, and coal tree are generated on the fly from hand-written literals. | `■ PASS` | `2026-05-06` | Covers config-writing logic in batch.py without running PhyloAcc. |
+| `tests/test_interface.py` | Integration | Summarize-only interface execution on minimal synthetic data | `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed`, `tests/data/minimal/model.mod` | These minimal files are hand-written synthetic fixtures in `tests/data/minimal/`. | `■ PASS` | `2026-05-06` | Exercises Python entrypoint without a full workflow run. |
+| `tests/test_st_gt.py` | Integration + golden | ST execution on minimal data and GT execution against the ratite subset, both compared to goldens | ST: `tests/data/minimal/*`; GT: ratite subset from `../PhyloAcc-test-data/` plus `tests/golden/minimal/*` | Minimal ST fixtures are hand-written; GT uses a subset selected from the external test-data repo and recorded goldens. | `■ PASS` | `2026-05-06` | Requires PHYLOACC_RUN_GT=1 for GT coverage. |
+| `tests/test_optional_testdata.py` | Optional integration + golden | Interface summarize and ST golden comparison using ../PhyloAcc-test-data | `../PhyloAcc-test-data/bioconda-test-data/*` plus `tests/golden/testdata/st_rate_postZ_M0.txt` | This data comes from the external `PhyloAcc-test-data` repo; the test subsets loci via `id-subset.txt`. | `■ PASS` | `2026-05-06` | Requires PHYLOACC_RUN_TESTDATA=1. |
+| `tests/test_cpp_unit.py` | Pytest wrapper | Runs lightweight C++ unit binaries and failure-path wrappers | Minimal fixtures in `tests/data/minimal/` plus wrapper-generated temp malformed files | The wrappers use hand-written minimal fixtures and create malformed FASTA/BED inputs on the fly when needed. | `■ PASS` | `2026-05-06` | This is the Python harness for the C++ sanity binaries. |
+| `tests/cpp/test_st_main.cpp` | C++ unit binary | ST tree/profile parse sanity on minimal data | `tests/data/minimal/model.mod`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/test_gt_main.cpp` | C++ unit binary | GT coalescent-tree/profile parse sanity on minimal data | `tests/data/minimal/tree_coal.tre`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/fail_st_main.cpp` | C++ failure-path binary | Intentional ST load failure to confirm transparent error behavior | No real data file; intentionally missing `.mod` path | The failure is generated by pointing the loader at a nonexistent hand-specified path. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/fail_gt_main.cpp` | C++ failure-path binary | Intentional GT coalescent-tree load failure to confirm transparent error behavior | No real data file; intentionally missing `.tre` path | The failure is generated by pointing the loader at a nonexistent hand-specified path. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/fail_st_profile_main.cpp` | C++ failure-path binary | Intentional ST profile-load failure for malformed FASTA input | Paths supplied by shell wrappers | The wrappers either point to missing files or write malformed FASTA/BED fixtures on the fly. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/fail_gt_profile_main.cpp` | C++ failure-path binary | Intentional GT profile-load failure for malformed FASTA input | Paths supplied by shell wrappers | The wrappers either point to missing files or write malformed FASTA/BED fixtures on the fly. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/wrap_fail_st.sh` | Shell wrapper | Validates the expected ST failure message | No real data file; missing `.mod` path | The wrapper simply invokes the helper against a nonexistent model path. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
+| `tests/cpp/wrap_fail_gt.sh` | Shell wrapper | Validates the expected GT failure message | No real data file; missing `.tre` path | The wrapper simply invokes the helper against a nonexistent coalescent-tree path. | `■ PASS` | `2026-05-06` | Observed via tests/test_cpp_unit.py. |
 
 Golden Files
 - Record or refresh goldens: `PHYLOACC_RECORD_GOLDEN=1 pytest -q`
@@ -77,6 +77,8 @@ Golden Files
 GT Golden Provenance
 - Metadata file: `tests/golden/minimal/gt_rate_postZ_M0.provenance.md`
 - `tests/golden/minimal/gt_rate_postZ_M0.txt` should be treated as a conda-forge/bioconda build baseline, not a generic local-compiler baseline.
+- Local macOS arm64 Pixi/Clang baseline: `tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.txt`
+- Local macOS arm64 Pixi/Clang metadata: `tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.provenance.md`
 - The documented matching build path is: `v2.4.5` source plus the conda-forge GCC 14 toolchain.
 - Earlier local rebuilds done with the system `g++ 8.5` path did not reproduce this GT golden and should not be used for regression baselines.
 
@@ -84,6 +86,8 @@ Environment Switches
 - `PHYLOACC_RUN_GT=1`: enable GT integration coverage
 - `PHYLOACC_RUN_TESTDATA=1`: enable optional `../PhyloAcc-test-data` integration tests
 - `PHYLOACC_RECORD_GOLDEN=1`: record goldens instead of comparing
+- `PHYLOACC_GT_GOLDEN=/path/to/file`: compare GT output against an explicit golden file
+- `PHYLOACC_GT_GOLDEN_ID=packaged-gcc14|osx-arm64-clang-pixi`: force a named GT golden baseline
 
 C++ Unit Tests
 - Build: `make cpp-tests`

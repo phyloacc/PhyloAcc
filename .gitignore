@@ -21,6 +21,9 @@ phyloacc-dev*
 dev/phyloacc-dev*
 dev/artifacts/
 .codex
+.llm-tmp/
+.pixi/
+.pixi-cache/
 tests/cpp/phyloacc_cpp_*
 *.errlog
 
@@ -32,6 +35,7 @@ tests/cpp/phyloacc_cpp_*
 *.exe
 *.o
 *.so
+*.dSYM/
 
 # Packages #
 ############

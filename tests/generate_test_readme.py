@@ -9,6 +9,8 @@ README_PATH = TESTS_DIR / "README.md"
 STATUS_PATH = TESTS_DIR / ".last_test_status.json"
 GT_GOLDEN = ROOT / "tests/golden/minimal/gt_rate_postZ_M0.txt"
 GT_GOLDEN_PROVENANCE = ROOT / "tests/golden/minimal/gt_rate_postZ_M0.provenance.md"
+GT_GOLDEN_OSX_ARM64_PIXI = ROOT / "tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.txt"
+GT_GOLDEN_OSX_ARM64_PIXI_PROVENANCE = ROOT / "tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.provenance.md"
 
 MANIFEST = [
     {
@@ -300,6 +302,8 @@ def render_readme(data=None):
         "GT Golden Provenance",
         f"- Metadata file: `{GT_GOLDEN_PROVENANCE.relative_to(ROOT)}`",
         "- `tests/golden/minimal/gt_rate_postZ_M0.txt` should be treated as a conda-forge/bioconda build baseline, not a generic local-compiler baseline.",
+        f"- Local macOS arm64 Pixi/Clang baseline: `{GT_GOLDEN_OSX_ARM64_PIXI.relative_to(ROOT)}`",
+        f"- Local macOS arm64 Pixi/Clang metadata: `{GT_GOLDEN_OSX_ARM64_PIXI_PROVENANCE.relative_to(ROOT)}`",
         "- The documented matching build path is: `v2.4.5` source plus the conda-forge GCC 14 toolchain.",
         "- Earlier local rebuilds done with the system `g++ 8.5` path did not reproduce this GT golden and should not be used for regression baselines.",
         "",
@@ -307,6 +311,8 @@ def render_readme(data=None):
         "- `PHYLOACC_RUN_GT=1`: enable GT integration coverage",
         "- `PHYLOACC_RUN_TESTDATA=1`: enable optional `../PhyloAcc-test-data` integration tests",
         "- `PHYLOACC_RECORD_GOLDEN=1`: record goldens instead of comparing",
+        "- `PHYLOACC_GT_GOLDEN=/path/to/file`: compare GT output against an explicit golden file",
+        "- `PHYLOACC_GT_GOLDEN_ID=packaged-gcc14|osx-arm64-clang-pixi`: force a named GT golden baseline",
         "",
         "C++ Unit Tests",
         "- Build: `make cpp-tests`",

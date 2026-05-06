@@ -1,0 +1,38 @@
+[workspace]
+name = "phyloacc"
+version = "0.1.0"
+description = "Development environment for building and testing PhyloAcc"
+channels = ["conda-forge", "bioconda"]
+platforms = ["osx-arm64", "linux-64"]
+
+[dependencies]
+python = ">=3.11,<3.13"
+make = "*"
+c-compiler = "*"
+cxx-compiler = "*"
+gsl = "*"
+armadillo = "*"
+llvm-openmp = "*"
+numpy = "*"
+matplotlib-base = "*"
+biopython = "*"
+pyyaml = "*"
+psutil = "*"
+pytest = "*"
+snakemake-minimal = "*"
+wget = "*"
+
+[tasks]
+build = "make -B PREFIX=$CONDA_PREFIX CXX=$CXX PhyloAcc-ST PhyloAcc-GT"
+cpp-tests = "make -B PREFIX=$CONDA_PREFIX CXX=$CXX cpp-tests"
+test = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache pytest -q"
+test-python = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache pytest -q tests/test_unit_alignment.py tests/test_unit_tree_groups.py tests/test_unit_templates.py tests/test_unit_batch.py tests/test_unit_scf.py tests/test_interface.py"
+test-cpp = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache pytest -q tests/test_cpp_unit.py"
+test-fast = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache pytest -q tests/test_unit_alignment.py tests/test_unit_tree_groups.py tests/test_unit_templates.py tests/test_unit_batch.py tests/test_unit_scf.py tests/test_interface.py tests/test_cpp_unit.py"
+test-st = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache pytest -q tests/test_st_gt.py::test_st_minimal_run"
+test-gt = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache PHYLOACC_RUN_GT=1 pytest -q tests/test_st_gt.py::test_gt_minimal_run"
+record-gt-golden = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache PHYLOACC_RUN_GT=1 PHYLOACC_RECORD_GOLDEN=1 pytest -q tests/test_st_gt.py::test_gt_minimal_run"
+test-optional = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache PHYLOACC_RUN_TESTDATA=1 pytest -q tests/test_optional_testdata.py"
+test-with-testdata = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache PHYLOACC_RUN_TESTDATA=1 pytest -q"
+test-all = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache PHYLOACC_RUN_GT=1 PHYLOACC_RUN_TESTDATA=1 pytest -q"
+depcheck = "TMPDIR=$PWD/.llm-tmp MPLCONFIGDIR=$PWD/.llm-tmp/matplotlib XDG_CACHE_HOME=$PWD/.llm-tmp/xdg-cache python src/PhyloAcc-interface/phyloacc.py --depcheck -st-path ./PhyloAcc-ST -gt-path ./PhyloAcc-GT"
