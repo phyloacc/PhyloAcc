@@ -25,6 +25,25 @@ struct SubstitutionEigen
     arma::vec log_pi;
 };
 
+enum class MissingBasePolicy
+{
+    GapOnly,
+    GapNStar
+};
+
+struct LeafEncoding
+{
+    std::vector<std::vector<arma::vec> > lambda;
+    std::vector<std::vector<int> > tg;
+};
+
+struct ColumnFilterResult
+{
+    bool filtered;
+    int length;
+    std::vector<int> removed_sites;
+};
+
 std::vector<int> ParseDelimitedNames(const std::string& names,
                                      const std::vector<std::string>& available_names);
 
@@ -44,6 +63,37 @@ void BuildUpperTreeSets(int root,
                         std::set<int>& upper_conserve);
 
 std::vector<int> BuildNonOutgroupSubtree(int node_count, const std::set<int>& upper);
+
+int EncodeLeafState(char base, char gapchar, MissingBasePolicy missing_policy);
+
+void EncodeLeafBase(char base,
+                    char gapchar,
+                    int num_base,
+                    MissingBasePolicy missing_policy,
+                    arma::vec& lambda,
+                    int& tg);
+
+LeafEncoding EncodeLeafAlignment(const std::vector<std::string>& sequences,
+                                 int start,
+                                 int length,
+                                 int species_count,
+                                 int node_count,
+                                 int num_base,
+                                 char gapchar,
+                                 MissingBasePolicy missing_policy,
+                                 const std::vector<int>& site_order);
+
+std::vector<int> CountMissingBySpecies(const std::vector<std::vector<int> >& tg,
+                                       int species_count);
+
+ColumnFilterResult RemoveHighMissingColumns(std::vector<std::vector<arma::vec> >& lambda,
+                                            std::vector<std::vector<int> >& tg,
+                                            int species_count,
+                                            double revgap,
+                                            int min_length,
+                                            int* simple_block_count = nullptr);
+
+bool IsSimpleOrMissingLeafPattern(std::vector<int> states);
 
 }  // namespace phyloacc
 

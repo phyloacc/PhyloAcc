@@ -72,11 +72,101 @@ static void test_upper_sets_and_subtree() {
     assert((subtree == std::vector<int>{1, 2}));
 }
 
+static void test_leaf_base_encoding() {
+    arma::vec lambda;
+    int tg = -99;
+
+    phyloacc::EncodeLeafBase('a', '-', 5, phyloacc::MissingBasePolicy::GapOnly, lambda, tg);
+    assert(tg == 0);
+    assert(lambda.n_elem == 5);
+    assert(lambda[0] == 0);
+    assert(std::isinf(lambda[1]) && lambda[1] < 0);
+
+    phyloacc::EncodeLeafBase('r', '-', 5, phyloacc::MissingBasePolicy::GapOnly, lambda, tg);
+    assert(tg == -1);
+    assert(lambda[0] == 0);
+    assert(lambda[2] == 0);
+    assert(std::isinf(lambda[1]) && lambda[1] < 0);
+
+    phyloacc::EncodeLeafBase('-', '-', 5, phyloacc::MissingBasePolicy::GapOnly, lambda, tg);
+    assert(tg == 4);
+    assert(arma::accu(lambda) == 0);
+
+    phyloacc::EncodeLeafBase('n', '-', 5, phyloacc::MissingBasePolicy::GapOnly, lambda, tg);
+    assert(tg == 5);
+    assert(arma::accu(lambda) == 0);
+
+    phyloacc::EncodeLeafBase('n', '-', 5, phyloacc::MissingBasePolicy::GapNStar, lambda, tg);
+    assert(tg == 4);
+    assert(arma::accu(lambda) == 0);
+
+    assert(phyloacc::EncodeLeafState('*', '-', phyloacc::MissingBasePolicy::GapOnly) == 5);
+    assert(phyloacc::EncodeLeafState('*', '-', phyloacc::MissingBasePolicy::GapNStar) == 4);
+}
+
+static void test_leaf_alignment_encoding_and_missing_counts() {
+    std::vector<std::string> sequences = {"acn-", "rg*t"};
+    std::vector<int> site_order = {2, 0, 3, 1};
+
+    phyloacc::LeafEncoding encoding = phyloacc::EncodeLeafAlignment(
+        sequences, 0, 4, 2, 5, 5, '-', phyloacc::MissingBasePolicy::GapNStar, site_order);
+
+    assert(encoding.lambda.size() == 4);
+    assert(encoding.lambda[0].size() == 5);
+    assert(encoding.lambda[0][0].n_elem == 5);
+    assert(encoding.tg[0][0] == 4);
+    assert(encoding.tg[0][1] == 4);
+    assert(encoding.tg[1][0] == 0);
+    assert(encoding.tg[1][1] == -1);
+    assert(encoding.tg[2][0] == 4);
+    assert(encoding.tg[2][1] == 3);
+
+    std::vector<int> missing = phyloacc::CountMissingBySpecies(encoding.tg, 2);
+    assert((missing == std::vector<int>{2, 1}));
+}
+
+static void test_high_missing_column_filter() {
+    std::vector<std::string> sequences = {"--ca", "-gca", "t-ca"};
+    std::vector<int> identity;
+    phyloacc::LeafEncoding encoding = phyloacc::EncodeLeafAlignment(
+        sequences, 0, 4, 3, 5, 5, '-', phyloacc::MissingBasePolicy::GapOnly, identity);
+
+    int simple_block_count = 2;
+    phyloacc::ColumnFilterResult result = phyloacc::RemoveHighMissingColumns(
+        encoding.lambda, encoding.tg, 3, 0.5, 2, &simple_block_count);
+
+    assert(!result.filtered);
+    assert(result.length == 2);
+    assert((result.removed_sites == std::vector<int>{0, 1}));
+    assert(simple_block_count == 1);
+    assert(encoding.tg.size() == 2);
+    assert(encoding.tg[0][0] == 1);
+
+    phyloacc::LeafEncoding filtered_encoding = phyloacc::EncodeLeafAlignment(
+        sequences, 0, 4, 3, 5, 5, '-', phyloacc::MissingBasePolicy::GapOnly, identity);
+    phyloacc::ColumnFilterResult filtered = phyloacc::RemoveHighMissingColumns(
+        filtered_encoding.lambda, filtered_encoding.tg, 3, 0.5, 3);
+    assert(filtered.filtered);
+    assert(filtered_encoding.tg.size() == 4);
+}
+
+static void test_simple_or_missing_leaf_pattern() {
+    assert(phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{0, 0, 0}));
+    assert(phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{0, 4, 5}));
+    assert(phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{3, 5}));
+    assert(!phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{0, 1}));
+    assert(!phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{0, 1, 4}));
+}
+
 int main() {
     test_parse_delimited_names();
     test_element_layout();
     test_indel_and_eigen_helpers();
     test_upper_sets_and_subtree();
+    test_leaf_base_encoding();
+    test_leaf_alignment_encoding_and_missing_counts();
+    test_high_missing_column_filter();
+    test_simple_or_missing_leaf_pattern();
     std::cout << "BPP constructor C++ unit tests passed.\n";
     return 0;
 }
