@@ -325,33 +325,10 @@ public:
         
 
         // set missing only for extant species and upper
-        missing = vector<bool>(N, false);       
         // set missing for all, will be used in getUpdateNode in sample_rate
-        for(int s=S; s<N; s++)
-        {
-            int* p = bpp.children[s];
-            for(int cc=0;cc<2;cc++)
-            {
-                int chi = p[cc];
-                if(chi<S && num_missing[chi]>missing_thres*GG)
-                {
-                    missing[chi] = true;
-                }
-            }
-            if(missing[p[0]] && missing[p[1]]) {
-                missing[s] = true;
-            }
-        }
+        missing = phyloacc::BuildMissingNodes(S, N, bpp.children, num_missing, missing_thres, GG);
 
-        int ct =0;
-        for(vector<int>::iterator it = bpp.conservedgroup.begin(); it<bpp.conservedgroup.end();it++)
-        {
-            if(missing[*it]){
-                ct +=1;
-            }
-        }
-
-        if(ct > bpp.conserve_prop * bpp.conservedgroup.size())
+        if(phyloacc::ConservedMissingExceeds(missing, bpp.conservedgroup, bpp.conserve_prop))
         {
             filter = true;
             return;
@@ -396,19 +373,8 @@ public:
         if(verbose) cout << "root: " << root << endl;
 
         getSubtree(root, nodes);  // will use children2 (only here)
-        for(vector<int>::iterator it = nodes.begin(); it < nodes.end(); it++)
-        {
-            if(bpp.upper.find(*it)!=bpp.upper.end())
-            {
-                upper_c.push_back(*it);
-            }
-
-            if(bpp.upper_conserve.find(*it)!=bpp.upper_conserve.end())
-            {
-                upper_conserve_c.push_back(*it);
-            }
-
-        }
+        phyloacc::CollectUpperNodesInSubtree(nodes, bpp.upper, bpp.upper_conserve,
+                                             upper_c, upper_conserve_c);
 
         //Han*
         pi=bpp.pi;
@@ -421,14 +387,16 @@ public:
 
 
         // from initMCMC
-        trace_loglik = vector<double >(num_burn+num_mcmc, 0); //P(X|Z, r)
-        trace_full_loglik = vector<double >(num_burn+num_mcmc, 0); //P(X, Z, r)
-        trace_Z = vector<vector<int> >(num_burn+num_mcmc, vector<int>(N,1));
-        trace_n_rate = vector<double >(num_burn+num_mcmc, 0);
-        trace_c_rate = vector<double >(num_burn+num_mcmc, 0);
-        trace_l_rate = vector<double >(num_burn+num_mcmc, bpp.cur_lrate[CC]);
-        trace_g_rate = vector<double >(num_burn+num_mcmc, bpp.cur_grate[CC]);
-        trace_l2_rate = vector<double >(num_burn+num_mcmc, bpp.cur_lrate2[CC]);
+        phyloacc::BppCTraceBuffers traces = phyloacc::InitializeBppCTraceBuffers(
+            num_burn+num_mcmc, N, bpp.cur_lrate[CC], bpp.cur_lrate2[CC], bpp.cur_grate[CC]);
+        trace_loglik = traces.trace_loglik; //P(X|Z, r)
+        trace_full_loglik = traces.trace_full_loglik; //P(X, Z, r)
+        trace_Z = traces.trace_z;
+        trace_n_rate = traces.trace_n_rate;
+        trace_c_rate = traces.trace_c_rate;
+        trace_l_rate = traces.trace_l_rate;
+        trace_g_rate = traces.trace_g_rate;
+        trace_l2_rate = traces.trace_l2_rate;
         trace_logNormratio = vector<double>(num_burn+num_mcmc, 0);
 
 
@@ -447,7 +415,7 @@ public:
             }
             bpp.cur_Z[res][CC][root] = 0; 
         }
-        log_emission = vector<vector<double> >(N, vector<double>(3,0));
+        log_emission = traces.log_emission;
     }
 
     ~BPP_C()

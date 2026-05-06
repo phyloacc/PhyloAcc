@@ -44,6 +44,19 @@ struct ColumnFilterResult
     std::vector<int> removed_sites;
 };
 
+struct BppCTraceBuffers
+{
+    std::vector<double> trace_loglik;
+    std::vector<double> trace_full_loglik;
+    std::vector<std::vector<int> > trace_z;
+    std::vector<double> trace_n_rate;
+    std::vector<double> trace_c_rate;
+    std::vector<double> trace_l_rate;
+    std::vector<double> trace_l2_rate;
+    std::vector<double> trace_g_rate;
+    std::vector<std::vector<double> > log_emission;
+};
+
 std::vector<int> ParseDelimitedNames(const std::string& names,
                                      const std::vector<std::string>& available_names);
 
@@ -94,6 +107,29 @@ ColumnFilterResult RemoveHighMissingColumns(std::vector<std::vector<arma::vec> >
                                             int* simple_block_count = nullptr);
 
 bool IsSimpleOrMissingLeafPattern(std::vector<int> states);
+
+std::vector<bool> BuildMissingNodes(int species_count,
+                                    int node_count,
+                                    int (*children)[2],
+                                    const std::vector<int>& num_missing,
+                                    double missing_threshold,
+                                    int site_count);
+
+bool ConservedMissingExceeds(const std::vector<bool>& missing,
+                             const std::vector<int>& conserved_group,
+                             double conserve_prop);
+
+void CollectUpperNodesInSubtree(const std::vector<int>& nodes,
+                                const std::set<int>& upper,
+                                const std::set<int>& upper_conserve,
+                                std::vector<int>& upper_c,
+                                std::vector<int>& upper_conserve_c);
+
+BppCTraceBuffers InitializeBppCTraceBuffers(int trace_length,
+                                            int node_count,
+                                            double initial_l_rate,
+                                            double initial_l2_rate,
+                                            double initial_g_rate);
 
 }  // namespace phyloacc
 

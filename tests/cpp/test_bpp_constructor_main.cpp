@@ -158,6 +158,53 @@ static void test_simple_or_missing_leaf_pattern() {
     assert(!phyloacc::IsSimpleOrMissingLeafPattern(std::vector<int>{0, 1, 4}));
 }
 
+static void test_missing_node_helpers() {
+    int children[5][2] = {
+        {-1, -1},
+        {-1, -1},
+        {-1, -1},
+        {0, 1},
+        {2, 3},
+    };
+
+    std::vector<bool> missing = phyloacc::BuildMissingNodes(
+        3, 5, children, std::vector<int>{6, 1, 6}, 0.5, 10);
+    assert(missing[0]);
+    assert(!missing[1]);
+    assert(missing[2]);
+    assert(!missing[3]);
+    assert(!missing[4]);
+
+    assert(phyloacc::ConservedMissingExceeds(missing, std::vector<int>{0, 1, 2}, 0.5));
+    assert(!phyloacc::ConservedMissingExceeds(missing, std::vector<int>{0, 1, 2}, 0.9));
+}
+
+static void test_upper_collection_and_trace_buffers() {
+    std::vector<int> upper_c;
+    std::vector<int> upper_conserve_c;
+    phyloacc::CollectUpperNodesInSubtree(
+        std::vector<int>{0, 2, 3},
+        std::set<int>{0, 3, 4},
+        std::set<int>{2, 4},
+        upper_c,
+        upper_conserve_c);
+    assert((upper_c == std::vector<int>{0, 3}));
+    assert((upper_conserve_c == std::vector<int>{2}));
+
+    phyloacc::BppCTraceBuffers traces = phyloacc::InitializeBppCTraceBuffers(4, 5, 1.2, 2.3, 3.4);
+    assert(traces.trace_loglik.size() == 4);
+    assert(traces.trace_full_loglik.size() == 4);
+    assert(traces.trace_z.size() == 4);
+    assert(traces.trace_z[0].size() == 5);
+    assert(traces.trace_z[0][0] == 1);
+    assert(traces.trace_l_rate[0] == 1.2);
+    assert(traces.trace_l2_rate[0] == 2.3);
+    assert(traces.trace_g_rate[0] == 3.4);
+    assert(traces.log_emission.size() == 5);
+    assert(traces.log_emission[0].size() == 3);
+    assert(traces.log_emission[0][0] == 0);
+}
+
 int main() {
     test_parse_delimited_names();
     test_element_layout();
@@ -167,6 +214,8 @@ int main() {
     test_leaf_alignment_encoding_and_missing_counts();
     test_high_missing_column_filter();
     test_simple_or_missing_leaf_pattern();
+    test_missing_node_helpers();
+    test_upper_collection_and_trace_buffers();
     std::cout << "BPP constructor C++ unit tests passed.\n";
     return 0;
 }

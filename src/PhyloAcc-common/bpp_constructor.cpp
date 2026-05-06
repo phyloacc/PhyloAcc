@@ -312,4 +312,86 @@ bool IsSimpleOrMissingLeafPattern(std::vector<int> states)
            states == std::vector<int>{2, 4, 5} || states == std::vector<int>{3, 4, 5};
 }
 
+std::vector<bool> BuildMissingNodes(int species_count,
+                                    int node_count,
+                                    int (*children)[2],
+                                    const std::vector<int>& num_missing,
+                                    double missing_threshold,
+                                    int site_count)
+{
+    std::vector<bool> missing(node_count, false);
+    for (int node = species_count; node < node_count; ++node)
+    {
+        int* child_nodes = children[node];
+        for (int child_index = 0; child_index < 2; ++child_index)
+        {
+            int child = child_nodes[child_index];
+            if (child < species_count && num_missing[child] > missing_threshold * site_count)
+            {
+                missing[child] = true;
+            }
+        }
+
+        if (missing[child_nodes[0]] && missing[child_nodes[1]])
+        {
+            missing[node] = true;
+        }
+    }
+    return missing;
+}
+
+bool ConservedMissingExceeds(const std::vector<bool>& missing,
+                             const std::vector<int>& conserved_group,
+                             double conserve_prop)
+{
+    int missing_count = 0;
+    for (std::vector<int>::const_iterator it = conserved_group.begin(); it != conserved_group.end(); ++it)
+    {
+        if (missing[*it])
+        {
+            missing_count++;
+        }
+    }
+    return missing_count > conserve_prop * conserved_group.size();
+}
+
+void CollectUpperNodesInSubtree(const std::vector<int>& nodes,
+                                const std::set<int>& upper,
+                                const std::set<int>& upper_conserve,
+                                std::vector<int>& upper_c,
+                                std::vector<int>& upper_conserve_c)
+{
+    for (std::vector<int>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+    {
+        if (upper.find(*it) != upper.end())
+        {
+            upper_c.push_back(*it);
+        }
+
+        if (upper_conserve.find(*it) != upper_conserve.end())
+        {
+            upper_conserve_c.push_back(*it);
+        }
+    }
+}
+
+BppCTraceBuffers InitializeBppCTraceBuffers(int trace_length,
+                                            int node_count,
+                                            double initial_l_rate,
+                                            double initial_l2_rate,
+                                            double initial_g_rate)
+{
+    BppCTraceBuffers traces;
+    traces.trace_loglik = std::vector<double>(trace_length, 0);
+    traces.trace_full_loglik = std::vector<double>(trace_length, 0);
+    traces.trace_z = std::vector<std::vector<int> >(trace_length, std::vector<int>(node_count, 1));
+    traces.trace_n_rate = std::vector<double>(trace_length, 0);
+    traces.trace_c_rate = std::vector<double>(trace_length, 0);
+    traces.trace_l_rate = std::vector<double>(trace_length, initial_l_rate);
+    traces.trace_l2_rate = std::vector<double>(trace_length, initial_l2_rate);
+    traces.trace_g_rate = std::vector<double>(trace_length, initial_g_rate);
+    traces.log_emission = std::vector<std::vector<double> >(node_count, std::vector<double>(3, 0));
+    return traces;
+}
+
 }  // namespace phyloacc
