@@ -27,6 +27,7 @@
 
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
+#include "../PhyloAcc-common/bpp_constructor.h"
 #include "../PhyloAcc-common/utils.h"
 
 using namespace std;
@@ -227,8 +228,9 @@ public:
     // matching the species in profile and tree data
     MatchProfAndTree(_prof, _tree);
 
-    element_size = vector<unsigned int>(C);
-    element_start = vector<unsigned int>(C);
+    phyloacc::ElementLayout layout = phyloacc::BuildElementLayout(_prof);
+    element_size = layout.sizes;
+    element_start = layout.starts;
     element_tree = vector<string>(C);
 
     // initialization of profile and tree
@@ -245,42 +247,18 @@ public:
         }
     }
 
-    vector<string> tmp = strutils::split(strutils::trim(_target),';');
-    for(vector<string>::iterator it = tmp.begin(); it<tmp.end();it++)
-    {
-        ptrdiff_t pos = find(species_names.begin(), species_names.end(), *it) - species_names.begin();
-        target_species.push_back(pos);
-    }
-
-    tmp = strutils::split(strutils::trim(_conservegroup),';');
-    for(vector<string>::iterator it = tmp.begin(); it<tmp.end();it++)
-    {
-        ptrdiff_t pos = find(species_names.begin(), species_names.end(), *it) - species_names.begin();
-        conservedgroup.push_back(pos);
-    }
+    target_species = phyloacc::ParseDelimitedNames(_target, species_names);
+    conservedgroup = phyloacc::ParseDelimitedNames(_conservegroup, species_names);
     conserve_prop = _conserve_prop;
 
-    if(indel<1e-10)
-    {
-        num_base = 4;
-    }else{
-        num_base = 5;
-
-    }
-
-    int start = 0;
+    num_base = phyloacc::NumBaseForIndel(indel);
 
     for(int c =0; c<C;c++)  // in mammal bed, the element pos is not continous
     {
-        int end = start + _prof.element_pos[c][1] - _prof.element_pos[c][0];
-        int len = end -start;
-        element_size[c] = len;
-        element_start[c] = start;
         //if(_prof.element_tree.size() >0) element_tree[c] =_prof.element_tree[c];
         if(_prof.element_tree.size() >0){
             element_tree[c] =_prof.element_tree[c]; //if input genetree, use input, and fixtree
         }
-        start = end;
     }
 
     InitPhyloTree(_tree);  //, _indel here read in Q, depends on _indel!
@@ -309,38 +287,20 @@ public:
     TM_Int = vector<mat >(N, zeros<mat>(3,3));
     log_TM_Int = vector<mat >(N, zeros<mat>(3,3));
 
-    tmp = strutils::split(strutils::trim(_outgroup),';');
-    for(vector<string>::iterator it = tmp.begin(); it<tmp.end();it++)
-    {
-        ptrdiff_t pos = find(species_names.begin(), species_names.end(), *it) - species_names.begin();
-        outgroup.push_back(pos);
-    }
-    getUppertree(N-1, outgroup, upper); //upper: set containing all nodes from roots to any species in outgroup
-    getUppertree(N-1, conservedgroup, upper_conserve); //include root!
+    outgroup = phyloacc::ParseDelimitedNames(_outgroup, species_names);
+    phyloacc::BuildUpperTreeSets(N-1, outgroup, conservedgroup, parent, upper, upper_conserve);
 
     if(num_base > 4)  // no indel
     {
-        submat *= (1-indel);
-        mat B = ones<mat>(4,1) * indel;
-        mat C = ones<mat>(1,5) * indel2;
-
-        submat.insert_cols(4, B);
-        submat.insert_rows(4, C);
-
-        colvec c = sum(submat,1);
-        submat.diag() -=c;
-        mat a = null(submat.t());
-        pi = a/accu(a);
+        phyloacc::ApplyIndelExpansion(indel, indel2, submat, pi);
     }
 
-    cx_mat bvec;
-    cx_vec aval;
-    eig_gen(aval, bvec, submat);
-    eigenval = conv_to<mat>::from(aval);
-    eigenvec = conv_to<mat>::from(bvec).t();
-    eigeninv = inv(eigenvec);
+    phyloacc::SubstitutionEigen eigen = phyloacc::ComputeSubstitutionEigen(submat, pi);
+    eigenval = eigen.eigenval;
+    eigenvec = eigen.eigenvec;
+    eigeninv = eigen.eigeninv;
 
-    log_pi = log(pi);
+    log_pi = eigen.log_pi;
 
     //Han*: calculate instantaneous rate
     inst_rate=zeros(6);
