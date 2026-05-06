@@ -33,6 +33,20 @@ std::string ModelPath(const RunPaths& paths, const std::string& stem, ModelId id
     return paths.output_prefix + stem + GetModelSpec(id).suffix + extension;
 }
 
+std::string SanitizeStatusField(const std::string& value) {
+    if (value.empty()) {
+        return ".";
+    }
+
+    std::string clean = value;
+    for (std::size_t i = 0; i < clean.size(); ++i) {
+        if (clean[i] == '\t' || clean[i] == '\n' || clean[i] == '\r') {
+            clean[i] = ' ';
+        }
+    }
+    return clean;
+}
+
 }  // namespace
 
 const ModelSpec& GetModelSpec(ModelId id) {
@@ -143,6 +157,13 @@ std::vector<int> ResolveElementIds(const Config& config, int element_count, Prog
     return ids;
 }
 
+std::string ElementName(const PhyloProf& profile, int element_index) {
+    if (element_index >= 0 && static_cast<std::size_t>(element_index) < profile.element_names.size()) {
+        return profile.element_names[element_index];
+    }
+    return ".";
+}
+
 RunPaths MakeRunPaths(const Config& config) {
     RunPaths paths;
     paths.result_folder = config.output_path;
@@ -186,6 +207,7 @@ void OutputBundle::Close() {
     hyper.close();
     likelihood.close();
     species_names.close();
+    status.close();
 }
 
 OutputBundle OpenOutputBundle(ProgramKind kind,
@@ -196,6 +218,9 @@ OutputBundle OpenOutputBundle(ProgramKind kind,
 
     bundle.hyper.open((paths.output_prefix + "_hyper.txt").c_str());
     WriteHyperHeader(bundle.hyper, config);
+
+    bundle.status.open((paths.output_prefix + "_elem_status.txt").c_str());
+    bundle.status << "chain\tNo.\telement_name\tmode\tstatus\tcompleted_models\tmessage" << std::endl;
 
     if (config.sample_hyper) {
         bundle.likelihood.open((paths.output_prefix + "_elem_lik.txt").c_str());
@@ -230,6 +255,25 @@ OutputBundle OpenOutputBundle(ProgramKind kind,
     }
 
     return bundle;
+}
+
+void WriteElementStatus(std::ofstream& out,
+                        int chain,
+                        int element_index,
+                        const std::string& element_name,
+                        const std::string& mode,
+                        const std::string& status,
+                        const std::string& completed_models,
+                        const std::string& message) {
+    #pragma omp critical(phyloacc_status_output)
+    {
+        out << chain << "\t" << element_index << "\t"
+            << SanitizeStatusField(element_name) << "\t"
+            << SanitizeStatusField(mode) << "\t"
+            << SanitizeStatusField(status) << "\t"
+            << SanitizeStatusField(completed_models) << "\t"
+            << SanitizeStatusField(message) << std::endl;
+    }
 }
 
 }  // namespace phyloacc

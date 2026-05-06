@@ -28,6 +28,17 @@ static std::string first_line(const std::string& path) {
     return line;
 }
 
+static std::vector<std::string> read_lines(const std::string& path) {
+    std::ifstream in(path.c_str());
+    assert(in.good());
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+        lines.push_back(line);
+    }
+    return lines;
+}
+
 static bool file_exists(const std::string& path) {
     std::ifstream in(path.c_str());
     return in.good();
@@ -90,6 +101,8 @@ static void test_output_headers() {
         "No.\tn_rate\tc_rate\tg_rate\tl_rate\tl2_rate"
         "\tsp1_0\tsp1_1\tsp1_2\tsp1_3"
         "\tsp2_0\tsp2_1\tsp2_2\tsp2_3";
+    const std::string expected_status_header =
+        "chain\tNo.\telement_name\tmode\tstatus\tcompleted_models\tmessage";
 
     phyloacc::Config st_config;
     st_config.output_path = make_temp_dir();
@@ -98,6 +111,8 @@ static void test_output_headers() {
     phyloacc::RunPaths st_paths = phyloacc::MakeRunPaths(st_config);
     phyloacc::OutputBundle st_outputs = phyloacc::OpenOutputBundle(
         phyloacc::ProgramKind::ST, st_paths, nodes, st_config);
+    phyloacc::WriteElementStatus(st_outputs.status, 1, 3, "elem\t3",
+                                 "ST", "ok", "M0,M1,M2", "");
     st_outputs.Close();
 
     assert(file_exists(st_paths.output_prefix + "_rate_postZ_M0.txt"));
@@ -106,6 +121,10 @@ static void test_output_headers() {
     assert(first_line(st_paths.output_prefix + "_rate_postZ_M0.txt") == expected_rate);
     assert(first_line(st_paths.output_prefix + "_elem_lik.txt") == "No.\tID\tloglik_all\tloglik_Max");
     assert(first_line(st_paths.output_prefix + "_species_names.txt") == "sp1");
+    assert(first_line(st_paths.output_prefix + "_elem_status.txt") == expected_status_header);
+    std::vector<std::string> st_status = read_lines(st_paths.output_prefix + "_elem_status.txt");
+    assert(st_status.size() == 2);
+    assert(st_status[1] == "1\t3\telem 3\tST\tok\tM0,M1,M2\t.");
 
     phyloacc::Config gt_config;
     gt_config.output_path = make_temp_dir();
@@ -121,12 +140,23 @@ static void test_output_headers() {
     assert(first_line(gt_paths.output_prefix + "_tree_M1.txt") == "No.\tprop\tgenetree");
     assert(first_line(gt_paths.output_prefix + "_tree_M2.txt") == "No.\tprop\tgenetree");
     assert(first_line(gt_paths.output_prefix + "_elem_lik.txt") == "No.\tID\tloglik_Full\tloglik_Max");
+    assert(first_line(gt_paths.output_prefix + "_elem_status.txt") == expected_status_header);
+}
+
+static void test_element_names() {
+    PhyloProf profile;
+    profile.element_names = {"elem0", "elem1"};
+    assert(phyloacc::ElementName(profile, 0) == "elem0");
+    assert(phyloacc::ElementName(profile, 1) == "elem1");
+    assert(phyloacc::ElementName(profile, 2) == ".");
+    assert(phyloacc::ElementName(profile, -1) == ".");
 }
 
 int main() {
     test_model_specs();
     test_resolve_element_ids();
     test_output_headers();
+    test_element_names();
     std::cout << "Run common C++ unit tests passed.\n";
     return 0;
 }

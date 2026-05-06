@@ -126,6 +126,9 @@ int main(int argc, char* argv[])
             {
                 int c = ids[i];
                 bool filter = false;
+                bool saw_model_failure = false;
+                string completed_models = "none";
+                string element_name = phyloacc::ElementName(profile, c);
 
                 try{
                     BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
@@ -133,6 +136,9 @@ int main(int argc, char* argv[])
                                config.prune, config.revgap, config.min_length);
                     if(filter) {
                         if(config.verbose) cerr << "filter: "<< c <<endl;
+                        phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                                     "GT-sample-hyper", "filtered",
+                                                     completed_models, "filter");
                         continue;
                     }
 
@@ -143,9 +149,18 @@ int main(int argc, char* argv[])
 
                     if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m2.trace_slot);
                     bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m2.id), outputs.Tree(m2.id), bppc.verbose);
+                    saw_model_failure = saw_model_failure || bppc.failure;
+                    completed_models = m2.suffix;
+                    phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                                 "GT-sample-hyper",
+                                                 saw_model_failure ? "model_failure" : "ok",
+                                                 completed_models, "");
 
                 }catch (exception& e){
                     cout << c << " Standard exception: " << e.what() << endl;
+                    phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                                 "GT-sample-hyper", "error",
+                                                 completed_models, e.what());
                 }
             }
             bpp.sample_hyperparam(iter, ids, outputs.hyper);
@@ -158,14 +173,25 @@ int main(int argc, char* argv[])
         {
             int c = ids[i];
             bool filter = false;
+            bool saw_model_failure = false;
+            string completed_models = "none";
+            string element_name = phyloacc::ElementName(profile, c);
             try{
                 // accelerate in target species
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
                            filter, config.verbose, config.consToMis, config.block,
                            config.prune, config.revgap, config.min_length);
                 bppc.simulate(bpp, profile, config.gapchar,config.prune);
+                saw_model_failure = saw_model_failure || bppc.failure;
+                completed_models = "simulate";
+                phyloacc::WriteElementStatus(outputs.status, 1, c, element_name,
+                                             "GT-simulate", saw_model_failure ? "model_failure" : "ok",
+                                             completed_models, "");
             }catch (exception& e){
                 cout << c << " Standard exception: " << e.what() << endl;
+                phyloacc::WriteElementStatus(outputs.status, 1, c, element_name,
+                                             "GT-simulate", "error",
+                                             completed_models, e.what());
             }
         }
 
@@ -176,6 +202,9 @@ int main(int argc, char* argv[])
         {
             int c = ids[i];
             bool filter = false;
+            bool saw_model_failure = false;
+            string completed_models = "none";
+            string element_name = phyloacc::ElementName(profile, c);
 
             try{
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
@@ -184,6 +213,8 @@ int main(int argc, char* argv[])
                 cout<<"element "<<to_string(c)<<", number of base pair="<<to_string(bppc.GG)<<endl;
                 if(filter) {
                   if(config.verbose) cerr << "filter: "<< c <<endl;
+                  phyloacc::WriteElementStatus(outputs.status, 1, c, element_name,
+                                               "GT", "filtered", completed_models, "filter");
                   continue;
                 }
 
@@ -220,6 +251,8 @@ int main(int argc, char* argv[])
                     }
                 }
                 bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m0.id), outputs.Tree(m0.id), bppc.verbose);
+                saw_model_failure = saw_model_failure || bppc.failure;
+                completed_models = m0.suffix;
 
                 cout<<"start restricted model\n";
                 for (int iter = 0; iter <= tot; iter++)
@@ -235,6 +268,8 @@ int main(int argc, char* argv[])
                     }
                 }
                 bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m1.id), outputs.Tree(m1.id), bppc.verbose);
+                saw_model_failure = saw_model_failure || bppc.failure;
+                completed_models = m0.suffix + "," + m1.suffix;
 
                 cout<<"start full model\n";
                 for (int iter = 0; iter <= tot; iter++)
@@ -250,12 +285,19 @@ int main(int argc, char* argv[])
                     }
                 }
                 bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m2.id), outputs.Tree(m2.id), bppc.verbose);
+                saw_model_failure = saw_model_failure || bppc.failure;
+                completed_models = m0.suffix + "," + m1.suffix + "," + m2.suffix;
 
                 cout << c << "\t" << bpp.log_liks_WL[0][c] <<"\t" <<  bpp.log_liks_WL[2][c] <<"\t" <<  bpp.log_liks_WL[1][c] <<endl;
                 cout<<"\t" << bpp.log_liks_Z[0][c] << "\t" << bpp.log_liks_Z[2][c]<<"\t" << bpp.log_liks_Z[1][c] << endl;
+                phyloacc::WriteElementStatus(outputs.status, 1, c, element_name,
+                                             "GT", saw_model_failure ? "model_failure" : "ok",
+                                             completed_models, "");
 
             }catch (exception& e){
               cout << c << " Standard exception: " << e.what() << endl;
+              phyloacc::WriteElementStatus(outputs.status, 1, c, element_name,
+                                           "GT", "error", completed_models, e.what());
             }
       }
 

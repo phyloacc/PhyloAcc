@@ -38,6 +38,7 @@ PhyloProf LoadProfile(const Config& config);
 PhyloTree LoadSpeciesTree(const Config& config);
 void DisplayRunSummary(const PhyloProf& profile, const Config& config, ProgramKind kind);
 std::vector<int> ResolveElementIds(const Config& config, int element_count, ProgramKind kind);
+std::string ElementName(const PhyloProf& profile, int element_index);
 
 struct RunPaths {
     std::string result_folder;
@@ -59,6 +60,7 @@ public:
     std::ofstream hyper;
     std::ofstream likelihood;
     std::ofstream species_names;
+    std::ofstream status;
 
     std::ofstream& RatePostZ(ModelId id);
     std::ofstream& Tree(ModelId id);
@@ -82,6 +84,15 @@ OutputBundle OpenOutputBundle(ProgramKind kind,
                               const RunPaths& paths,
                               const std::vector<std::string>& node_names,
                               const Config& config);
+
+void WriteElementStatus(std::ofstream& out,
+                        int chain,
+                        int element_index,
+                        const std::string& element_name,
+                        const std::string& mode,
+                        const std::string& status,
+                        const std::string& completed_models,
+                        const std::string& message);
 
 }  // namespace phyloacc
 

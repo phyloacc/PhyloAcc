@@ -78,6 +78,9 @@ int main(int argc, char* argv[])
         {
             int c = ids[i];
             bool filter = false;
+            bool saw_model_failure = false;
+            string completed_models = "none";
+            string element_name = phyloacc::ElementName(profile, c);
             try {
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
                            filter, config.verbose, config.consToMis, config.prune,
@@ -85,6 +88,8 @@ int main(int argc, char* argv[])
 
                 if(filter) {
                     if(config.verbose) cerr << "filter: "<< c <<endl;
+                    phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                                 "ST", "filtered", completed_models, "filter");
                     continue;
                 }
 
@@ -97,6 +102,8 @@ int main(int argc, char* argv[])
                     bppc.Eval2(bpp,m0.res_z);
                     if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m0.trace_slot);
                     bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m0.id), m0.res_z);
+                    saw_model_failure = saw_model_failure || bppc.failure;
+                    completed_models = m0.suffix;
 
                     bppc.initMCMC(iter,bpp,m1.res_z);
                     bppc.Gibbs(iter,bpp,outputs.RatePostZ(m1.id),paths.output_prefix,
@@ -105,6 +112,8 @@ int main(int argc, char* argv[])
                     bppc.Eval2(bpp,m1.res_z);
                     if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m1.trace_slot);
                     bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m1.id), m1.res_z);
+                    saw_model_failure = saw_model_failure || bppc.failure;
+                    completed_models = m0.suffix + "," + m1.suffix;
                 }
 
                 bppc.initMCMC(iter,bpp,m2.res_z);
@@ -114,9 +123,16 @@ int main(int argc, char* argv[])
                 bppc.Eval2(bpp,m2.res_z);
                 if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m2.trace_slot);
                 bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m2.id), m2.res_z);
+                saw_model_failure = saw_model_failure || bppc.failure;
+                completed_models = config.sample_hyper ? m2.suffix : m0.suffix + "," + m1.suffix + "," + m2.suffix;
+                phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                             "ST", saw_model_failure ? "model_failure" : "ok",
+                                             completed_models, "");
 
             }catch (exception& e){
               cout << c << " 1 Standard exception: " << e.what() << endl;
+              phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
+                                           "ST", "error", completed_models, e.what());
             }
         }
 

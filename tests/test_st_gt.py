@@ -83,6 +83,24 @@ def _assert_gt_output_invariants(output_path):
             assert 0.0 <= value <= 1.0
 
 
+def _assert_status_file(status_path, expected_rows, expected_mode):
+    assert status_path.exists(), f"Expected status output not found: {status_path}"
+    lines = [line.rstrip("\n") for line in status_path.read_text(encoding="utf-8").splitlines()]
+    assert lines[0].split("\t") == [
+        "chain",
+        "No.",
+        "element_name",
+        "mode",
+        "status",
+        "completed_models",
+        "message",
+    ]
+    rows = [line.split("\t") for line in lines[1:]]
+    assert len(rows) == expected_rows
+    assert {row[3] for row in rows} == {expected_mode}
+    assert all(row[4] != "error" for row in rows)
+
+
 def _write_st_cfg(cfg_path, minimal_data, out_dir):
     cfg_path.write_text(
         "\n".join(
@@ -143,6 +161,7 @@ def test_st_minimal_run(minimal_data, tmp_path, phyloacc_st_bin):
 
     out_file = out_dir / "test_rate_postZ_M0.txt"
     assert out_file.exists(), f"Expected output not found: {out_file}"
+    _assert_status_file(out_dir / "test_elem_status.txt", expected_rows=2, expected_mode="ST")
     compare_or_record_golden(
         out_file,
         Path("tests/golden/minimal/st_rate_postZ_M0.txt"),
@@ -163,6 +182,8 @@ def test_gt_minimal_run(minimal_data, tmp_path, phyloacc_gt_bin):
     out_file = out_dir / "test_rate_postZ_M0.txt"
     assert out_file.exists(), f"Expected output not found: {out_file}"
     _assert_gt_output_invariants(out_file)
+    expected_status_rows = len([line for line in gt_data["ids"].read_text(encoding="utf-8").splitlines() if line.strip()])
+    _assert_status_file(out_dir / "test_elem_status.txt", expected_status_rows, expected_mode="GT")
     compare_or_record_golden(
         out_file,
         _resolve_gt_golden(),
