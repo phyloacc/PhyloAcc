@@ -6,7 +6,10 @@ from conftest import run_cmd
 
 CPP_DIR = Path("tests/cpp")
 ENV_PREFIX = Path(sys.executable).resolve().parents[1]
-CPP_ENV = {"LD_LIBRARY_PATH": str(ENV_PREFIX / "lib")}
+ROOT = Path(__file__).resolve().parents[1]
+CPP_TMPDIR = ROOT / ".llm-tmp"
+CPP_TMPDIR.mkdir(exist_ok=True)
+CPP_ENV = {"LD_LIBRARY_PATH": str(ENV_PREFIX / "lib"), "TMPDIR": str(CPP_TMPDIR)}
 
 
 def _cpp_bin(name):
@@ -24,6 +27,11 @@ def test_cpp_st_sanity_binary_runs():
 def test_cpp_gt_sanity_binary_runs():
     output = run_cmd([_cpp_bin("phyloacc_cpp_tests_gt")], env=CPP_ENV)
     assert "GT C++ unit tests passed." in output
+
+
+def test_cpp_run_common_sanity_binary_runs():
+    output = run_cmd([_cpp_bin("phyloacc_cpp_tests_run_common")], env=CPP_ENV)
+    assert "Run common C++ unit tests passed." in output
 
 
 def test_cpp_st_missing_file_fails():

@@ -15,10 +15,11 @@ FAIL_ST_BIN := phyloacc_cpp_fail_st
 FAIL_GT_BIN := phyloacc_cpp_fail_gt
 FAIL_ST_PROFILE_BIN := phyloacc_cpp_fail_st_profile
 FAIL_GT_PROFILE_BIN := phyloacc_cpp_fail_gt_profile
+RUN_COMMON_BIN := phyloacc_cpp_tests_run_common
 
 .PHONY: all clean
 
-all: $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN)
+all: $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN)
 
 $(ST_BIN): test_st_main.cpp $(COMMON_DIR)/newick.cpp $(COMMON_DIR)/profile.cpp $(COMMON_DIR)/utils.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) -I$(ST_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
@@ -38,5 +39,8 @@ $(FAIL_ST_PROFILE_BIN): fail_st_profile_main.cpp $(COMMON_DIR)/profile.cpp $(COM
 $(FAIL_GT_PROFILE_BIN): fail_gt_profile_main.cpp $(COMMON_DIR)/profile.cpp $(COMMON_DIR)/utils.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) -I$(GT_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
+$(RUN_COMMON_BIN): test_run_common_main.cpp $(COMMON_DIR)/run.cpp $(COMMON_DIR)/config.cpp $(COMMON_DIR)/newick.cpp $(COMMON_DIR)/profile.cpp $(COMMON_DIR)/utils.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) -I$(ST_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+
 clean:
-	rm -f $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN)
+	rm -f $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN)
