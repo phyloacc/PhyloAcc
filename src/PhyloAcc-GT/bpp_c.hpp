@@ -31,6 +31,7 @@
 
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
+#include "../PhyloAcc-common/bpp_constructor.h"
 #include "bpp.hpp"
 #include "../PhyloAcc-common/utils.h"
 #include "genetree.hpp"
@@ -235,10 +236,6 @@ public:
 
         //cout << CC << ": " << GG << " bp" << endl;
 
-        lambda = vector< vector<vec> > (GG, vector<vec>(N));
-        Tg = vector < vector< int> > (GG, vector<int>(N));
-        
-
         ratio0 = bpp.ratio0;  //no use
         ratio1 = bpp.ratio1; //no use
 
@@ -264,7 +261,6 @@ public:
         prior_dir_param=bpp.prior_dir_param;        
 
         if(verbose) cout << "Init lambda" <<endl;
-        vector<int> num_missing = vector<int> (S,0);
 
         //get leaves lambda
         int st = bpp.element_start[CC];
@@ -275,154 +271,41 @@ public:
 
         vector < vector< int> > Tg2 = vector < vector< int> > (GG, vector<int>(N));
         for(int s=0; s<S; s++){
-            string y = _prof.X[s].substr(st, st+GG);
             for(int g=0; g<GG; g++){
                 int gs=myvector[g];
-                Tg2[g][s] = -1;
-                switch (y[gs])
-                {
-                    case 'a':
-                        Tg2[g][s] = 0; break;
-                    case 'c':
-                        Tg2[g][s] = 1; break;
-                    case 'g':
-                        Tg2[g][s] = 2; break;
-                    case 't':
-                        Tg2[g][s] = 3; break;
-                    case 'r':
-                        break;
-                    case 'y':
-                        break;
-                    case 'k':
-                        break;
-                    case 'm':
-                        break;
-                    case 's':
-                        break;
-                    case 'w':
-                        break;
-                    default:
-                        if(y[gs] == gapchar || y[gs]=='n' || y[gs]=='*') {Tg2[g][s] = 4; break;}
-			            Tg2[g][s] = 5;
-                }
+                Tg2[g][s] = phyloacc::EncodeLeafState(
+                    _prof.X[s][st + gs], gapchar, phyloacc::MissingBasePolicy::GapNStar);
             }
         }
         
-        vector<int>::iterator ip;
         vector<int> tmp_tg;
         vector<int> myvector2={}; //put all identical bp blocks in front.
         for(int g=0; g<GG; g++){
             tmp_tg=Tg2[g];
-            std::sort(tmp_tg.begin(),tmp_tg.end());
-            ip=std::unique(tmp_tg.begin(),tmp_tg.end());
-            tmp_tg.resize(std::distance(tmp_tg.begin(),ip));
-            if(tmp_tg.size()==1){
-                myvector2.insert(myvector2.begin(),g);
-                idblk_count+=1;
-            }else if(tmp_tg.size()==2){
-                if(tmp_tg== vector<int>{0,4} || tmp_tg==vector<int>{0,5} || tmp_tg==vector<int>{1,4} || 
-                tmp_tg==vector<int>{1,5} || tmp_tg==vector<int>{2,4} || tmp_tg==vector<int>{2,5} || 
-                tmp_tg==vector<int>{3,4} || tmp_tg==vector<int>{3,5} || tmp_tg==vector<int>{4,5}){
+            if(phyloacc::IsSimpleOrMissingLeafPattern(tmp_tg)){
                     myvector2.insert(myvector2.begin(),g);
                     idblk_count+=1;
-                }else{
-                    myvector2.push_back(g);
-                }
-            }else if(tmp_tg==vector<int> {0,4,5} ||tmp_tg==vector<int> {1,4,5} ||tmp_tg==vector<int> {2,4,5} ||tmp_tg==vector<int> {3,4,5}){
-                    myvector2.insert(myvector2.begin(),g);
-                    idblk_count+=1;                
             }else{
                 myvector2.push_back(g);
             }
         }
         //cout<<"number of idblk is "<<idblk_count<<". myvec2 length "<<myvector2.size()<<". GG="<<GG<<endl;
 
-        for(int s=0; s<S; s++)
+        phyloacc::LeafEncoding leaf_encoding = phyloacc::EncodeLeafAlignment(
+            _prof.X, st, GG, S, N, bpp.num_base, gapchar,
+            phyloacc::MissingBasePolicy::GapNStar, myvector2);
+        lambda = leaf_encoding.lambda;
+        Tg = leaf_encoding.tg;
+
+        phyloacc::ColumnFilterResult column_filter = phyloacc::RemoveHighMissingColumns(
+            lambda, Tg, S, revgap, min_length, &idblk_count);
+        if(column_filter.filtered)
         {
-            //const char* y = bpp.X[c][s].c_str();
-            string y = _prof.X[s].substr(st, st+GG);
-
-            for(int g=0; g<GG; g++) {
-                int gs = myvector2[g];
-                lambda[g][s] = zeros<vec>(bpp.num_base);
-                lambda[g][s].fill(LOG_ZERO);
-                Tg[g][s] = -1;
-                switch (y[gs])
-                {
-                    case 'a':
-                        lambda[g][s][0] = 0; Tg[g][s] = 0; break;
-                    case 'c':
-                        lambda[g][s][1] = 0; Tg[g][s] = 1; break;
-                    case 'g':
-                        lambda[g][s][2] = 0; Tg[g][s] = 2; break;
-                    case 't':
-                        lambda[g][s][3] = 0; Tg[g][s] = 3; break;
-                    case 'r': // a/g
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][2] = 0;
-                        break;
-                    case 'y': // c/t
-                        lambda[g][s][1] = 0;
-                        lambda[g][s][3] = 0;  break;
-                    case 'k': // g/t
-                        lambda[g][s][2] = 0;
-                        lambda[g][s][3] = 0;  break;
-                    case 'm': // a/c
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][1] = 0;  break;
-                    case 's': // g/c
-                        lambda[g][s][1] = 0;
-                        lambda[g][s][2] = 0;  break;
-                    case 'w': // a/t
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][3] = 0;  break;
-                    default:
-                        for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
-                        //if(y[gs] == gapchar) {Tg[g][s] = 4; break;}
-                        if(y[gs] == gapchar || y[gs]=='n' || y[gs]=='*') {Tg[g][s] = 4; break;}
-			            Tg[g][s] = 5;
-                }
-            }
-
+            filter = true;
+            return;
         }
-   
 
-        // remove columns with nearly all gaps
-        if(revgap < 1)
-        {
-            //remove bases with 'n'/'*' or gap in more than 80% species
-            vector<int> missingBase;
-            for(int g=0; g<GG; g++)
-            {
-                int mis = 0;
-                for(int s=0; s<S; s++){
-                    if(Tg[g][s] >= 4)
-                    {
-                        mis++;
-                    }
-                }
-                if(mis > S*revgap)
-                {
-                    missingBase.push_back(g);
-                    if(g<idblk_count) idblk_count = idblk_count -1;
-                }
-
-            }
-
-            if(static_cast<int>(GG - missingBase.size()) < min_length)
-            {
-                filter = true;
-                return;
-            }
-
-            for(vector<int>::reverse_iterator it = missingBase.rbegin(); it!= missingBase.rend(); it ++)
-            {
-                lambda.erase(lambda.begin() + *it);
-                Tg.erase(Tg.begin() + *it);
-            }
-
-            GG = lambda.size();
-        }
+        GG = column_filter.length;
         //cout<<"After filter, number of idblk is "<<idblk_count<<". GG="<<GG<<endl;
         if(idblk_count<=5) idblk_count=0; 
         
@@ -437,18 +320,7 @@ public:
         }
         */
 
-        // get gap species after filtering
-        for(int s=0; s<S; s++)
-        {
-            for(int g= 0; g < GG; g++)
-            {
-                if( Tg[g][s] == 4) //10Nov: >=4?
-                {
-                    num_missing[s] ++;
-                }
-
-            }
-        }
+        vector<int> num_missing = phyloacc::CountMissingBySpecies(Tg, S);
 
         
 

@@ -30,6 +30,7 @@
 
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
+#include "../PhyloAcc-common/bpp_constructor.h"
 #include "bpp.hpp"
 #include "../PhyloAcc-common/utils.h"
 
@@ -161,11 +162,8 @@ public:
             return;
         }
         
-        Tg = vector<vector<int> > (GG, vector<int>(N, -1));
         root = N-1;
         S = bpp.S;
-        
-        lambda = vector< vector<vec> >(GG, vector<vec>(N, zeros<vec>(bpp.num_base)));
         
         
         ratio0 = bpp.ratio0;  //no use
@@ -201,117 +199,25 @@ public:
         
         
         if(verbose) cout << "Init lambda" <<endl;
-        vector<int> num_missing = vector<int> (S,0);
         
         int st = bpp.element_start[CC];
-        //get leaves lambda
-        for(int s=0; s<S; s++)
+        vector<int> site_order;
+        phyloacc::LeafEncoding leaf_encoding = phyloacc::EncodeLeafAlignment(
+            _prof.X, st, GG, S, N, bpp.num_base, gapchar,
+            phyloacc::MissingBasePolicy::GapOnly, site_order);
+        lambda = leaf_encoding.lambda;
+        Tg = leaf_encoding.tg;
+
+        phyloacc::ColumnFilterResult column_filter = phyloacc::RemoveHighMissingColumns(
+            lambda, Tg, S, revgap, min_length);
+        if(column_filter.filtered)
         {
-            //const char* y = bpp.X[c][s].c_str();
-            string y = _prof.X[s].substr(st, st+GG);
-            
-            for(int g=0; g<GG; g++){
-                lambda[g][s].fill(LOG_ZERO);
-//                if( y[g]== gapchar || y[g]=='n')
-//                {
-//                    num_missing[s] ++;
-//                    //Tg[g][s] = 4;  // for missing base pair
-//                }
-                switch (y[g])
-                {
-                    case 'a':
-                        lambda[g][s][0] = 0; Tg[g][s] = 0; break;
-                    case 'c':
-                        lambda[g][s][1] = 0; Tg[g][s] = 1; break;
-                    case 'g':
-                        lambda[g][s][2] = 0; Tg[g][s] = 2; break;
-                    case 't':
-                        lambda[g][s][3] = 0; Tg[g][s] = 3; break;
-                    case 'r':
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][2] = 0;
-                        break;
-                    case 'y':
-                        lambda[g][s][1] = 0;
-                        lambda[g][s][3] = 0;   break;
-                    case 'k':
-                        lambda[g][s][2] = 0;
-                        lambda[g][s][3] = 0;  break;
-                    case 'm':
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][1] = 0;  break;
-                    case 's':
-                        lambda[g][s][1] = 0;
-                        lambda[g][s][2] = 0;   break;
-                    case 'w':
-                        lambda[g][s][0] = 0;
-                        lambda[g][s][3] = 0;   break;
-                    // case gapchar:
-                    //     if(bpp.num_base <= 4){
-                    //         for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
-                    //     }
-                    //     else{
-                    //         lambda[g][s][4] = 0;
-                    //     }
-                    //     Tg[g][s] = 4; break;
-                    default:
-                        for(int b =0;b<bpp.num_base;b++) lambda[g][s][b] = 0;
-                        if(y[g] == gapchar) {Tg[g][s] = 4; break;}
-                        Tg[g][s] = 5; 
-                }
-            }
-            
+            filter = true;
+            return;
         }
-        
-        
-        // remove columns with nearly all gaps
-        if(revgap < 1)
-        {
-            //remove bases with 'n'/'*' or gap in more than 80% species
-            vector<int> missingBase;
-            for(int g=0; g<GG; g++)
-            {
-                int mis = 0;
-                for(int s=0; s<S; s++){
-                    if(Tg[g][s] >= 4)
-                    {
-                        mis++;
-                    }
-                }
-                if(mis > S*revgap)
-                {
-                    missingBase.push_back(g);
-                }
-                
-            }
-            
-            if(static_cast<int>(GG - missingBase.size()) < min_length)
-            {
-                filter = true;
-                return;
-            }
-            
-            for(vector<int>::reverse_iterator it = missingBase.rbegin(); it!= missingBase.rend(); it ++)
-            {
-                lambda.erase(lambda.begin() + *it);
-                Tg.erase(Tg.begin() + *it);
-            }
-            
-            GG = lambda.size();
-        }
-        
-        // get gap species after filtering
-        for(int s=0; s<S; s++)
-        {
-            for(int g= 0; g < GG; g++)
-            {
-                if( Tg[g][s] == 4)
-                {
-                    num_missing[s] ++;
-                }
-                
-            }
-        }
+        GG = column_filter.length;
+
+        vector<int> num_missing = phyloacc::CountMissingBySpecies(Tg, S);
 
         ambiguousS_null = vector<vector<vec> > (GG, vector<vec>(S,zeros<vec>(bpp.num_base)));
         
