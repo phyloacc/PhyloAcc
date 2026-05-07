@@ -72,6 +72,10 @@ int main(int argc, char* argv[])
     for(int iter =0; iter<config.num_chain; iter++)
     {
         cout << "Running MCMC chain " << iter +1 << " ..." << endl;
+        vector<string> rate_rows_m0(ids.size());
+        vector<string> rate_rows_m1(ids.size());
+        vector<string> rate_rows_m2(ids.size());
+        vector<string> status_rows(ids.size());
 
         #pragma omp parallel for schedule (guided) num_threads(config.num_thread)
         for(std::size_t i = 0; i < ids.size(); i++ )
@@ -84,12 +88,13 @@ int main(int argc, char* argv[])
             try {
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
                            filter, config.verbose, config.consToMis, config.prune,
-                           config.revgap, config.min_length);
+                           config.revgap, config.min_length, 1, iter);
 
                 if(filter) {
                     if(config.verbose) cerr << "filter: "<< c <<endl;
-                    phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
-                                                 "ST", "filtered", completed_models, "filter");
+                    status_rows[i] = phyloacc::FormatElementStatus(iter + 1, c, element_name,
+                                                                   "ST", "filtered",
+                                                                   completed_models, "filter");
                     continue;
                 }
 
@@ -101,7 +106,7 @@ int main(int argc, char* argv[])
                                lrate_prop, grate_prop);
                     bppc.Eval2(bpp,m0.res_z);
                     if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m0.trace_slot);
-                    bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m0.id), m0.res_z);
+                    rate_rows_m0[i] = bppc.Output_init_row(bpp, m0.res_z);
                     saw_model_failure = saw_model_failure || bppc.failure;
                     completed_models = m0.suffix;
 
@@ -111,7 +116,7 @@ int main(int argc, char* argv[])
                                lrate_prop, grate_prop);
                     bppc.Eval2(bpp,m1.res_z);
                     if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m1.trace_slot);
-                    bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m1.id), m1.res_z);
+                    rate_rows_m1[i] = bppc.Output_init_row(bpp, m1.res_z);
                     saw_model_failure = saw_model_failure || bppc.failure;
                     completed_models = m0.suffix + "," + m1.suffix;
                 }
@@ -122,18 +127,27 @@ int main(int argc, char* argv[])
                            lrate_prop, grate_prop);
                 bppc.Eval2(bpp,m2.res_z);
                 if(bppc.verbose || bppc.failure) bppc.Output_sampling(iter, paths.output_prefix2, bpp, m2.trace_slot);
-                bppc.Output_init(paths.output_prefix,paths.output_prefix2,bpp,outputs.RatePostZ(m2.id), m2.res_z);
+                rate_rows_m2[i] = bppc.Output_init_row(bpp, m2.res_z);
                 saw_model_failure = saw_model_failure || bppc.failure;
                 completed_models = config.sample_hyper ? m2.suffix : m0.suffix + "," + m1.suffix + "," + m2.suffix;
-                phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
-                                             "ST", saw_model_failure ? "model_failure" : "ok",
-                                             completed_models, "");
+                status_rows[i] = phyloacc::FormatElementStatus(iter + 1, c, element_name,
+                                                               "ST", saw_model_failure ? "model_failure" : "ok",
+                                                               completed_models, "");
 
             }catch (exception& e){
               cout << c << " 1 Standard exception: " << e.what() << endl;
-              phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
-                                           "ST", "error", completed_models, e.what());
+              status_rows[i] = phyloacc::FormatElementStatus(iter + 1, c, element_name,
+                                                             "ST", "error", completed_models,
+                                                             e.what());
             }
+        }
+
+        for(std::size_t i = 0; i < ids.size(); i++)
+        {
+            outputs.RatePostZ(m0.id) << rate_rows_m0[i];
+            outputs.RatePostZ(m1.id) << rate_rows_m1[i];
+            outputs.RatePostZ(m2.id) << rate_rows_m2[i];
+            outputs.status << status_rows[i];
         }
 
         try{

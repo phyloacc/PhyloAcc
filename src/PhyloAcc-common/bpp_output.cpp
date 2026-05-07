@@ -1,6 +1,7 @@
 #include "bpp_output.h"
 
 #include <algorithm>
+#include <sstream>
 
 namespace phyloacc
 {
@@ -42,6 +43,26 @@ std::vector<std::vector<int> > CountZStates(int node_count,
     return countZ;
 }
 
+std::string FormatInitSummaryRow(int cc,
+                                 double n_rate,
+                                 double c_rate,
+                                 double g_rate,
+                                 double l_rate,
+                                 double l2_rate,
+                                 const std::vector<std::vector<int> >& countZ,
+                                 int denom)
+{
+    std::ostringstream row;
+    row << cc << "\t" << n_rate << "\t" << c_rate << "\t" << g_rate << "\t" << l_rate << "\t" << l2_rate;
+    for (std::size_t s = 0; s < countZ.size(); ++s)
+    {
+        for (int k = 0; k < 4; ++k)
+            row << "\t" << static_cast<double>(countZ[s][k]) / denom;
+    }
+    row << "\n";
+    return row.str();
+}
+
 void WriteInitSummaryRow(std::ofstream& out_Z,
                          int cc,
                          double n_rate,
@@ -52,13 +73,7 @@ void WriteInitSummaryRow(std::ofstream& out_Z,
                          const std::vector<std::vector<int> >& countZ,
                          int denom)
 {
-    out_Z << cc << "\t" << n_rate << "\t" << c_rate << "\t" << g_rate << "\t" << l_rate << "\t" << l2_rate;
-    for (std::size_t s = 0; s < countZ.size(); ++s)
-    {
-        for (int k = 0; k < 4; ++k)
-            out_Z << "\t" << static_cast<double>(countZ[s][k]) / denom;
-    }
-    out_Z << std::endl;
+    out_Z << FormatInitSummaryRow(cc, n_rate, c_rate, g_rate, l_rate, l2_rate, countZ, denom);
 }
 
 void WriteNodeHeader(std::ofstream& out,

@@ -29,6 +29,7 @@ void GTree:: copyto(int len, GTree & gtree){
     //gtree.N = N;
     //gtree.S = S;
     gtree.RNG = RNG;
+    gtree.twister_ptr = twister_ptr == nullptr ? &twister : twister_ptr;
     gtree.GG = len;
     gtree.root = root;
     
@@ -404,7 +405,7 @@ void GTree:: initTree(vector<bool> & missing, set<int> & upper, BPP & bpp){
         int p = bpp.parent[s];
         double height2 = p < N? bpp.heights[p] : INFINITY;
         
-        std::shuffle ( temp_children[s].begin(),temp_children[s].end(), bpp.twister); //default_random_engine(seed)
+        std::shuffle ( temp_children[s].begin(),temp_children[s].end(), ShuffleRng()); //default_random_engine(seed)
         
         size_t nn = temp_children[s].size();
         double current_height = bpp.heights[s];

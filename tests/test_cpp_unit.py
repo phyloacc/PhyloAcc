@@ -39,6 +39,11 @@ def test_cpp_bpp_constructor_sanity_binary_runs():
     assert "BPP constructor C++ unit tests passed." in output
 
 
+def test_cpp_rng_sanity_binary_runs():
+    output = run_cmd([_cpp_bin("phyloacc_cpp_tests_rng")], env=CPP_ENV)
+    assert "RNG C++ unit tests passed." in output
+
+
 def test_cpp_st_missing_file_fails():
     output = run_cmd(["bash", str(CPP_DIR / "wrap_fail_st.sh")], env=CPP_ENV)
     assert "Observed expected ST failure." in output

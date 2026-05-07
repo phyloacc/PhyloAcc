@@ -32,6 +32,7 @@
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
 #include "../PhyloAcc-common/bpp_constructor.h"
+#include "../PhyloAcc-common/rng.h"
 #include "bpp.hpp"
 #include "../PhyloAcc-common/utils.h"
 #include "genetree.hpp"
@@ -191,10 +192,13 @@ public:
     bool verboseGT = false;
     int idblk_count=0; //length of 1st blck of all identical bp across sp.
     
-    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, bool _verboseGT, double _consToMis, int blocks = 20, bool prune=0, double revgap=0, int min_length =50, double _nconsToMis = 0.5)//, double _indel)
+    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, bool _verboseGT, double _consToMis, int blocks = 20, bool prune=0, double revgap=0, int min_length =50, double _nconsToMis = 0.5, int chain_index = 0)//, double _indel)
     {
 
-        RNG = bpp.RNG;
+        RNG = gsl_rng_alloc(gsl_rng_default);
+        gsl_rng_set(RNG, phyloacc::DeriveSeed(bpp.seed, phyloacc::ProgramKind::GT,
+                                              chain_index, c, blocks,
+                                              phyloacc::RngStream::WorkerGsl));
 
         num_burn = bpp.num_burn*bpp.num_thin;   // num of burn-in updates
         num_mcmc = bpp.num_mcmc*bpp.num_thin;   // num of MCMC updates
@@ -222,7 +226,10 @@ public:
             children2[i][1] = bpp.children[i][1];
         }
         
-        gtree = new GTree(N, GG, S, RNG);
+        unsigned long gene_tree_seed = phyloacc::DeriveSeed(
+            bpp.seed2, phyloacc::ProgramKind::GT, chain_index, c, blocks,
+            phyloacc::RngStream::GtGeneTreeShuffle);
+        gtree = new GTree(N, GG, S, RNG, phyloacc::MakeTwister(gene_tree_seed));
 
         if(GG < min_length)
         {
@@ -267,7 +274,11 @@ public:
         // shuffle sequence
         vector<int> myvector;
         for (int i=0; i<GG; ++i) myvector.push_back(i);
-        std::shuffle ( myvector.begin(), myvector.end(), bpp.twister2);//default_random_engine(bpp.seed)
+        unsigned long site_shuffle_seed = phyloacc::DeriveSeed(
+            bpp.seed, phyloacc::ProgramKind::GT, chain_index, c, blocks,
+            phyloacc::RngStream::GtSiteShuffle);
+        std::mt19937 site_shuffle_rng = phyloacc::MakeTwister(site_shuffle_seed);
+        std::shuffle ( myvector.begin(), myvector.end(), site_shuffle_rng);//default_random_engine(bpp.seed)
 
         vector < vector< int> > Tg2 = vector < vector< int> > (GG, vector<int>(N));
         for(int s=0; s<S; s++){
@@ -420,9 +431,9 @@ public:
 
     ~BPP_C()
     {
-        //gsl_rng_free(RNG);
         delete [] children2;
         delete gtree;
+        gsl_rng_free(RNG);
     }
 
     void getSubtree(int root, vector<int> & visited_init);

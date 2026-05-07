@@ -1,46 +1,50 @@
 {
   "files": {
     "tests/test_cpp_unit.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_interface.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_optional_testdata.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
+      "status": "SKIP"
+    },
+    "tests/test_rng_repro.py": {
+      "last_run": "2026-05-07T10:41:26",
       "status": "PASS"
     },
     "tests/test_st_gt.py": {
-      "last_run": "2026-05-06T19:40:07",
-      "status": "PASS"
+      "last_run": "2026-05-07T10:35:16",
+      "status": "MIXED"
     },
     "tests/test_unit_alignment.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_unit_batch.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_unit_scf.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_unit_templates.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     },
     "tests/test_unit_tree_groups.py": {
-      "last_run": "2026-05-06T19:40:07",
+      "last_run": "2026-05-07T10:35:16",
       "status": "PASS"
     }
   },
   "session": {
-    "command": "PHYLOACC_RUN_GT=1 PHYLOACC_RUN_TESTDATA=1 /Users/tim/Work/PhyloAcc/.pixi/envs/default/bin/python3.12 -m pytest -q",
+    "command": "PHYLOACC_RUN_GT=1 /Users/tim/Library/CloudStorage/Dropbox/Projects/PhyloAcc/.pixi/envs/default/bin/python3.12 -m pytest -q tests/test_rng_repro.py",
     "exitstatus": 0,
-    "summary": "35 passed in 119.25s",
-    "timestamp": "2026-05-06T19:40:07"
+    "summary": "4 passed in 363.97s",
+    "timestamp": "2026-05-07T10:41:26"
   }
 }

@@ -714,7 +714,7 @@ void BPP_C::Output_sampling(int iter, string output_path2, BPP &bpp, int resZ){
 }
 
 
-void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstream & out_Z, int resZ) //resZ no use
+string BPP_C::Output_init_row(BPP &bpp, int resZ) //resZ no use
 {
     double n_rate = phyloacc::MedianInPlace(trace_n_rate, 0, trace_n_rate.size());
     double c_rate = phyloacc::MedianInPlace(trace_c_rate, 0, trace_c_rate.size());
@@ -724,13 +724,20 @@ void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstre
 
     vector<vector<int>> countZ = phyloacc::CountZStates(
         N, num_burn, trace_loglik.size(), trace_Z, missing, num_mcmc);
-    
-    #pragma omp critical
-    {
-        phyloacc::WriteInitSummaryRow(out_Z, CC, n_rate, c_rate, g_rate, l_rate, l2_rate, countZ, num_mcmc);
-    }
+
+    return phyloacc::FormatInitSummaryRow(CC, n_rate, c_rate, g_rate, l_rate, l2_rate, countZ, num_mcmc);
 }
 
+
+void BPP_C::Output_init(string output_path,string output_path2, BPP &bpp, ofstream & out_Z, int resZ) //resZ no use
+{
+    string row = Output_init_row(bpp, resZ);
+
+    #pragma omp critical
+    {
+        out_Z << row;
+    }
+}
 
 
 

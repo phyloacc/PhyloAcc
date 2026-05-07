@@ -1285,7 +1285,7 @@ vector<int>  BPP_C::Move_Z(int & propConf, int & revConf, int & changeZ){
     int totN = deN + inN;
     propConf = totN;
     
-    int ind = rand() % (deN + inN);
+    int ind = gsl_rng_uniform_int(RNG, deN + inN);
     
     // compute reverse prob: propZ -> Z
     if(ind < deN)

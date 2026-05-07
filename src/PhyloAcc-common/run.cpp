@@ -267,13 +267,26 @@ void WriteElementStatus(std::ofstream& out,
                         const std::string& message) {
     #pragma omp critical(phyloacc_status_output)
     {
-        out << chain << "\t" << element_index << "\t"
-            << SanitizeStatusField(element_name) << "\t"
-            << SanitizeStatusField(mode) << "\t"
-            << SanitizeStatusField(status) << "\t"
-            << SanitizeStatusField(completed_models) << "\t"
-            << SanitizeStatusField(message) << std::endl;
+        out << FormatElementStatus(chain, element_index, element_name, mode, status,
+                                   completed_models, message);
     }
+}
+
+std::string FormatElementStatus(int chain,
+                                int element_index,
+                                const std::string& element_name,
+                                const std::string& mode,
+                                const std::string& status,
+                                const std::string& completed_models,
+                                const std::string& message) {
+    std::ostringstream row;
+    row << chain << "\t" << element_index << "\t"
+        << SanitizeStatusField(element_name) << "\t"
+        << SanitizeStatusField(mode) << "\t"
+        << SanitizeStatusField(status) << "\t"
+        << SanitizeStatusField(completed_models) << "\t"
+        << SanitizeStatusField(message) << "\n";
+    return row.str();
 }
 
 }  // namespace phyloacc

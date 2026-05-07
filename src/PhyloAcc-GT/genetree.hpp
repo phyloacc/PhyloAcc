@@ -10,6 +10,8 @@
 
 #include "bpp.hpp"
 
+#include <random>
+
 using namespace std;
 using namespace arma;
 
@@ -20,6 +22,12 @@ private:
     int S;
     //int seed;
     gsl_rng * RNG;
+    std::mt19937 twister;
+    std::mt19937* twister_ptr;
+    std::mt19937& ShuffleRng()
+    {
+        return twister_ptr == nullptr ? twister : *twister_ptr;
+    }
     
 public:
     // gene tree
@@ -47,6 +55,8 @@ public:
         N = _N;
         S = _S;
         RNG = nullptr;
+        twister.seed(1);
+        twister_ptr = nullptr;
         
         lambda = vector< map<int, vector<mat>> >(N, map<int, vector<mat>>());
         Tg = vector< map<int, vector < int> >> (N, map<int, vector<int>>());
@@ -72,12 +82,14 @@ public:
         temp_coal = vector<vector<int>>(N);
     }
     
-    GTree(int _N, int _GG, int _S,  gsl_rng* _RNG)
+    GTree(int _N, int _GG, int _S,  gsl_rng* _RNG, std::mt19937 _twister)
     {
         GG = _GG;
         N = _N;
         S = _S;
         RNG = _RNG;
+        twister = _twister;
+        twister_ptr = nullptr;
         
         
         lambda = vector< map<int, vector<mat>> >(N, map<int, vector<mat>>());

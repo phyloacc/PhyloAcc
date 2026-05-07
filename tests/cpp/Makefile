@@ -17,10 +17,11 @@ FAIL_ST_PROFILE_BIN := phyloacc_cpp_fail_st_profile
 FAIL_GT_PROFILE_BIN := phyloacc_cpp_fail_gt_profile
 RUN_COMMON_BIN := phyloacc_cpp_tests_run_common
 CONSTRUCTOR_BIN := phyloacc_cpp_tests_bpp_constructor
+RNG_BIN := phyloacc_cpp_tests_rng
 
 .PHONY: all clean
 
-all: $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN) $(CONSTRUCTOR_BIN)
+all: $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN) $(CONSTRUCTOR_BIN) $(RNG_BIN)
 
 $(ST_BIN): test_st_main.cpp $(COMMON_DIR)/newick.cpp $(COMMON_DIR)/profile.cpp $(COMMON_DIR)/utils.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) -I$(ST_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
@@ -46,5 +47,8 @@ $(RUN_COMMON_BIN): test_run_common_main.cpp $(COMMON_DIR)/run.cpp $(COMMON_DIR)/
 $(CONSTRUCTOR_BIN): test_bpp_constructor_main.cpp $(COMMON_DIR)/bpp_constructor.cpp $(COMMON_DIR)/bpp_tree.cpp $(COMMON_DIR)/utils.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) -I$(ST_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
+$(RNG_BIN): test_rng_main.cpp $(COMMON_DIR)/rng.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(COMMON_DIR) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+
 clean:
-	rm -f $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN) $(CONSTRUCTOR_BIN)
+	rm -f $(ST_BIN) $(GT_BIN) $(FAIL_ST_BIN) $(FAIL_GT_BIN) $(FAIL_ST_PROFILE_BIN) $(FAIL_GT_PROFILE_BIN) $(RUN_COMMON_BIN) $(CONSTRUCTOR_BIN) $(RNG_BIN)

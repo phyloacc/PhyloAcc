@@ -94,6 +94,14 @@ void WriteElementStatus(std::ofstream& out,
                         const std::string& completed_models,
                         const std::string& message);
 
+std::string FormatElementStatus(int chain,
+                                int element_index,
+                                const std::string& element_name,
+                                const std::string& mode,
+                                const std::string& status,
+                                const std::string& completed_models,
+                                const std::string& message);
+
 }  // namespace phyloacc
 
 #endif

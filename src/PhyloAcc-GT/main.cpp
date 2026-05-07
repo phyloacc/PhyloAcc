@@ -35,7 +35,6 @@ int main(int argc, char* argv[])
     time_t start = time(NULL);
 
     cout << std::fixed << setprecision(4);
-    srand(time(NULL));
 
     phyloacc::Config config = phyloacc::LoadConfigForProgram(argc, argv, phyloacc::ProgramKind::GT);
     if(! phyloacc::ValidateOutputDirectory(config))
@@ -132,8 +131,8 @@ int main(int argc, char* argv[])
 
                 try{
                     BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
-                               filter, config.verbose, config.consToMis, config.block,
-                               config.prune, config.revgap, config.min_length);
+                               filter, config.verbose, false, config.consToMis, config.block,
+                               config.prune, config.revgap, config.min_length, 0.5, iter);
                     if(filter) {
                         if(config.verbose) cerr << "filter: "<< c <<endl;
                         phyloacc::WriteElementStatus(outputs.status, iter + 1, c, element_name,
@@ -179,8 +178,8 @@ int main(int argc, char* argv[])
             try{
                 // accelerate in target species
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
-                           filter, config.verbose, config.consToMis, config.block,
-                           config.prune, config.revgap, config.min_length);
+                           filter, config.verbose, false, config.consToMis, config.block,
+                           config.prune, config.revgap, config.min_length, 0.5, 0);
                 bppc.simulate(bpp, profile, config.gapchar,config.prune);
                 saw_model_failure = saw_model_failure || bppc.failure;
                 completed_models = "simulate";
@@ -209,7 +208,7 @@ int main(int argc, char* argv[])
             try{
                 BPP_C bppc(c, profile, bpp, config.gapchar, config.missing_thres,
                            filter, config.verbose, config.verboseGT, config.consToMis,
-                           config.block, config.prune, config.revgap, config.min_length);
+                           config.block, config.prune, config.revgap, config.min_length, 0.5, 0);
                 cout<<"element "<<to_string(c)<<", number of base pair="<<to_string(bppc.GG)<<endl;
                 if(filter) {
                   if(config.verbose) cerr << "filter: "<< c <<endl;

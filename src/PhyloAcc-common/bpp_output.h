@@ -20,6 +20,15 @@ std::vector<std::vector<int> > CountZStates(int node_count,
                                             const std::vector<bool>& missing,
                                             int missing_count_value);
 
+std::string FormatInitSummaryRow(int cc,
+                                 double n_rate,
+                                 double c_rate,
+                                 double g_rate,
+                                 double l_rate,
+                                 double l2_rate,
+                                 const std::vector<std::vector<int> >& countZ,
+                                 int denom);
+
 void WriteInitSummaryRow(std::ofstream& out_Z,
                          int cc,
                          double n_rate,

@@ -31,6 +31,7 @@
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
 #include "../PhyloAcc-common/bpp_constructor.h"
+#include "../PhyloAcc-common/rng.h"
 #include "bpp.hpp"
 #include "../PhyloAcc-common/utils.h"
 
@@ -141,11 +142,13 @@ public:
     bool failure = false;
     bool verbose = false; 
     
-    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, bool prune=0, double revgap=0, int min_length =50, double nconsToMis = 1)//, double _indel)
+    BPP_C(int c, PhyloProf _prof, BPP& bpp, char gapchar, double missing_thres, bool & filter, bool _verbose, double consToMis, bool prune=0, double revgap=0, int min_length =50, double nconsToMis = 1, int chain_index = 0)//, double _indel)
     {
         
         RNG = gsl_rng_alloc(gsl_rng_default);
-        gsl_rng_set(RNG, bpp.seed);
+        gsl_rng_set(RNG, phyloacc::DeriveSeed(bpp.seed, phyloacc::ProgramKind::ST,
+                                              chain_index, c, 0,
+                                              phyloacc::RngStream::WorkerGsl));
         
         num_burn = bpp.num_burn;   // num of burn-in updates
         num_mcmc = bpp.num_mcmc;   // num of MCMC updates
@@ -369,6 +372,7 @@ public:
     double sample_rate(int resZ, double old_rate, bool neut, vector<bool> visited, double & loglik_old, BPP& bpp, int M =1, bool adaptive = true, double adaptive_factor = 0.5);
     void Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string output_path2,int resZ, bool UpR, bool UpHyper, double lrate_prop, double grate_prop);
     vector<int> Update_Z_subtree(int num_base = 5, bool prior = false);
+    string Output_init_row(BPP& bpp, int resZ);
     void Output_init(string output_path, string output_path2, BPP& bpp,ofstream& outZ, int resZ);
     void Output_sampling(int iter, string output_path2, BPP &bpp, int resZ);
     
