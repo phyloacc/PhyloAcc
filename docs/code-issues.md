@@ -1,6 +1,8 @@
 # Code Issues Handoff
 
-This document summarizes the currently unfixed or partially unresolved code-review findings in the PhyloAcc repository. It is intended as a resume guide for a future coding agent.
+This document tracks resolved, unfixed, and partially unresolved code-review
+findings in the PhyloAcc repository. It is intended as a resume guide for a
+future coding agent.
 
 Current baseline commits already landed before this handoff:
 
@@ -11,69 +13,72 @@ Current baseline commits already landed before this handoff:
 - `560923e Add BPP_C leaf encoding helpers`
 - `31227c3 Share BPP_C leaf encoding`
 - `c7bbdc0 Share BPP_C post-encoding setup`
+- `1b4bbe8 Implement one public RNG seed contract`
 
-The last full verification after the constructor dedup work passed:
+The last full verification after the one-public-seed RNG work passed:
 
-- `pixi run build`
-- `pixi run cpp-tests`
-- `pixi run test-cpp`
-- `pixi run test-all`
-- `git diff --check`
+- ST, GT, and C++ test binaries rebuilt with the project-local Pixi toolchain.
+- `tests/test_cpp_unit.py`: `13 passed`
+- `tests/test_rng_repro.py` with GT/RNG enabled: `6 passed`
+- Full enabled suite with GT, optional test-data, and RNG tiers:
+  `42 passed in 631.60s`
 
-## Highest Priority
+## Recently Resolved High Priority
 
 ### P1: GT shares one mutable RNG across workers
 
-Status: unfixed.
+Status: fixed in the current refactor baseline and verified after `1b4bbe8`.
 
 Primary locations:
 
-- `src/PhyloAcc-GT/bpp_c.hpp`: `BPP_C` constructor assigns `RNG = bpp.RNG`.
-- `src/PhyloAcc-GT/main.cpp`: per-element `BPP_C` workers are created inside OpenMP loops.
+- `src/PhyloAcc-GT/bpp_c.hpp`: each `BPP_C` worker allocates and owns its
+  GSL RNG.
+- `src/PhyloAcc-GT/bpp_c.hpp`: worker GSL, site shuffle, and gene-tree shuffle
+  streams are derived from one public `SEED` plus stable stream coordinates.
+- `src/PhyloAcc-GT/bpp.hpp`: the run-wide GSL RNG is also seeded through the
+  derived `RunGsl` stream.
+- `src/PhyloAcc-common/rng.*`: shared seed derivation helper and stream labels.
 
-Problem:
+Resolution:
 
-The GT element worker keeps a pointer to the parent `BPP` object's GSL RNG. GSL RNG state is mutable. When multiple OpenMP workers sample at the same time, they can advance the same RNG state concurrently. That is not thread-safe and can make GT runs non-reproducible when `NUM_THREAD > 1`.
+- GT workers no longer alias the parent `BPP::RNG`.
+- `SEED` is the only active public seed. Deprecated GT `SEEDS` and `SEED2`
+  are accepted but ignored with a warning.
+- Repeated GT runs are covered for same-thread and cross-thread reproducibility.
 
-Recommended fix direction:
+Verification:
 
-- Give each `BPP_C` worker its own RNG instance.
-- Derive per-worker seeds deterministically from the configured base seed plus stable run coordinates such as program kind, element id, model id, and chain/block index.
-- Avoid pointer aliasing to `bpp.RNG` in worker-owned sampling code.
-- Add a small seed-derivation helper in common code rather than scattering arithmetic through ST and GT.
-
-Testing needed:
-
-- Repeat a minimal GT run twice with the same seed and `NUM_THREAD=1`; outputs should match.
-- Repeat the same run twice with `NUM_THREAD > 1`; outputs should match.
-- Compare thread-count behavior carefully. Exact byte identity between `NUM_THREAD=1` and `NUM_THREAD > 1` may require stronger scheduling guarantees, so define the desired reproducibility contract before asserting it.
+- C++ RNG tests cover stable derivation, stream uniqueness, `RunGsl`, and
+  stable `MakeTwister` output.
+- C++ config parser tests cover `SEED`, ignored `SEEDS`, and ignored `SEED2`.
+- `tests/test_rng_repro.py` covers GT same-thread and `NUM_THREAD=1` versus
+  `NUM_THREAD=2` reproducibility.
 
 ### P1: ST workers reuse the same seed and still call global `rand()`
 
-Status: unfixed.
+Status: fixed in the current refactor baseline and verified after `1b4bbe8`.
 
 Primary locations:
 
-- `src/PhyloAcc-ST/bpp_c.hpp`: each `BPP_C` constructor allocates a fresh GSL RNG but seeds it with the same `bpp.seed`.
-- `src/PhyloAcc-ST/bpp_c.cpp`: `sample_Z` uses global `rand()`.
-- `src/PhyloAcc-ST/main.cpp`: `srand(time(NULL))` seeds the global C RNG.
+- `src/PhyloAcc-ST/bpp_c.hpp`: each `BPP_C` worker allocates and owns its
+  GSL RNG.
+- `src/PhyloAcc-ST/bpp_c.hpp`: worker GSL streams are derived from one public
+  `SEED` plus stable stream coordinates.
+- `src/PhyloAcc-ST/bpp.hpp`: the run-wide GSL RNG is seeded through the
+  derived `RunGsl` stream.
 
-Problem:
+Resolution:
 
-Every ST element worker starts from the same GSL random stream. If two elements run the same sampling path, they can receive identical random draws. Separately, global `rand()` is shared process state and is a poor fit for parallel MCMC.
+- ST workers no longer start from the same GSL stream.
+- Active ST sampling no longer depends on process-global `rand()`/`srand()`.
+- Repeated ST runs are covered for same-thread and cross-thread reproducibility.
 
-Recommended fix direction:
+Verification:
 
-- Use the same deterministic per-worker seed helper as GT.
-- Replace `rand()` in ST sampling paths with the worker-owned GSL RNG.
-- Keep public CLI/config behavior unchanged in the first patch.
-- Document the reproducibility contract in code comments and tests.
-
-Testing needed:
-
-- Unit-test the seed derivation helper.
-- Add integration checks that repeated ST runs with the same seed are stable.
-- Include a test path that exercises `sample_Z`, because that is where `rand()` currently appears.
+- C++ RNG tests cover stable derivation, stream uniqueness, `RunGsl`, and
+  stable `MakeTwister` output.
+- `tests/test_rng_repro.py` covers ST same-thread and `NUM_THREAD=1` versus
+  `NUM_THREAD=2` reproducibility.
 
 ## Correctness And Validation
 
@@ -340,7 +345,8 @@ Recommended fix direction:
 
 - Deduplicate output and monitor formatting before touching rate kernels.
 - Extract small common row-building/data-reduction helpers first.
-- Leave `sample_rate` until after RNG and RAII fixes, because it mutates a lot of state and differs more deeply between ST and GT.
+- Leave `sample_rate` until after narrow RAII fixes and more focused tests,
+  because it mutates a lot of state and differs more deeply between ST and GT.
 
 Testing needed:
 
@@ -425,14 +431,13 @@ Recommended fix direction:
 
 ## Suggested Order Of Attack
 
-1. Fix RNG/thread-safety issues in ST and GT.
-2. Fix small parser/input-validation bugs: undefined `optional`, wrong `--labelmod` source, and runtime alignment validation.
-3. Start RAII cleanup for narrow `BPP_C` worker-owned arrays and delete unsafe copy operations.
-4. Decide and document missing-data semantics before changing any encoding behavior.
-5. Introduce internal single-model execution functions as the first step toward model decoupling.
-6. Teach interface/post-processing about per-element status and later model-level artifacts.
-7. Deduplicate monitor/output formatting, then revisit heavier MCMC kernel duplication.
-8. Clean up lower-risk interface/template/parser duplication once numerical behavior is protected by tests.
+1. Fix small parser/input-validation bugs: undefined `optional`, wrong `--labelmod` source, and runtime alignment validation.
+2. Start RAII cleanup for narrow `BPP_C` worker-owned arrays and delete unsafe copy operations.
+3. Decide and document missing-data semantics before changing any encoding behavior.
+4. Introduce internal single-model execution functions as the first step toward model decoupling.
+5. Teach interface/post-processing about per-element status and later model-level artifacts.
+6. Deduplicate monitor/output formatting, then revisit heavier MCMC kernel duplication.
+7. Clean up lower-risk interface/template/parser duplication once numerical behavior is protected by tests.
 
 ## General Test Guidance
 
@@ -454,6 +459,8 @@ For numerical or RNG changes, define the reproducibility contract first, then ad
 
 These older findings should not be restarted from scratch:
 
+- The active ST/GT RNG contract now uses one public `SEED` with derived
+  run-wide, worker, site-shuffle, and gene-tree-shuffle streams.
 - Shared ST/GT run setup and output stream wiring were introduced in `src/PhyloAcc-common/run_common.*`.
 - BPP and BPP_C constructor setup was partially deduplicated through `src/PhyloAcc-common/bpp_constructor.*`.
 - Per-element status output now exists as `*_elem_status.txt`.
