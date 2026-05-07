@@ -181,7 +181,6 @@ class BPP_C
     time_t last_time = 0;
 
     unsigned long int seed = 0;
-    unsigned long int seed2 = 0;
     GTree* gtree = nullptr;
     friend class GTree;
 
@@ -227,7 +226,7 @@ public:
         }
         
         unsigned long gene_tree_seed = phyloacc::DeriveSeed(
-            bpp.seed2, phyloacc::ProgramKind::GT, chain_index, c, blocks,
+            bpp.seed, phyloacc::ProgramKind::GT, chain_index, c, blocks,
             phyloacc::RngStream::GtGeneTreeShuffle);
         gtree = new GTree(N, GG, S, RNG, phyloacc::MakeTwister(gene_tree_seed));
 

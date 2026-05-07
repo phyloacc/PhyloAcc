@@ -60,7 +60,6 @@ def _write_gt_cfg(cfg_path, gt_data, out_dir, num_thread):
                 f"NUM_THREAD {num_thread}",
                 "MIN_LEN 1",
                 "SEED 1",
-                "SEED2 2",
             ]
         )
         + "\n",
@@ -118,6 +117,45 @@ def test_gt_rng_reproducible_same_thread_count(tmp_path, phyloacc_gt_bin, num_th
     cfg2 = tmp_path / f"gt_t{num_thread}_run2.cfg"
     _write_gt_cfg(cfg1, gt_data, out1, num_thread)
     _write_gt_cfg(cfg2, gt_data, out2, num_thread)
+
+    run_cmd([phyloacc_gt_bin, str(cfg1)])
+    run_cmd([phyloacc_gt_bin, str(cfg2)])
+
+    _assert_outputs_repeatable(out1, out2)
+
+
+def test_st_rng_reproducible_across_thread_counts(minimal_data, tmp_path, phyloacc_st_bin):
+    out1 = tmp_path / "st_t1"
+    out2 = tmp_path / "st_t2"
+    out1.mkdir()
+    out2.mkdir()
+
+    cfg1 = tmp_path / "st_t1.cfg"
+    cfg2 = tmp_path / "st_t2.cfg"
+    _write_st_cfg(cfg1, minimal_data, out1, 1)
+    _write_st_cfg(cfg2, minimal_data, out2, 2)
+
+    run_cmd([phyloacc_st_bin, str(cfg1)])
+    run_cmd([phyloacc_st_bin, str(cfg2)])
+
+    _assert_outputs_repeatable(out1, out2)
+
+
+@pytest.mark.skipif(
+    os.environ.get("PHYLOACC_RUN_GT", "0") != "1",
+    reason="GT RNG reproducibility tests disabled. Set PHYLOACC_RUN_GT=1 to enable.",
+)
+def test_gt_rng_reproducible_across_thread_counts(tmp_path, phyloacc_gt_bin):
+    gt_data = _resolve_gt_integration_data(tmp_path)
+    out1 = tmp_path / "gt_t1"
+    out2 = tmp_path / "gt_t2"
+    out1.mkdir()
+    out2.mkdir()
+
+    cfg1 = tmp_path / "gt_t1.cfg"
+    cfg2 = tmp_path / "gt_t2.cfg"
+    _write_gt_cfg(cfg1, gt_data, out1, 1)
+    _write_gt_cfg(cfg2, gt_data, out2, 2)
 
     run_cmd([phyloacc_gt_bin, str(cfg1)])
     run_cmd([phyloacc_gt_bin, str(cfg2)])

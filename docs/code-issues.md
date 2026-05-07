@@ -301,7 +301,7 @@ Status: unfixed and intentionally preserved during dedup.
 
 Primary location:
 
-- `src/PhyloAcc-GT/bpp_c.hpp`: GT shuffles sites with `twister2`, then reorders simple or missing-like blocks and preserves `idblk_count`.
+- `src/PhyloAcc-GT/bpp_c.hpp`: GT shuffles sites with a derived site-shuffle RNG, then reorders simple or missing-like blocks and preserves `idblk_count`.
 
 Problem:
 

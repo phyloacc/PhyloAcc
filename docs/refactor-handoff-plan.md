@@ -63,34 +63,14 @@ tests flaky or hide real behavior changes.
 
 #### RNG and shared mutable state
 
-The current RNG story is the highest priority issue.
+The active seed contract is one public `SEED` parameter. ST and GT derive all
+run-wide, worker, site-shuffle, and gene-tree-shuffle streams internally from
+that seed plus stable coordinates such as program kind, chain, element ID,
+block, and stream label.
 
-- GT `BPP_C` aliases `bpp.RNG`, so parallel element workers can share one
-  mutable GSL RNG.
-- ST `BPP_C` allocates a per-worker GSL RNG but seeds each worker with the same
-  `bpp.seed`.
-- ST still uses global `rand()` in the Z sampler.
-- GT also uses shared `std::mt19937` state for site shuffling through
-  `bpp.twister2` inside the OpenMP element loop.
-
-The fix should cover all random streams, not just GSL:
-
-- `gsl_rng*`
-- `rand()`
-- `std::mt19937 twister`
-- `std::mt19937 twister2`
-
-Recommended direction:
-
-1. Define the reproducibility contract first. For example, repeated runs with
-   the same seed should match for the same thread count; decide separately
-   whether `NUM_THREAD=1` and `NUM_THREAD>1` must be byte-identical.
-2. Add one shared deterministic seed-derivation helper, using base seed plus
-   stable coordinates such as program kind, chain, element ID, model ID, and
-   block/iteration where needed.
-3. Give each worker its own RNG state.
-4. Replace global `rand()` with worker-owned RNG draws.
-5. Avoid advancing shared `std::mt19937` state inside parallel loops.
+This contract is intended to make repeated runs byte-identical for the same
+seed, including `NUM_THREAD=1` versus `NUM_THREAD>1`. Deprecated GT parameters
+`SEEDS` and `SEED2` are accepted but ignored with a warning.
 
 #### Input and config validation
 

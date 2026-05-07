@@ -53,7 +53,6 @@ struct Config {
 
     int batch = -1;
     int seed = 5;
-    int seed2 = 1;
     double indel = 0.0;
     double indel2 = 0.0;
     bool sample_indel = false;

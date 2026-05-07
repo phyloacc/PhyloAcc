@@ -19,6 +19,11 @@ Environment
   - `conda run -n phyloacc-test make -B CXX=/n/holylfs05/LABS/informatics/Lab/projects/gwct/phyloacc/PhyloAcc/dev/cc14-wrap.sh PREFIX=/n/home07/gthomas/miniconda3/envs/phyloacc-test PhyloAcc-ST PhyloAcc-GT`
 - The duplicate `profile.*`, `newick.*`, and `utils.*` files still present under `src/PhyloAcc-ST/` and `src/PhyloAcc-GT/` are legacy copies excluded by `Makefile`; the active shared implementations live under `src/PhyloAcc-common/`.
 
+RNG Seed Contract
+- `SEED` is the only public random-seed parameter for active ST and GT binaries.
+- Separate deterministic streams are derived internally from `SEED`, program kind, chain, element, block, and stream label.
+- Deprecated GT parameters `SEEDS` and `SEED2` are ignored with a warning.
+
 Minimal Test Data
 - `tests/data/minimal/` is hand-written synthetic data, not output copied from production analyses.
 - `aln.fa` contains three 20 bp sequences arranged as two concatenated 10 bp loci so ST/GT smoke tests run quickly.
@@ -30,8 +35,8 @@ Minimal Test Data
 
 Latest Suite Status
 - Last pytest session: `2026-05-07`
-- Command shape used here: `PHYLOACC_RUN_GT=1 /Users/tim/Library/CloudStorage/Dropbox/Projects/PhyloAcc/.pixi/envs/default/bin/python3.12 -m pytest -q tests/test_rng_repro.py`
-- Result: `4 passed in 363.97s`
+- Command shape used here: `PHYLOACC_RUN_GT=1 PHYLOACC_RUN_TESTDATA=1 /Users/tim/Work/PhyloAcc/.pixi/envs/default/bin/python -m pytest -q`
+- Result: `42 passed in 631.59s`
 - GT golden status: `tests/golden/minimal/gt_rate_postZ_M0.txt` exists
 
 Status Legend
@@ -52,8 +57,8 @@ Test Inventory
 | `tests/test_unit_tree_groups.py` | Python unit | Propagation of target, conserved, and outgroup branch categories from tip assignments | `tests/data/unit/tree_groups.nwk` | The test tree is stored as a hand-written Newick fixture file. | `■ PASS` | `2026-05-07` | Covers internal branch categorization logic in tree.py. |
 | `tests/test_unit_batch.py` | Python unit | Batch job-file generation for ST and GT configs, including ID files and model-specific options | Temporary files written under `tmp_path` from inline sequences/tree strings | Configs, model file, and coal tree are generated on the fly from hand-written literals. | `■ PASS` | `2026-05-07` | Covers config-writing logic in batch.py without running PhyloAcc. |
 | `tests/test_interface.py` | Integration | Summarize-only interface execution on minimal synthetic data | `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed`, `tests/data/minimal/model.mod` | These minimal files are hand-written synthetic fixtures in `tests/data/minimal/`. | `■ PASS` | `2026-05-07` | Exercises Python entrypoint without a full workflow run. |
-| `tests/test_st_gt.py` | Integration + golden | ST execution on minimal data and GT execution against the ratite subset, both compared to goldens | ST: `tests/data/minimal/*`; GT: ratite subset from `../PhyloAcc-test-data/` plus `tests/golden/minimal/*` | Minimal ST fixtures are hand-written; GT uses a subset selected from the external test-data repo and recorded goldens. | `◆ MIXED` | `2026-05-07` | Requires PHYLOACC_RUN_GT=1 for GT coverage. |
-| `tests/test_optional_testdata.py` | Optional integration + golden | Interface summarize and ST golden comparison using ../PhyloAcc-test-data | `../PhyloAcc-test-data/bioconda-test-data/*` plus `tests/golden/testdata/st_rate_postZ_M0.txt` | This data comes from the external `PhyloAcc-test-data` repo; the test subsets loci via `id-subset.txt`. | `▲ SKIP` | `2026-05-07` | Requires PHYLOACC_RUN_TESTDATA=1. |
+| `tests/test_st_gt.py` | Integration + golden | ST execution on minimal data and GT execution against the ratite subset, both compared to goldens | ST: `tests/data/minimal/*`; GT: ratite subset from `../PhyloAcc-test-data/` plus `tests/golden/minimal/*` | Minimal ST fixtures are hand-written; GT uses a subset selected from the external test-data repo and recorded goldens. | `■ PASS` | `2026-05-07` | Requires PHYLOACC_RUN_GT=1 for GT coverage. |
+| `tests/test_optional_testdata.py` | Optional integration + golden | Interface summarize and ST golden comparison using ../PhyloAcc-test-data | `../PhyloAcc-test-data/bioconda-test-data/*` plus `tests/golden/testdata/st_rate_postZ_M0.txt` | This data comes from the external `PhyloAcc-test-data` repo; the test subsets loci via `id-subset.txt`. | `■ PASS` | `2026-05-07` | Requires PHYLOACC_RUN_TESTDATA=1. |
 | `tests/test_cpp_unit.py` | Pytest wrapper | Runs lightweight C++ unit binaries and failure-path wrappers | Minimal fixtures in `tests/data/minimal/` plus wrapper-generated temp malformed files | The wrappers use hand-written minimal fixtures and create malformed FASTA/BED inputs on the fly when needed. | `■ PASS` | `2026-05-07` | This is the Python harness for the C++ sanity binaries. |
 | `tests/cpp/test_st_main.cpp` | C++ unit binary | ST tree/profile parse sanity on minimal data | `tests/data/minimal/model.mod`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-05-07` | Observed via tests/test_cpp_unit.py. |
 | `tests/cpp/test_gt_main.cpp` | C++ unit binary | GT coalescent-tree/profile parse sanity on minimal data | `tests/data/minimal/tree_coal.tre`, `tests/data/minimal/aln.fa`, `tests/data/minimal/bed.bed` | All of these are hand-written synthetic fixtures under `tests/data/minimal/`. | `■ PASS` | `2026-05-07` | Observed via tests/test_cpp_unit.py. |

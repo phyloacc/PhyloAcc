@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     BPP bpp(0, profile, phytree, config.output_path, config.targetspecies, config.outgroup,
             config.conserve_prop, config.conservegroup, config.ratio0, config.ratio1,
             config.ropt, config.cub, config.nlb, config.nprior_a, config.nprior_b,
-            config.cprior_a, config.cprior_b, config.seed, config.seed2,
+            config.cprior_a, config.cprior_b, config.seed,
             config.prep_grate, config.prep_lrate, config.prep_lrate2,
             config.prior_grate_a, config.prior_grate_b, config.prior_lrate_a,
             config.prior_lrate_b, config.prior_lrate2_a, config.prior_lrate2_b,

@@ -8,6 +8,7 @@
 namespace phyloacc {
 
 enum class RngStream {
+    RunGsl = 0,
     WorkerGsl = 1,
     GtSiteShuffle = 2,
     GtGeneTreeShuffle = 3

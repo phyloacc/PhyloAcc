@@ -4,8 +4,8 @@ Golden file
 - `tests/golden/minimal/gt_rate_postZ_M0.osx-arm64-clang-pixi.txt`
 
 Status
-- Recorded on `2026-05-06`.
-- Golden SHA256: `5be539b7e13db75218ca67cc801e82a336d5db38613252a828ab5fc751aed848`
+- Recorded on `2026-05-07` after the one-public-`SEED` RNG contract change.
+- Golden SHA256: `4d4fd45b61590089d6da4b6d60ca1d41d1ebe7fb089d7a0154744fb200f3038a`
 
 What matches this golden
 - Local macOS arm64 Pixi environment in this repository.
@@ -15,19 +15,17 @@ What matches this golden
 Build provenance
 - Platform: `darwin`, `arm64`.
 - Pixi lock SHA256: `8a2d224c7e4dc8601b9cc52f90a7467356b92ff111f40e16311562ef2c9de623`
-- `PhyloAcc-GT` binary SHA256: `e6e21c92fb66d045a6a76bea13878757a05c3519afc24e45a8a294961b2a2636`
-- Compiler executable: `arm64-apple-darwin20.0.0-clang++`
+- `PhyloAcc-GT` binary SHA256: `3a7c44e14b18d0ad2fdc39db855dee0b9860fb1ca6d408ab374b733faa4cb467`
+- Compiler executable: `.pixi/envs/default/bin/clang++`
 - Compiler version output:
   - `clang version 19.1.7`
-  - `Target: arm64-apple-darwin20.0.0`
+  - `Target: arm64-apple-darwin24.6.0`
 
 Repeatability checks
-- Recording run: `PHYLOACC_RUN_GT=1 PHYLOACC_RECORD_GOLDEN=1 pytest -q tests/test_st_gt.py::test_gt_minimal_run`
-  - Result: `1 passed in 104.53s`
-- First comparison run: `pixi run test-gt`
-  - Result: `1 passed in 101.90s`
-- Second comparison run: `pixi run test-gt`
-  - Result: `1 passed in 109.96s`
+- Recording run: `PHYLOACC_RUN_GT=1 PHYLOACC_RUN_TESTDATA=1 PHYLOACC_RECORD_GOLDEN=1 pytest -q tests/test_st_gt.py::test_gt_minimal_run tests/test_optional_testdata.py::test_optional_testdata_st_golden`
+  - Result: `2 passed in 107.22s`
+- RNG contract run: `PHYLOACC_RUN_RNG=1 PHYLOACC_RUN_GT=1 pytest -q tests/test_rng_repro.py`
+  - Result: `6 passed in 548.70s`
 
 Selection behavior
 - `tests/test_st_gt.py` selects this golden automatically when all of the following are true:

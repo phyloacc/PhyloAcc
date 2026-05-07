@@ -29,6 +29,7 @@
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
 #include "../PhyloAcc-common/bpp_constructor.h"
+#include "../PhyloAcc-common/rng.h"
 #include "../PhyloAcc-common/utils.h"
 
 
@@ -176,7 +177,8 @@ public:
     
     seed = _seed;
     RNG = gsl_rng_alloc(gsl_rng_default);
-    gsl_rng_set(RNG, seed);
+    gsl_rng_set(RNG, phyloacc::DeriveSeed(
+        seed, phyloacc::ProgramKind::ST, 0, -1, 0, phyloacc::RngStream::RunGsl));
 
     
     C = _prof.element_names.size();

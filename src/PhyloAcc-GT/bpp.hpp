@@ -28,6 +28,7 @@
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
 #include "../PhyloAcc-common/bpp_constructor.h"
+#include "../PhyloAcc-common/rng.h"
 #include "../PhyloAcc-common/utils.h"
 
 using namespace std;
@@ -150,7 +151,6 @@ private:
 
     time_t last_time = 0;
     unsigned long int seed = 0;
-    unsigned long int seed2 = 0;
     friend class GTree;
 
 
@@ -163,8 +163,6 @@ public:
     vector<string> nodes_names;  //size N
     // GSL random number generator
     gsl_rng * RNG = nullptr;
-    std::mt19937 twister;
-    std::mt19937 twister2; //for shuffling input data only.
     
     // species tree (using array to accelerate)
     int    (*children)[2] = nullptr;
@@ -182,16 +180,13 @@ public:
     
     //Han*: BPP dirichlet prior param arguments added
     //BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, double _prep_grate, double _prep_lrate, double _prep_lrate2, double _prior_g_a, double _prior_g_b, double _prior_l_a, double _prior_l_b,double _prior_l2_a, double _prior_l2_b, double _indel, double _indel2, double missing_thres, bool _sample_indel)
-    BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, int _seed2, double _prep_grate, double _prep_lrate, double _prep_lrate2, double _prior_g_a, double _prior_g_b, double _prior_l_a, double _prior_l_b,double _prior_l2_a, double _prior_l2_b, double _indel, double _indel2, double missing_thres, bool _sample_indel, vector<double> _prior_dir_param, double _br_sample_cutoff, string _deepcoal_species)
+    BPP(int pC, PhyloProf & _prof, PhyloTree & _tree, string output_path, string _target, string _outgroup, double _conserve_prop, string _conservegroup, double _ratio0, double _ratio1, int _ropt, double _cub, double _nlb, double _npriora, double _npriorb, double _cpriora, double _cpriorb, int _seed, double _prep_grate, double _prep_lrate, double _prep_lrate2, double _prior_g_a, double _prior_g_b, double _prior_l_a, double _prior_l_b,double _prior_l2_a, double _prior_l2_b, double _indel, double _indel2, double missing_thres, bool _sample_indel, vector<double> _prior_dir_param, double _br_sample_cutoff, string _deepcoal_species)
 {
 
     seed = _seed;
-    seed2= _seed2;
     RNG = gsl_rng_alloc(gsl_rng_default);
-    gsl_rng_set(RNG, seed);
-    
-    twister.seed(seed);
-    twister2.seed(seed2);
+    gsl_rng_set(RNG, phyloacc::DeriveSeed(
+        seed, phyloacc::ProgramKind::GT, 0, -1, 0, phyloacc::RngStream::RunGsl));
 
     C = _prof.element_names.size();
     G = _prof.G;

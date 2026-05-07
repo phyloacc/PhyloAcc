@@ -44,6 +44,23 @@ static bool file_exists(const std::string& path) {
     return in.good();
 }
 
+static phyloacc::Config load_gt_config_text(const std::string& text) {
+    const std::string dir = make_temp_dir();
+    const std::string cfg_path = dir + "/gt.cfg";
+    {
+        std::ofstream out(cfg_path.c_str());
+        out << text;
+    }
+
+    std::vector<char> arg0;
+    arg0.push_back('t');
+    arg0.push_back('\0');
+    std::vector<char> arg1(cfg_path.begin(), cfg_path.end());
+    arg1.push_back('\0');
+    char* argv[] = {arg0.data(), arg1.data()};
+    return phyloacc::LoadConfig(2, argv, phyloacc::DefaultGTConfig(), true, false);
+}
+
 static std::vector<int> ids_from_file(const std::string& path) {
     phyloacc::Config config;
     config.id_path = path;
@@ -68,6 +85,19 @@ static void test_model_specs() {
     assert(m2.suffix == "M2");
 
     assert(phyloacc::AllModelSpecs().size() == 3);
+}
+
+static void test_seed_config() {
+    phyloacc::Config explicit_seed = load_gt_config_text(
+        "SEED 42\n"
+        "SEEDS 99\n"
+        "SEED2 123\n");
+    assert(explicit_seed.seed == 42);
+
+    phyloacc::Config deprecated_only = load_gt_config_text(
+        "SEEDS 99\n"
+        "SEED2 123\n");
+    assert(deprecated_only.seed == phyloacc::DefaultGTConfig().seed);
 }
 
 static void test_resolve_element_ids() {
@@ -154,6 +184,7 @@ static void test_element_names() {
 
 int main() {
     test_model_specs();
+    test_seed_config();
     test_resolve_element_ids();
     test_output_headers();
     test_element_names();

@@ -145,8 +145,10 @@ void ParseGTParam(const std::string& key, const std::string& value, Config& conf
         config.simulate = StringToBool(value);
     } else if (key == "TREE_IN_COALESCENT_UNIT") {
         config.tree_coal_unit = value;
-    } else if (key == "SEEDS") {
-        config.seed2 = std::stoi(value);
+    } else if (key == "SEEDS" || key == "SEED2") {
+        std::cout << "Deprecated GT parameter " << key
+                  << " is ignored; use SEED to control all random streams."
+                  << std::endl;
     } else if (key == "THIN") {
         config.num_thin = std::stoi(value);
     } else if (key == "WL") {
@@ -200,7 +202,6 @@ Config DefaultGTConfig() {
     config.prior_grate_a = 1.0;
     config.prior_grate_b = 1.0;
     config.seed = 1;
-    config.seed2 = 1;
     config.consToMis = 0.5;
     config.revgap = 0.9;
     config.verboseGT = true;
