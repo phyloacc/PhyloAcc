@@ -54,6 +54,11 @@ def test_cpp_gt_missing_file_fails():
     assert "Observed expected GT failure." in output
 
 
+def test_cpp_invalid_config_boolean_fails():
+    output = run_cmd(["bash", str(CPP_DIR / "wrap_fail_config_bool.sh")], env=CPP_ENV)
+    assert "Observed expected config boolean failure." in output
+
+
 def test_cpp_st_malformed_profile_fails():
     output = run_cmd(["bash", str(CPP_DIR / "wrap_fail_st_profile.sh")], env=CPP_ENV)
     assert "Observed expected ST profile failure." in output

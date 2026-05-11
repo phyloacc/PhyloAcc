@@ -77,7 +77,7 @@ Config DefaultSTConfig();
 Config DefaultGTConfig();
 Config LoadConfig(int argc, char* argv[], Config config, bool is_gt, bool print_reading_message);
 bool DirectoryExists(const std::string& path);
-bool StringToBool(const std::string& s);
+bool StringToBool(const std::string& s, const std::string& key);
 
 }  // namespace phyloacc
 

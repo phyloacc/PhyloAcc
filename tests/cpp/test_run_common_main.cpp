@@ -100,6 +100,19 @@ static void test_seed_config() {
     assert(deprecated_only.seed == phyloacc::DefaultGTConfig().seed);
 }
 
+static void test_boolean_config_values() {
+    phyloacc::Config config = load_gt_config_text(
+        "WL FALSE\n"
+        "SIMULATE True\n"
+        "VERBOSE_GENETREE 0\n"
+        "SAMPLE_HYPER 1\n");
+
+    assert(config.WL == false);
+    assert(config.simulate == true);
+    assert(config.verboseGT == false);
+    assert(config.sample_hyper == true);
+}
+
 static void test_resolve_element_ids() {
     phyloacc::Config config;
 
@@ -185,6 +198,7 @@ static void test_element_names() {
 int main() {
     test_model_specs();
     test_seed_config();
+    test_boolean_config_values();
     test_resolve_element_ids();
     test_output_headers();
     test_element_names();

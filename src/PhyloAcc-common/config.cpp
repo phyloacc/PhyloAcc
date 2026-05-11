@@ -2,6 +2,8 @@
 
 #include <dirent.h>
 
+#include <algorithm>
+#include <cctype>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -98,7 +100,7 @@ void ParseCommonParam(const std::string& key, const std::string& value, Config& 
     } else if (key == "GAPCHAR") {
         config.gapchar = value[0];
     } else if (key == "PRUNE_TREE") {
-        config.prune = StringToBool(value);
+        config.prune = StringToBool(value, key);
     } else if (key == "TRIM_GAP_PERCENT") {
         config.revgap = std::stod(value);
     } else if (key == "MIN_LEN") {
@@ -108,11 +110,11 @@ void ParseCommonParam(const std::string& key, const std::string& value, Config& 
     } else if (key == "INDEL2") {
         config.indel2 = std::stod(value);
     } else if (key == "SAMPLE_INDEL") {
-        config.sample_indel = StringToBool(value);
+        config.sample_indel = StringToBool(value, key);
     } else if (key == "SAMPLE_HYPER") {
-        config.sample_hyper = StringToBool(value);
+        config.sample_hyper = StringToBool(value, key);
     } else if (key == "VERBOSE") {
-        config.verbose = StringToBool(value);
+        config.verbose = StringToBool(value, key);
     } else if (key == "NUM_THREAD") {
         config.num_thread = std::stoi(value);
     } else {
@@ -142,7 +144,7 @@ void ParseGTParam(const std::string& key, const std::string& value, Config& conf
 
     handled = true;
     if (key == "SIMULATE") {
-        config.simulate = StringToBool(value);
+        config.simulate = StringToBool(value, key);
     } else if (key == "TREE_IN_COALESCENT_UNIT") {
         config.tree_coal_unit = value;
     } else if (key == "SEEDS" || key == "SEED2") {
@@ -152,7 +154,7 @@ void ParseGTParam(const std::string& key, const std::string& value, Config& conf
     } else if (key == "THIN") {
         config.num_thin = std::stoi(value);
     } else if (key == "WL") {
-        config.WL = StringToBool(value);
+        config.WL = StringToBool(value, key);
     } else if (key == "BLK_WL") {
         config.block = std::stoi(value);
     } else if (key == "BR_SAMPLE_THRESHOLD") {
@@ -162,7 +164,7 @@ void ParseGTParam(const std::string& key, const std::string& value, Config& conf
     } else if (key == "DEEP_COAL_BRANCH") {
         config.deepcoal_species = value;
     } else if (key == "VERBOSE_GENETREE") {
-        config.verboseGT = StringToBool(value);
+        config.verboseGT = StringToBool(value, key);
     } else {
         handled = false;
     }
@@ -301,8 +303,22 @@ bool DirectoryExists(const std::string& path) {
     return true;
 }
 
-bool StringToBool(const std::string& s) {
-    return s == "true" || s == "1";
+bool StringToBool(const std::string& s, const std::string& key) {
+    std::string value = s;
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+    if (value == "true" || value == "1") {
+        return true;
+    }
+    if (value == "false" || value == "0") {
+        return false;
+    }
+
+    std::cerr << "Invalid boolean value for parameter " << key << ": " << s << std::endl;
+    std::cerr << "Expected one of: true, false, 1, 0. Boolean values are case-insensitive."
+              << std::endl;
+    std::exit(1);
 }
 
 }  // namespace phyloacc
