@@ -27,6 +27,7 @@
 #include <set>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 
 #include "../PhyloAcc-common/newick.h"
 #include "../PhyloAcc-common/profile.h"
@@ -51,9 +52,9 @@ class BPP_C
     
     vector< vector<vec > > ambiguousS_null;  //base * species# * 4;
     
-    int    (*children2)[2] = nullptr;  //children from pruned tree
-    double  *distances2 = nullptr;
-    int *parent2 = nullptr;
+    std::unique_ptr<int[][2]> children2;  //children from pruned tree
+    std::unique_ptr<double[]> distances2;
+    std::unique_ptr<int[]> parent2;
     int root = -1;
     vec pi;
     vec log_pi;
@@ -139,6 +140,9 @@ class BPP_C
 
     
 public:
+    BPP_C(const BPP_C&) = delete;
+    BPP_C& operator=(const BPP_C&) = delete;
+
     bool failure = false;
     bool verbose = false; 
     
@@ -225,9 +229,9 @@ public:
         ambiguousS_null = vector<vector<vec> > (GG, vector<vec>(S,zeros<vec>(bpp.num_base)));
         
         
-        children2    = new int[N][2];
-        parent2      = new int[N];
-        distances2   = new double[N];
+        children2.reset(new int[N][2]);
+        parent2.reset(new int[N]);
+        distances2.reset(new double[N]);
         for(int i=0; i<N; i++)
         {
             children2[i][0] = bpp.children[i][0];
@@ -237,7 +241,7 @@ public:
         }
        
         // set missing
-        missing = phyloacc::BuildMissingNodes(S, N, children2, num_missing, missing_thres, GG);
+        missing = phyloacc::BuildMissingNodes(S, N, children2.get(), num_missing, missing_thres, GG);
         
 //        cout << "missing: ";
 //        for(int s = 0; s<N;s++)

@@ -163,6 +163,9 @@ private:
 
     
 public:
+    BPP(const BPP&) = delete;
+    BPP& operator=(const BPP&) = delete;
+
     int N = 0;
     int C = 0;  //total number of elements
     vector< string > species_names; // size S

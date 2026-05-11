@@ -30,6 +30,9 @@ private:
     }
     
 public:
+    GTree(const GTree&) = delete;
+    GTree& operator=(const GTree&) = delete;
+
     // gene tree
     int GG = 0;
     int root = -1;

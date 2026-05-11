@@ -185,6 +185,9 @@ class BPP_C
     friend class GTree;
 
 public:
+    BPP_C(const BPP_C&) = delete;
+    BPP_C& operator=(const BPP_C&) = delete;
+
     int GG = 0; //base pairs current elements
     bool failure = false;
     bool verbose = false;

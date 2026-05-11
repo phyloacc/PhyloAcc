@@ -48,7 +48,7 @@
 
 void BPP_C::getSubtree(int root, vector<int> & visited_init)
 {
-    phyloacc::CollectSubtreeNodes(root, children2, visited_init);
+    phyloacc::CollectSubtreeNodes(root, children2.get(), visited_init);
 }
 
 
@@ -514,7 +514,7 @@ void BPP_C::Gibbs(int iter, BPP &bpp, ofstream & outZ, string output_path,string
 void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
 {
     phyloacc::SampleTransitionRates(
-        RNG, nodes, Z, fixZ, parent2, N, true,
+        RNG, nodes, Z, fixZ, parent2.get(), N, true,
         prior_g_a, prior_g_b, prior_l_a, prior_l_b, prior_l2_a, prior_l2_b,
         gr, lr, lr2, log_TM_Int);
 }
@@ -526,7 +526,7 @@ void BPP_C::sample_transition( double  & gr, double  & lr, double  & lr2)
 // only update probability of nodes above changedZ
 void BPP_C::getUpdateNode(vector<int> changedZ, vector<bool> & visited_init) //changedZ from small to large (bottom to top)
 {
-    phyloacc::MarkChangedZAncestors(changedZ, N, N, parent2, true, true, visited_init, &lambda);
+    phyloacc::MarkChangedZAncestors(changedZ, N, N, parent2.get(), true, true, visited_init, &lambda);
 }
 
 void BPP_C::Update_Tg(int g, vector<bool> visited, BPP& bpp, bool tosample)  // impute base pair of each internal node (except missing nodes)
