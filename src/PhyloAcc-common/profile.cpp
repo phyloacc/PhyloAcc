@@ -1,12 +1,30 @@
 #include "profile.h"
 #include "utils.h"
 
-#include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 
 using namespace std;
+
+namespace {
+
+void ValidateProfileSequenceLength(const string& profile_path,
+                                   const string& species_name,
+                                   size_t observed_length,
+                                   unsigned expected_length)
+{
+    if (observed_length == expected_length)
+        return;
+
+    cerr << "(Error. Sequence length mismatch in phylogenetic profile input file: "
+         << profile_path << ". Species " << species_name << " has "
+         << observed_length << " sites; expected " << expected_length << ".)" << endl;
+    exit(1);
+}
+
+}  // namespace
 
 PhyloProf LoadPhyloProfiles(string profile_path, string segment_path, string segment_ID)
 {
@@ -29,19 +47,22 @@ PhyloProf LoadPhyloProfiles(string profile_path, string segment_path, string seg
         linestr = strutils::trim(linestr);
         if (!strncmp(linestr.c_str(), ">", 1))
         {
+            if (!prof.species_names.empty())
+            {
+                if (prof.G == 0)
+                    prof.G = wholeline.length();
+                else
+                    ValidateProfileSequenceLength(profile_path, prof.species_names.back(),
+                                                  wholeline.length(), prof.G);
+
+                if (prof.G > 0)
+                {
+                    wholeline = strutils::ToLowerCase(wholeline);
+                    prof.X.push_back(wholeline);
+                }
+            }
             string tmp = strutils::trim(linestr.substr(1));
             prof.species_names.push_back(tmp);
-
-            if (prof.G == 0)
-                prof.G = wholeline.length();
-            else
-                assert(wholeline.length() == prof.G);
-
-            if (prof.G > 0)
-            {
-                wholeline = strutils::ToLowerCase(wholeline);
-                prof.X.push_back(wholeline);
-            }
             wholeline = "";
         }
         else
@@ -49,10 +70,23 @@ PhyloProf LoadPhyloProfiles(string profile_path, string segment_path, string seg
             wholeline += strutils::trim(linestr);
         }
     }
-    if (prof.G == 0)
-        prof.G = wholeline.length();
-    wholeline = strutils::ToLowerCase(wholeline);
-    prof.X.push_back(wholeline);
+    if (!prof.species_names.empty())
+    {
+        if (prof.G == 0)
+            prof.G = wholeline.length();
+        else
+            ValidateProfileSequenceLength(profile_path, prof.species_names.back(),
+                                          wholeline.length(), prof.G);
+        wholeline = strutils::ToLowerCase(wholeline);
+        prof.X.push_back(wholeline);
+    }
+    else
+    {
+        if (prof.G == 0)
+            prof.G = wholeline.length();
+        wholeline = strutils::ToLowerCase(wholeline);
+        prof.X.push_back(wholeline);
+    }
 
     prof.S = prof.species_names.size();
 
