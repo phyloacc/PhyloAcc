@@ -1,6 +1,20 @@
 import sys
+from pathlib import Path
 
+import pytest
 from conftest import run_cmd
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src" / "PhyloAcc-interface"))
+
+import phyloacc_lib.opt_parse as OP
+import phyloacc_lib.params as PARAMS
+
+
+def _test_globs():
+    globs = PARAMS.init()
+    globs["log-v"] = -1
+    return globs
 
 
 def test_interface_summarize(minimal_data, tmp_path, phyloacc_py_env, phyloacc_st_bin, phyloacc_gt_path):
@@ -40,3 +54,47 @@ def test_interface_summarize(minimal_data, tmp_path, phyloacc_py_env, phyloacc_s
 
     summary = out_dir / "phyloacc-pre-run-summary.html"
     assert summary.exists(), f"Expected summary file not found: {summary}"
+
+
+def test_getopt_missing_file_and_dir_fail_cleanly(tmp_path, capsys):
+    globs = _test_globs()
+    flags = {"mod_file": "-m", "aln_dir": "-d"}
+
+    with pytest.raises(SystemExit):
+        OP.getOpt(str(tmp_path / "missing.mod"), "mod_file", "FILE", False, {}, flags, globs)
+    assert "does not exist or is not a file" in capsys.readouterr().out
+
+    with pytest.raises(SystemExit):
+        OP.getOpt(str(tmp_path / "missing-dir"), "aln_dir", "DIR", False, {}, flags, globs)
+    assert "does not exist or is not a directory" in capsys.readouterr().out
+
+
+def test_labeltree_and_labelmod_parse_independently(monkeypatch):
+    globs = _test_globs()
+    captured = {}
+
+    def stop_after_label_options(parsed_globs, dep_check, dev_opt):
+        captured["label-tree"] = parsed_globs["label-tree"]
+        captured["label-mod"] = parsed_globs["label-mod"]
+        raise RuntimeError("stop after label option parsing")
+
+    monkeypatch.setattr(OP.PC, "execCheck", stop_after_label_options)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "phyloacc.py",
+            "--quiet",
+            "--depcheck",
+            "--labelmod",
+            "-st-path",
+            "true",
+            "-gt-path",
+            "true",
+        ],
+    )
+
+    with pytest.raises(RuntimeError, match="stop after label option parsing"):
+        OP.optParse(globs)
+
+    assert captured == {"label-tree": False, "label-mod": True}

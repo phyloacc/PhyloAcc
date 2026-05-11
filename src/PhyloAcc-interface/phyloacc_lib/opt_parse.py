@@ -43,12 +43,10 @@ def getOpt(args_var, arg_str, arg_type, arg_default, config, flags, globs, check
             PC.errorOut("OP4", "The value for " + arg_str + " must be a positive float between 0 and 1.", globs);
 
         if arg_type == "FILE" and param_value and not os.path.isfile(param_value):
-            if not optional:
-                PC.errorOut("OP4", "The path provided for " + arg_str + " does not exist or is not a file. Current path: " + str(param_value), globs);
+            PC.errorOut("OP4", "The path provided for " + arg_str + " does not exist or is not a file. Current path: " + str(param_value), globs);
 
         if arg_type == "DIR" and param_value and not os.path.isdir(param_value):
-            if not optional:
-                PC.errorOut("OP4", "The path provided for " + arg_str + " does not exist or is not a directory. Current path: " + str(param_value), globs);
+            PC.errorOut("OP4", "The path provided for " + arg_str + " does not exist or is not a directory. Current path: " + str(param_value), globs);
 
         if type(arg_type) == list and param_value not in arg_type:
             PC.errorOut("OP4", "The value for " + arg_str + " must be one of: " + ", ".join(arg_type) + ". Current value: " + str(param_value), globs);
@@ -443,8 +441,8 @@ def optParse(globs):
     globs['label-tree'] = getOpt(args.labeltree, "labeltree", bool, globs['label-tree'], config, arg_flags, globs);
     # Parse the --labeltree option
 
-    globs['label-mod'] = getOpt(args.labeltree, "labelmod", bool, globs['label-mod'], config, arg_flags, globs);
-    # Parse the --labeltree option    
+    globs['label-mod'] = getOpt(args.labelmod, "labelmod", bool, globs['label-mod'], config, arg_flags, globs);
+    # Parse the --labelmod option
 
     globs['test-cmd-flag'] = getOpt(args.test_cmd_flag, "test_cmd_flag", bool, False, config, arg_flags, globs);
     # Parse the --testcmd option
