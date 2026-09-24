@@ -406,7 +406,8 @@ def genPlotsPost(globs):
 
     bf_dist_file = os.path.join(globs['plot-dir'], globs['bf-dist-file']);
     plt.figure(figsize=(8,6));
-    plt.boxplot([bf1s, bf2s, bf3s], notch=False, sym='+', vert=True, whis=1.5, labels=["BF1", "BF2", "BF3"]);
+    plt.boxplot([bf1s, bf2s, bf3s], notch=False, sym='+', vert=True, whis=1.5);
+    plt.xticks([1, 2, 3], ["BF1", "BF2", "BF3"]);
     plt.savefig(bf_dist_file, dpi=100);
     
     # All three BF dists (boxplot)
